@@ -15,9 +15,15 @@
     "ts-node": "ts-node"
   },
   "dependencies": {
-    "@yarnaimo/rain": "^0.6.0"
+    "@sindresorhus/is": "^3.0.0",
+    "dayjs": "^1.8.30",
+    "lifts": "^0.1.4",
+    "remeda": "^0.0.20"
   },
   "devDependencies": {
-    "@yarnaimo/tss": "^0.3.1"
+    "@yarnaimo/eslint-config": "^0.0.4",
+    "@yarnaimo/tss": "^0.3.2",
+    "firebase": "^7.16.1",
+    "firebase-admin": "^9.0.0"
   }
 }

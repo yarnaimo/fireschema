@@ -2,7 +2,7 @@
     "extends": "@yarnaimo/tss/tsconfig.json",
     "compilerOptions": {
         "outDir": "dist",
-        "lib": ["dom", "dom.iterable", "es2018"],
+        "lib": ["dom", "dom.iterable", "es2019"],
         "baseUrl": ".",
         "paths": {
             "*": ["node_modules/@types/*", "src/@types/*"]
