@@ -1,0 +1,23 @@
+{
+  "name": "fireschema",
+  "version": "0.0.0",
+  "repository": "github:yarnaimo/fireschema",
+  "license": "MIT",
+  "author": "yamaimo <yarnaimo@gmail.com>",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "debug": "node --inspect -r ts-node/register",
+    "dev": "yarn ts-node src/index.ts",
+    "prepare": "yarn build",
+    "start": "NODE_ENV=production node dist/index.js",
+    "test": "NODE_ENV=test jest",
+    "ts-node": "ts-node"
+  },
+  "dependencies": {
+    "@yarnaimo/rain": "^0.6.0"
+  },
+  "devDependencies": {
+    "@yarnaimo/tss": "^0.3.1"
+  }
+}
