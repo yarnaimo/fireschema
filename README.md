@@ -16,8 +16,10 @@ npm i -S fireschema
 
 - /users/{uid}
   - ユーザー (`IUser`)
-- /users/{uid}/posts/{post}
+- /users/{uid}/posts/{postId}
   - ユーザーの投稿 (`IPostA` または `IPostB`)
+- /users/{uid}/privatePosts/{postId}
+  - ユーザーの非公開投稿 (`IPostA`)
 
 ```ts
 import {
