@@ -1,4 +1,3 @@
-import { is } from './lib/type'
 import { Fireschema } from './types'
 
 export const $functions = Symbol('Fireschema - functions')
@@ -6,8 +5,15 @@ export const $schema = Symbol('Fireschema - schema')
 export const $docLabel = Symbol('Fireschema - docLabel')
 export const $allow = Symbol('Fireschema - allow')
 
-export const $or = (conditions: Fireschema.ConditionExp[]) =>
-  is.emptyArray(conditions) ? 'true' : `(${conditions.join(' || ')})`
+const $join = (separator: string) => (
+  conditions: Fireschema.ConditionExp[],
+) => {
+  return conditions.length === 0
+    ? 'true'
+    : conditions.length === 1
+    ? conditions.join(separator)
+    : `(${conditions.join(separator)})`
+}
 
-export const $and = (conditions: Fireschema.ConditionExp[]) =>
-  is.emptyArray(conditions) ? 'true' : `(${conditions.join(' && ')})`
+export const $or = $join(' || ')
+export const $and = $join(' && ')
