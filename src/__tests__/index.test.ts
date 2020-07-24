@@ -1,88 +1,7 @@
-import { dataSchema, fireschema } from '../fireschema'
-import { $allow, $docLabel, $functions, $or, $schema } from '../utils'
-
-const VersionSchema = dataSchema<{}>({})
-
-type IUser = {
-  name: string
-  displayName: string | null
-  age: number
-}
-
-type IPostA = {
-  type: 'a'
-  text: string
-}
-type IPostB = {
-  type: 'b'
-  texts: number[]
-}
-
-const UserSchema = dataSchema<IUser>({
-  name: 'string',
-  displayName: 'string | null',
-  age: 'int',
-})
-
-const PostASchema = dataSchema<IPostA>({
-  type: 'string',
-  text: 'string',
-})
-const PostBSchema = dataSchema<IPostB>({
-  type: 'string',
-  texts: 'list',
-})
-
-const getCurrentAuthUser = () => `getCurrentAuthUser()`
-const isAdmin = () => `isAdmin()`
-const isUserScope = (arg: string) => `isUserScope(${arg})`
-
-const schema = fireschema({
-  [$functions]: {
-    // [getCurrentAuthUser()]: `
-    //   return get(/databases/$(database)/documents/authUsers/$(request.auth.uid));
-    // `,
-    [isAdmin()]: `
-      return ${getCurrentAuthUser()}.data.isAdmin == true;
-    `,
-    [isUserScope('uid')]: `
-      return request.auth.uid == uid;
-    `,
-  },
-
-  versions: {
-    [$schema]: VersionSchema,
-    [$docLabel]: 'version',
-    [$allow]: {},
-
-    users: {
-      [$schema]: UserSchema,
-      [$docLabel]: 'uid',
-      [$allow]: {
-        read: true,
-        write: $or([isUserScope('uid')]),
-      },
-
-      posts: {
-        [$schema]: [PostASchema, PostBSchema],
-        [$docLabel]: 'postId',
-        [$allow]: {
-          read: true,
-          write: $or([isUserScope('uid')]),
-        },
-      },
-
-      privatePosts: {
-        [$schema]: PostASchema,
-        [$docLabel]: 'postId',
-        [$allow]: {
-          read: $or(['isAdmin()', 'isUserScope(uid)']),
-          write: $or(['isUserScope(uid)']),
-        },
-      },
-    },
-  },
-})
+import { firestore } from 'firebase-admin'
+import { initFirestore } from '..'
+import { dbAdmin } from './firestore'
+import { schema } from './fixtures/schema'
 
 const expected = `
 rules_version = '2';
@@ -135,4 +54,19 @@ service cloud.firestore {
 test('render', () => {
   expect(schema.rendered).toBe(expected)
 })
-// console.log(schema.rendered)
+
+describe('types', () => {
+  test('', () => {})
+})
+
+const storeAdmin = initFirestore(firestore, dbAdmin, schema.schema)
+
+const versions = storeAdmin('root', 'versions')
+const v1 = versions.ref.doc('v1')
+
+const users = storeAdmin(v1, 'users')
+const user = users.ref.doc('user')
+
+const posts = storeAdmin(user, 'posts')
+const post = posts.ref.doc('post')
+post.get().then((a) => a.data())

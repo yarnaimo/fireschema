@@ -1,6 +1,6 @@
 import { EntriesStrict, P } from 'lifts'
 import { R } from '../lib/fp'
-import { Fireschema } from '../types'
+import { Fireschema } from '../types/fireschema'
 import { _ } from '../_utils'
 
 export const renderFunctions = (

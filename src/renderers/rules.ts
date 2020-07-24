@@ -1,7 +1,7 @@
 import { EntriesStrict, P } from 'lifts'
 import { R } from '../lib/fp'
 import { is } from '../lib/type'
-import { allowOptions, Fireschema } from '../types'
+import { allowOptions, Fireschema } from '../types/fireschema'
 import { $and, $or } from '../utils'
 import { join, _ } from '../_utils'
 import { renderFunctions } from './functions'

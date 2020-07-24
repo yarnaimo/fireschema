@@ -1,6 +1,6 @@
 import { EntriesStrict, P } from 'lifts'
 import { R } from '../lib/fp'
-import { Fireschema } from '../types'
+import { Fireschema } from '../types/fireschema'
 import { $allow, $docLabel, $schema } from '../utils'
 import { join, _ } from '../_utils'
 import { renderRules } from './rules'

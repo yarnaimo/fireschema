@@ -21,9 +21,11 @@
     "remeda": "^0.0.20"
   },
   "devDependencies": {
+    "@firebase/testing": "^0.20.9",
     "@yarnaimo/eslint-config": "^0.0.4",
     "@yarnaimo/tss": "^0.3.2",
     "firebase": "^7.16.1",
-    "firebase-admin": "^9.0.0"
+    "firebase-admin": "^9.0.0",
+    "typescript": "^4.0.0-beta"
   }
 }

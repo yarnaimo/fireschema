@@ -1,14 +1,16 @@
 import { renderRoot } from './renderers/root'
-import { Fireschema } from './types'
+import { Fireschema } from './types/fireschema'
 import { $functions } from './utils'
 
 export const dataSchema = <T>(options: Fireschema.DataSchemaOptions<T>) =>
-  options
+  options as Fireschema.DataSchemaOptionsWithType<T>
 
-export const fireschema = <T extends Fireschema.RootOptions.All>(schema: T) => {
+export const createFireschema = <S extends Fireschema.RootOptions.All>(
+  schema: S,
+) => {
   const { [$functions]: functions, ...collections } = schema
 
   const rendered = renderRoot(functions, collections).join('\n')
 
-  return { rendered }
+  return { schema, rendered }
 }

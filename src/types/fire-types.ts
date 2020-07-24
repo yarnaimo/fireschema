@@ -1,5 +1,4 @@
-import { firestore as fadmin } from 'firebase-admin'
-import { firestore as fweb } from 'firebase/app'
+import { fadmin, fweb } from './firestore'
 
 export declare namespace FireTypes {
   export type Env<F, W, A> = F extends fweb.Firestore ? W : A

@@ -1,4 +1,4 @@
-import { Fireschema } from '../types'
+import { Fireschema } from '../types/fireschema'
 import { renderCollections } from './collections'
 import { renderFunctions } from './functions'
 

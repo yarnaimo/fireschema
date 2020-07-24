@@ -1,5 +1,5 @@
-import { FireTypes } from './firestore'
-import type { $allow, $docLabel, $functions, $schema } from './utils'
+import type { $adapter, $allow, $docLabel, $functions, $schema } from '../utils'
+import { FireTypes } from './fire-types'
 
 export const allowOptions = {
   read: {
@@ -26,6 +26,8 @@ export declare namespace Fireschema {
   //   | 'timestamp'
   //   | 'list'
   //   | 'map';
+
+  export type DataSchemaOptionsWithType<T> = { __T__: T } & DataSchemaOptions<T>
 
   export type DataSchemaOptions<T> = {
     [K in keyof T]: T[K] extends null
@@ -72,15 +74,12 @@ export declare namespace Fireschema {
     export type All = Meta & Children
   }
 
-  export type AllowOptions = {
-    [K in keyof (typeof allowOptions.read & typeof allowOptions.write)]+?:
-      | string
-      | true
-  }
-
   export namespace CollectionOptions {
     export type Meta = {
-      [$schema]: DataSchemaOptions<any> | DataSchemaOptions<any>[]
+      [$schema]:
+        | DataSchemaOptionsWithType<unknown>
+        | DataSchemaOptionsWithType<unknown>[]
+      [$adapter]: any
       [$docLabel]: string
       [$allow]: AllowOptions
     }
@@ -90,4 +89,12 @@ export declare namespace Fireschema {
 
     export type All = Meta & Children
   }
+
+  export type AllowOptions = {
+    [K in keyof (typeof allowOptions.read & typeof allowOptions.write)]+?:
+      | string
+      | true
+  }
+
+  export type CollectionInterface<T> = null
 }

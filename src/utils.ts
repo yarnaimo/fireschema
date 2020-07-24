@@ -1,7 +1,8 @@
-import { Fireschema } from './types'
+import { Fireschema } from './types/fireschema'
 
 export const $functions = Symbol('Fireschema - functions')
 export const $schema = Symbol('Fireschema - schema')
+export const $adapter = Symbol('Fireschema - adapter')
 export const $docLabel = Symbol('Fireschema - docLabel')
 export const $allow = Symbol('Fireschema - allow')
 
