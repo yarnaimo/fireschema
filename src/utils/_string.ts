@@ -1,4 +1,4 @@
-import { is } from './lib/type'
+import { is } from '../lib/type'
 
 export const _ = (n: number) => ' '.repeat(n)
 

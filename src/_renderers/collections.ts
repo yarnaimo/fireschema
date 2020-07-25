@@ -1,8 +1,8 @@
 import { EntriesStrict, P } from 'lifts'
+import { $allow, $docLabel, $schema } from '../constants/symbols'
 import { R } from '../lib/fp'
-import { Fireschema } from '../types/fireschema'
-import { $allow, $docLabel, $schema } from '../utils'
-import { join, _ } from '../_utils'
+import { Fireschema } from '../types/Fireschema'
+import { join, _ } from '../utils/_string'
 import { renderRules } from './rules'
 
 export const renderCollections = (

@@ -1,6 +1,3 @@
-import { firestore } from 'firebase-admin'
-import { initFirestore } from '..'
-import { dbAdmin } from './firestore'
 import { schema } from './fixtures/schema'
 
 const expected = `
@@ -23,7 +20,7 @@ service cloud.firestore {
 
       match /users/{uid} {
         function __validator_1__(data) {
-          return (data.name is string && (data.displayName is string || data.displayName is null) && data.age is int);
+          return (data.name is string && (data.displayName is string || data.displayName is null) && data.age is int && data.tags is list);
         }
 
         allow read: if true;
@@ -54,19 +51,3 @@ service cloud.firestore {
 test('render', () => {
   expect(schema.rendered).toBe(expected)
 })
-
-describe('types', () => {
-  test('', () => {})
-})
-
-const storeAdmin = initFirestore(firestore, dbAdmin, schema.schema)
-
-const versions = storeAdmin('root', 'versions')
-const v1 = versions.ref.doc('v1')
-
-const users = storeAdmin(v1, 'users')
-const user = users.ref.doc('user')
-
-const posts = storeAdmin(user, 'posts')
-const post = posts.ref.doc('post')
-post.get().then((a) => a.data())

@@ -1,4 +1,4 @@
-import { fadmin, fweb } from './firestore'
+import { fadmin, fweb } from './_firestore'
 
 export declare namespace FireTypes {
   export type Env<F, W, A> = F extends fweb.Firestore ? W : A

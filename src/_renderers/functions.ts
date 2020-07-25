@@ -1,7 +1,7 @@
 import { EntriesStrict, P } from 'lifts'
 import { R } from '../lib/fp'
-import { Fireschema } from '../types/fireschema'
-import { _ } from '../_utils'
+import { Fireschema } from '../types/Fireschema'
+import { _ } from '../utils/_string'
 
 export const renderFunctions = (
   $functions: Fireschema.FunctionsOptions,

@@ -5,35 +5,43 @@ import {
   $functions,
   $or,
   $schema,
+  adapter,
   createFireschema,
   dataSchema,
 } from '../..'
-import { adapter } from '../../adapter'
 
-const VersionSchema = dataSchema<{}>({})
-const VersionAdapter = adapter<{}>({})
+export type IVersion = {}
 
-type IUser = {
+export type IUser = {
   name: string
   displayName: string | null
   age: number
+  tags: string[]
 }
 
-type IPostA = {
+export type IPostA = {
   type: 'a'
   text: string
 }
-type IPostB = {
+export type IPostB = {
   type: 'b'
   texts: number[]
 }
+
+const VersionSchema = dataSchema<IVersion>({})
+const VersionAdapter = adapter<IVersion>()({})
 
 const UserSchema = dataSchema<IUser>({
   name: 'string',
   displayName: 'string | null',
   age: 'int',
+  tags: 'list',
 })
-const UserAdapter = adapter<IUser>({})
+const UserAdapter = adapter<IUser>()({
+  selectors: (q) => ({
+    adults: () => q.where('age', '>=', 18),
+  }),
+})
 
 const PostASchema = dataSchema<IPostA>({
   type: 'string',
@@ -43,7 +51,7 @@ const PostBSchema = dataSchema<IPostB>({
   type: 'string',
   texts: 'list',
 })
-const PostAdapter = adapter<IPostA | IPostB>({})
+const PostAdapter = adapter<IPostA | IPostB>()({})
 
 const getCurrentAuthUser = () => `getCurrentAuthUser()`
 const isAdmin = () => `isAdmin()`

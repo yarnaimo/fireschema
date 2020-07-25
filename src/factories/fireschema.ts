@@ -1,6 +1,6 @@
-import { renderRoot } from './renderers/root'
-import { Fireschema } from './types/fireschema'
-import { $functions } from './utils'
+import { $functions } from '../constants/symbols'
+import { Fireschema } from '../types/Fireschema'
+import { renderRoot } from '../_renderers/root'
 
 export const dataSchema = <T>(options: Fireschema.DataSchemaOptions<T>) =>
   options as Fireschema.DataSchemaOptionsWithType<T>

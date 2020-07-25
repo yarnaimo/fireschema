@@ -65,7 +65,7 @@ export type GetDeep<T, L extends readonly string[]> = L[0] extends keyof T
   : L extends []
   ? T
   : never
-type aaaaa = GetDeep<{ a: string }, []>
+
 export const getDeep = <T extends object, Loc extends readonly string[]>(
   object: T,
   paths: Loc,

@@ -1,8 +1,8 @@
-import { FireTypes } from './types/fire-types'
-import { Fireschema } from './types/fireschema'
-import { fadmin, fweb } from './types/firestore'
-import { getDeep, GetDeep } from './types/object'
-import { $schema } from './utils'
+import { $adapter, $schema } from '../constants/symbols'
+import { Fireschema } from '../types/Fireschema'
+import { FireTypes } from '../types/FireTypes'
+import { fadmin, fweb } from '../types/_firestore'
+import { getDeep, GetDeep } from '../types/_object'
 
 const getLoc = (parentOrRoot: FireTypes.DocumentRef<unknown>) =>
   parentOrRoot.path.split('/').filter((_, i) => i % 2 === 0)
@@ -15,7 +15,7 @@ type GetDocT<
   D extends 'root' | FireTypes.DocumentRef<unknown>
 > = D extends FireTypes.DocumentRef<infer T> ? T : never
 
-type GetOptionsType<
+type GetOptionsT<
   Options
 > = Options extends Fireschema.DataSchemaOptionsWithType<unknown>
   ? Options['__T__']
@@ -31,7 +31,7 @@ export const initFirestore = <
   instance: F,
   schema: S,
 ) => {
-  const initCollection = <
+  const collection = <
     P extends 'root' | FireTypes.DocumentRef<DocumentSchemaLoc<string[]>>,
     C extends keyof POptions & string,
     // PT extends DocumentSchemaLoc<Loc<S>> = DocumentSchemaLoc<Loc<S>>,
@@ -53,20 +53,51 @@ export const initFirestore = <
           >['__loc__'])
 
     const parentOptions = (getDeep(schema, parentLoc) as unknown) as POptions
-    const collectionOptions = parentOptions[collectionPath]
+
+    type Options = POptions[C]
+    const collectionOptions = parentOptions[collectionPath] as Options
 
     const collectionRef = parentOrRoot.collection(
       collectionPath,
-    ) as POptions[C] extends Fireschema.CollectionOptions.Meta
+    ) as Options extends Fireschema.CollectionOptions.Meta
       ? FireTypes.CollectionRef<
-          GetOptionsType<POptions[C][typeof $schema]> &
+          GetOptionsT<Options[typeof $schema]> &
             DocumentSchemaLoc<[...PLoc, C]>,
           F
         >
       : never
 
-    return { ref: collectionRef }
+    const adapter = (collectionOptions as any)[$adapter]
+    // as Options extends Fireschema.CollectionOptions.Meta
+    //   ? Options[typeof $adapter]
+    //   : never
+
+    const adapted = adapter(collectionRef)
+    // as Options[typeof $adapter] extends Fireschema.Adapter<
+    //   infer _,
+    //   infer SL,
+    //   infer _
+    // >
+    //   ? Fireschema.Adapted<SL, F>
+    //   : never
+
+    const select = adapted.select as Options extends Fireschema.CollectionOptions.Meta
+      ? Fireschema.Selectors<Options[typeof $adapter]['__SL__'], F>
+      : never
+
+    // const select = adapted.select as typeof adapted extends Fireschema.Adapted<
+    //   // infer _,
+    //   infer SL,
+    //   infer _
+    // >
+    //   ? typeof adapted['__SL__']
+    //   : never
+
+    return {
+      ref: collectionRef,
+      select,
+    }
   }
 
-  return initCollection
+  return { collection }
 }

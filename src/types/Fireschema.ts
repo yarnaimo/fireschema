@@ -1,5 +1,11 @@
-import type { $adapter, $allow, $docLabel, $functions, $schema } from '../utils'
-import { FireTypes } from './fire-types'
+import {
+  $adapter,
+  $allow,
+  $docLabel,
+  $functions,
+  $schema,
+} from '../constants/symbols'
+import { FireTypes } from './FireTypes'
 
 export const allowOptions = {
   read: {
@@ -79,7 +85,7 @@ export declare namespace Fireschema {
       [$schema]:
         | DataSchemaOptionsWithType<unknown>
         | DataSchemaOptionsWithType<unknown>[]
-      [$adapter]: any
+      [$adapter]: Adapter<any, any, any>
       [$docLabel]: string
       [$allow]: AllowOptions
     }
@@ -96,5 +102,23 @@ export declare namespace Fireschema {
       | true
   }
 
-  export type CollectionInterface<T> = null
+  // export type CollectionInterface<T> = null
+
+  export type Selectors<SL, F extends FireTypes.Firestore> = {
+    [K in keyof SL]: SL[K] extends (
+      ...args: infer A
+    ) => FireTypes.Query<infer U>
+      ? (...args: A) => FireTypes.Query<U, F>
+      : SL[K]
+  }
+
+  export type Adapter<T, SL, F extends FireTypes.Firestore> = ((
+    q: FireTypes.Query<T>,
+  ) => Adapted<SL, F>) & {
+    __SL__: SL
+  }
+
+  export type Adapted<SL, F extends FireTypes.Firestore> = {
+    select: Selectors<SL, F>
+  }
 }
