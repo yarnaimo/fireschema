@@ -1,2 +1,2 @@
-export * from './FireTypes'
 export * from './Fireschema'
+export * from './FTypes'

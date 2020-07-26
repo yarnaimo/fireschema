@@ -1,11 +1,13 @@
 import {
   $adapter,
   $allow,
+  $collectionGroup,
   $docLabel,
   $functions,
   $schema,
 } from '../constants/symbols'
-import { FireTypes } from './FireTypes'
+import { Type } from '../lib/type'
+import { FTypes } from './FTypes'
 
 export const allowOptions = {
   read: {
@@ -50,9 +52,9 @@ export declare namespace Fireschema {
       ? 'bool'
       : T[K] extends boolean | null
       ? 'bool | null'
-      : T[K] extends FireTypes.Timestamp
+      : T[K] extends FTypes.Timestamp
       ? 'timestamp'
-      : T[K] extends FireTypes.Timestamp | null
+      : T[K] extends FTypes.Timestamp | null
       ? 'timestamp | null'
       : T[K] extends any[]
       ? 'list'
@@ -87,6 +89,7 @@ export declare namespace Fireschema {
         | DataSchemaOptionsWithType<unknown>[]
       [$adapter]: Adapter<any, any, any>
       [$docLabel]: string
+      [$collectionGroup]?: boolean
       [$allow]: AllowOptions
     }
     export type Children = {
@@ -104,21 +107,40 @@ export declare namespace Fireschema {
 
   // export type CollectionInterface<T> = null
 
-  export type Selectors<SL, F extends FireTypes.Firestore> = {
-    [K in keyof SL]: SL[K] extends (
-      ...args: infer A
-    ) => FireTypes.Query<infer U>
-      ? (...args: A) => FireTypes.Query<U, F>
+  export type Selectors<SL, F extends FTypes.FirestoreApp> = {
+    [K in keyof SL]: SL[K] extends (...args: infer A) => FTypes.Query<infer U>
+      ? (...args: A) => FTypes.Query<U, F>
       : SL[K]
   }
 
-  export type Adapter<T, SL, F extends FireTypes.Firestore> = ((
-    q: FireTypes.Query<T>,
+  export type Adapter<T, SL, F extends FTypes.FirestoreApp> = ((
+    q: FTypes.Query<T>,
   ) => Adapted<SL, F>) & {
     __SL__: SL
   }
 
-  export type Adapted<SL, F extends FireTypes.Firestore> = {
+  export type Adapted<SL, F extends FTypes.FirestoreApp> = {
     select: Selectors<SL, F>
+  }
+
+  export type DocumentSchemaLoc<L extends string[]> = {
+    __loc__: L
+  }
+
+  type DocFieldToWrite<
+    T,
+    F extends FTypes.FirestoreApp = FTypes.FirestoreApp
+  > = T extends FTypes.Timestamp ? FTypes.Timestamp<F> : T
+
+  type WithoutLoc<T> = T extends DocumentSchemaLoc<any>
+    ? Type.Except<T, '__loc__'>
+    : T
+
+  export type DocDataToWrite<
+    T,
+    F extends FTypes.FirestoreApp = FTypes.FirestoreApp,
+    _T = WithoutLoc<T>
+  > = {
+    [K in keyof _T]: DocFieldToWrite<_T[K], F> | FTypes.FieldValue<F>
   }
 }

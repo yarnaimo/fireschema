@@ -1,5 +1,5 @@
 import { Fireschema } from '../types/Fireschema'
-import { FireTypes } from '../types/FireTypes'
+import { FTypes } from '../types/FTypes'
 
 // export const adapter = <T, S = unknown>({
 //   selectors,
@@ -13,16 +13,14 @@ export const adapter = <T>() => {
   return <SL = {}>({
     selectors = () => ({} as SL),
   }: {
-    selectors?: (q: FireTypes.Query<T>) => SL
+    selectors?: (q: FTypes.Query<T>) => SL
   }) => {
-    const adapter = <F extends FireTypes.Firestore>(
-      q: FireTypes.Query<T, F>,
+    const adapter = <F extends FTypes.FirestoreApp>(
+      q: FTypes.Query<T, F>,
     ): Fireschema.Adapted<SL, F> => ({
       select: selectors(q) as Fireschema.Selectors<SL, F>,
     })
 
-    return Object.assign(adapter, {
-      __SL__: {} as SL,
-    })
+    return adapter as typeof adapter & { __SL__: SL }
   }
 }

@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import { P } from 'lifts'
 import { _createdAt } from '../constants/firestore'
 import { Type } from '../lib/type'
-import { FireTypes } from '../types'
+import { FTypes } from '../types'
 
 type _SpanOption = { since: dayjs.Dayjs; until: dayjs.Dayjs }
 export type SpanQueryOption =
@@ -10,7 +10,7 @@ export type SpanQueryOption =
   | Type.SetOptional<_SpanOption, 'since'>
   | Type.SetOptional<_SpanOption, 'until'>
 
-export const CreatedWithin = <T>(query: FireTypes.Query<T>) => ({
+export const CreatedWithin = <T>(query: FTypes.Query<T>) => ({
   since,
   until,
 }: SpanQueryOption) => {
@@ -21,8 +21,8 @@ export const CreatedWithin = <T>(query: FireTypes.Query<T>) => ({
   )
 }
 
-export const Combine = <T>(query: FireTypes.Query<T>) => <
-  Ss extends ((query: FireTypes.Query<T>) => (arg: any) => any)[]
+export const Combine = <T>(query: FTypes.Query<T>) => <
+  Ss extends ((query: FTypes.Query<T>) => (arg: any) => any)[]
 >(
   ...Selectors: Ss
 ) => {

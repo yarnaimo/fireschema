@@ -66,11 +66,8 @@ export type GetDeep<T, L extends readonly string[]> = L[0] extends keyof T
   ? T
   : never
 
-export const getDeep = <T extends object, Loc extends readonly string[]>(
-  object: T,
-  paths: Loc,
-) => {
-  return (paths.reduce((state, path) => {
-    return state[path] as never
-  }, object as { [key: string]: unknown }) as unknown) as GetDeep<T, Loc>
-}
+export type GetDeepByKey<T, Key> = {
+  [K in keyof T]: T[K] extends object
+    ? GetDeepByKey<T[K], Key> | (K extends Key ? T[K] : never)
+    : never
+}[keyof T]

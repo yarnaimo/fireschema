@@ -1,2 +1,2 @@
 export * from './controller'
-export * from './query'
+export * from './query-utils'

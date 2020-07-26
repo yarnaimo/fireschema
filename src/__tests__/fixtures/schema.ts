@@ -9,6 +9,8 @@ import {
   createFireschema,
   dataSchema,
 } from '../..'
+import { FTypes } from '../../types'
+import { $collectionGroup } from '../../utils'
 
 export type IVersion = {}
 
@@ -17,6 +19,7 @@ export type IUser = {
   displayName: string | null
   age: number
   tags: string[]
+  timestamp: FTypes.Timestamp
 }
 
 export type IPostA = {
@@ -25,7 +28,7 @@ export type IPostA = {
 }
 export type IPostB = {
   type: 'b'
-  texts: number[]
+  texts: string[]
 }
 
 const VersionSchema = dataSchema<IVersion>({})
@@ -36,10 +39,11 @@ const UserSchema = dataSchema<IUser>({
   displayName: 'string | null',
   age: 'int',
   tags: 'list',
+  timestamp: 'timestamp',
 })
 const UserAdapter = adapter<IUser>()({
   selectors: (q) => ({
-    adults: () => q.where('age', '>=', 18),
+    teen: () => q.where('age', '>=', 10).where('age', '<', 20),
   }),
 })
 
@@ -71,24 +75,25 @@ export const schema = createFireschema({
   },
 
   versions: {
+    [$docLabel]: 'version',
     [$schema]: VersionSchema,
     [$adapter]: VersionAdapter,
-    [$docLabel]: 'version',
     [$allow]: {},
 
     users: {
+      [$docLabel]: 'uid',
       [$schema]: UserSchema,
       [$adapter]: UserAdapter,
-      [$docLabel]: 'uid',
       [$allow]: {
         read: true,
         write: $or([isUserScope('uid')]),
       },
 
       posts: {
+        [$docLabel]: 'postId',
         [$schema]: [PostASchema, PostBSchema],
         [$adapter]: PostAdapter,
-        [$docLabel]: 'postId',
+        [$collectionGroup]: true,
         [$allow]: {
           read: true,
           write: $or([isUserScope('uid')]),
@@ -96,9 +101,9 @@ export const schema = createFireschema({
       },
 
       privatePosts: {
+        [$docLabel]: 'postId',
         [$schema]: PostASchema,
         [$adapter]: PostAdapter,
-        [$docLabel]: 'postId',
         [$allow]: {
           read: $or(['isAdmin()', 'isUserScope(uid)']),
           write: $or(['isUserScope(uid)']),

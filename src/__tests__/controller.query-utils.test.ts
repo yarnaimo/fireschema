@@ -1,11 +1,11 @@
 import dayjs from 'dayjs'
 import { Combine, CreatedWithin } from '..'
-import { FireTypes } from '../types'
-import { users } from './fixtures/collections'
+import { FTypes } from '../types'
 import { IUser } from './fixtures/schema'
+import { users } from './infrastructure/collections'
 import { expectEqualRef } from './utils/firestore'
 
-const Tags = (query: FireTypes.Query<IUser>) => (tagIds: string[]) =>
+const Tags = (query: FTypes.Query<IUser>) => (tagIds: string[]) =>
   query.where('tags', 'array-contains-any', tagIds)
 
 const tagIds = ['81', '117']
