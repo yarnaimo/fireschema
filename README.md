@@ -2,15 +2,26 @@
 
 Firestore のスキーマを定義してバリデーションを含むセキュリティルールを自動生成するツール
 
+## Requirements
+
+- **TypeScript** (>= 4.0)
+
 ## Install
 
 ```sh
 yarn add fireschema
+yarn add -D ts-node
 # or
 npm i -S fireschema
+npm i -D ts-node
 ```
 
 ## Usage
+
+### スキーマ定義・セキュリティルール生成
+
+1. 以下のようにスキーマを定義する (`schema` として named export する)
+2. `npx fireschema <スキーマのパス>`
 
 **Case**
 
@@ -23,19 +34,23 @@ npm i -S fireschema
 
 ```ts
 import {
+  $adapter,
   $allow,
   $docLabel,
   $functions,
   $or,
   $schema,
+  adapter,
+  createFireschema,
   dataSchema,
-  fireschema,
 } from 'fireschema'
 
 type IUser = {
   name: string
   displayName: string | null
   age: number
+  tags: string[]
+  timestamp: FTypes.Timestamp
 }
 
 type IPostA = {
@@ -44,13 +59,20 @@ type IPostA = {
 }
 type IPostB = {
   type: 'b'
-  texts: number[]
+  texts: string[]
 }
 
 const UserSchema = dataSchema<IUser>({
   name: 'string',
   displayName: 'string | null',
   age: 'int',
+  tags: 'list',
+  timestamp: 'timestamp',
+})
+const UserAdapter = adapter<IUser>()({
+  selectors: (q) => ({
+    teen: () => q.where('age', '>=', 10).where('age', '<', 20),
+  }),
 })
 
 const PostASchema = dataSchema<IPostA>({
@@ -61,11 +83,12 @@ const PostBSchema = dataSchema<IPostB>({
   type: 'string',
   texts: 'list',
 })
+const PostAdapter = adapter<IPostA | IPostB>()({})
 
 // const isAdmin = () => `'isAdmin()'`
 // const isUserScope = (arg: string) => `isUserScope(${arg})`
 
-const schema = fireschema({
+export const schema = createFireschema({
   [$functions]: {
     // /admins/<uid> が存在するかどうか
     ['isAdmin()']: `
@@ -86,8 +109,9 @@ const schema = fireschema({
    *   [write]: uid がユーザーと一致する場合のみ
    */
   users: {
-    [$schema]: UserSchema,
     [$docLabel]: 'uid',
+    [$schema]: UserSchema,
+    [$adapter]: UserAdapter,
     [$allow]: {
       read: true,
       write: $or(['isUserScope(uid)']),
@@ -101,8 +125,9 @@ const schema = fireschema({
      *   [write]: uid がユーザーと一致する場合のみ
      */
     posts: {
-      [$schema]: [PostASchema, PostBSchema],
       [$docLabel]: 'postId',
+      [$schema]: [PostASchema, PostBSchema],
+      [$adapter]: PostAdapter,
       [$allow]: {
         read: true,
         write: $or(['isUserScope(uid)']),
@@ -117,8 +142,9 @@ const schema = fireschema({
      *   [write]: uid がユーザーと一致する場合のみ
      */
     privatePosts: {
-      [$schema]: PostASchema,
       [$docLabel]: 'postId',
+      [$schema]: PostASchema,
+      [$adapter]: PostAdapter,
       [$allow]: {
         read: $or(['isAdmin()', 'isUserScope(uid)']),
         write: $or(['isUserScope(uid)']),
@@ -126,4 +152,30 @@ const schema = fireschema({
     },
   },
 })
+```
+
+### a
+
+```ts
+import firebase, { firestore, initializeApp } from 'firebase' // or firebase-admin
+
+const app: firebase.app.App = initializeApp({
+  // ...
+})
+const firestoreApp = app.firestore()
+
+const store: FirestoreController<
+  typeof firestoreApp,
+  typeof schema
+> = initFirestore(firestore, firestoreApp, schema)
+
+const users = storeAdmin.collection('root', 'users')
+const user = users.ref.doc('user')
+
+const posts = storeAdmin.collection(user, 'posts')
+const post = posts.ref.doc('post')
+
+const usersGroup = storeAdmin.collectionGroup(['users'])
+
+user.get().then((snap) => snap.data()) // => IUser
 ```

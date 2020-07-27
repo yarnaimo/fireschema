@@ -1,3 +1,4 @@
+import { renderSchema } from '../_renderers/root'
 import { schema } from './fixtures/schema'
 
 const expected = `
@@ -49,5 +50,6 @@ service cloud.firestore {
 }`.trim()
 
 test('render', () => {
-  expect(schema.rendered).toBe(expected)
+  const result = renderSchema(schema)
+  expect(result).toBe(expected)
 })

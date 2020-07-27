@@ -1,7 +1,7 @@
 import { EntriesStrict, P } from 'lifts'
 import { R } from '../lib/fp'
 import { is } from '../lib/type'
-import { allowOptions, Fireschema } from '../types/Fireschema'
+import { allowOptions, STypes } from '../types/Fireschema'
 import { $and, $or } from '../utils/operators'
 import { join, _ } from '../utils/_string'
 import { renderFunctions } from './functions'
@@ -9,10 +9,8 @@ import { renderFunctions } from './functions'
 let index = 0
 
 export const renderRules = (
-  $allow: Fireschema.AllowOptions,
-  $schema:
-    | Fireschema.DataSchemaOptions<any>
-    | Fireschema.DataSchemaOptions<any>[],
+  $allow: STypes.AllowOptions,
+  $schema: STypes.DataSchemaOptions<any> | STypes.DataSchemaOptions<any>[],
   pIndent: number,
 ) => {
   const indent = pIndent + 2

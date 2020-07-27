@@ -1,10 +1,11 @@
-import { Fireschema } from '../types/Fireschema'
+import { $functions } from '../constants'
+import { STypes } from '../types/Fireschema'
 import { renderCollections } from './collections'
 import { renderFunctions } from './functions'
 
 export const renderRoot = (
-  $functions: Fireschema.FunctionsOptions,
-  collections: Fireschema.CollectionOptions.Children,
+  $functions: STypes.FunctionsOptions,
+  collections: STypes.CollectionOptions.Children,
 ) => {
   return [
     "rules_version = '2';",
@@ -17,4 +18,13 @@ export const renderRoot = (
     '  }',
     '}',
   ]
+}
+
+export const renderSchema = <S extends STypes.RootOptions.All>(
+  schemaOptions: S,
+) => {
+  const { [$functions]: functions, ...collections } = schemaOptions
+
+  const rendered = renderRoot(functions, collections).join('\n')
+  return rendered
 }

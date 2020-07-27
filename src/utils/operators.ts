@@ -1,8 +1,6 @@
-import { Fireschema } from '../types/Fireschema'
+import { STypes } from '../types/Fireschema'
 
-const $join = (separator: string) => (
-  conditions: Fireschema.ConditionExp[],
-) => {
+const $join = (separator: string) => (conditions: STypes.ConditionExp[]) => {
   return conditions.length === 0
     ? 'true'
     : conditions.length === 1

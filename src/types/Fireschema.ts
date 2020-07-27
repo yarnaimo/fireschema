@@ -22,7 +22,7 @@ export const allowOptions = {
   },
 }
 
-export declare namespace Fireschema {
+export declare namespace STypes {
   export type ConditionExp = string | true
   // type DataTypes =
   //   | 'string'

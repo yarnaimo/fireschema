@@ -1,4 +1,4 @@
-import { Fireschema } from '../types/Fireschema'
+import { STypes } from '../types/Fireschema'
 import { FTypes } from '../types/FTypes'
 
 // export const adapter = <T, S = unknown>({
@@ -17,8 +17,8 @@ export const adapter = <T>() => {
   }) => {
     const adapter = <F extends FTypes.FirestoreApp>(
       q: FTypes.Query<T, F>,
-    ): Fireschema.Adapted<SL, F> => ({
-      select: selectors(q) as Fireschema.Selectors<SL, F>,
+    ): STypes.Adapted<SL, F> => ({
+      select: selectors(q) as STypes.Selectors<SL, F>,
     })
 
     return adapter as typeof adapter & { __SL__: SL }

@@ -28,10 +28,16 @@ export declare namespace FTypes {
     fadmin.Timestamp
   >
 
-  export type FieldValueClass =
-    | typeof fweb.FieldValue
-    | typeof fadmin.FieldValue
-  export type TimestampClass = typeof fweb.Timestamp | typeof fadmin.Timestamp
+  export type FieldValueClass<F extends FirestoreApp = FirestoreApp> = Env<
+    F,
+    typeof fweb.FieldValue,
+    typeof fadmin.FieldValue
+  >
+  export type TimestampClass<F extends FirestoreApp = FirestoreApp> = Env<
+    F,
+    typeof fweb.Timestamp,
+    typeof fadmin.Timestamp
+  >
 
   export type SetOptions = fweb.SetOptions | FirebaseFirestore.SetOptions
   export type DocumentData = fweb.DocumentData | fadmin.DocumentData
