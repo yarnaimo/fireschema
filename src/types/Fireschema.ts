@@ -1,7 +1,6 @@
 import {
   $adapter,
   $allow,
-  $collectionGroup,
   $docLabel,
   $functions,
   $schema,
@@ -89,7 +88,7 @@ export declare namespace Fireschema {
         | DataSchemaOptionsWithType<unknown>[]
       [$adapter]: Adapter<any, any, any>
       [$docLabel]: string
-      [$collectionGroup]?: boolean
+      // [$collectionGroup]?: boolean
       [$allow]: AllowOptions
     }
     export type Children = {

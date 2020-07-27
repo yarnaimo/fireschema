@@ -10,7 +10,6 @@ import {
   dataSchema,
 } from '../..'
 import { FTypes } from '../../types'
-import { $collectionGroup } from '../../utils'
 
 export type IVersion = {}
 
@@ -93,7 +92,6 @@ export const schema = createFireschema({
         [$docLabel]: 'postId',
         [$schema]: [PostASchema, PostBSchema],
         [$adapter]: PostAdapter,
-        [$collectionGroup]: true,
         [$allow]: {
           read: true,
           write: $or([isUserScope('uid')]),
