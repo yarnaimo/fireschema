@@ -5,11 +5,13 @@
   "license": "MIT",
   "author": "yamaimo <yarnaimo@gmail.com>",
   "main": "dist/index.js",
+  "bin": "src/bin/cli.ts",
   "scripts": {
     "build": "tsc",
     "debug": "node --inspect -r ts-node/register",
     "dev": "yarn ts-node src/index.ts",
     "prepare": "yarn build",
+    "serve": "firebase emulators:start --only firestore",
     "start": "NODE_ENV=production node dist/index.js",
     "test": "NODE_ENV=test jest",
     "ts-node": "ts-node"
@@ -21,9 +23,11 @@
     "remeda": "^0.0.20"
   },
   "devDependencies": {
+    "@firebase/testing": "^0.20.9",
     "@yarnaimo/eslint-config": "^0.0.4",
     "@yarnaimo/tss": "^0.3.2",
     "firebase": "^7.16.1",
-    "firebase-admin": "^9.0.0"
+    "firebase-admin": "^9.0.0",
+    "typescript": "^4.0.0-beta"
   }
 }

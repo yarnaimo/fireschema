@@ -1,10 +1,10 @@
 import { EntriesStrict, P } from 'lifts'
 import { R } from '../lib/fp'
-import { Fireschema } from '../types'
-import { _ } from '../_utils'
+import { STypes } from '../types/Fireschema'
+import { _ } from '../utils/_string'
 
 export const renderFunctions = (
-  $functions: Fireschema.FunctionsOptions,
+  $functions: STypes.FunctionsOptions,
   pIndent: number,
 ) => {
   const indent = pIndent + 2
