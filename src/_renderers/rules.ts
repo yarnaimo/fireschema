@@ -24,7 +24,10 @@ export const renderRules = (
       R.flatMap(([key, type]) => {
         return P(
           type.split(' | '),
-          R.map((t) => `data.${String(key)} is ${t}`),
+          R.map((t) => {
+            const op = t === 'null' ? '==' : 'is'
+            return `data.${String(key)} ${op} ${t}`
+          }),
           $or,
         )
       }),
@@ -32,19 +35,6 @@ export const renderRules = (
     R.map($and),
     $or,
   )
-
-  // const validatorBody_ = P(
-  //   $schema,
-  //   EntriesStrict,
-  //   R.flatMap(([key, type]) => {
-  //     return P(
-  //       type.split(' | '),
-  //       R.map((t) => `data.${String(key)} is ${t}`),
-  //       $or,
-  //     );
-  //   }),
-  //   $and,
-  // );
 
   const functions = renderFunctions(
     {
@@ -55,14 +45,14 @@ export const renderRules = (
     pIndent,
   )
 
-  const validationRule = validator('request.resource.data')
+  const array = EntriesStrict($allow)
+  const hasWriteRules = array.some(([op]) => op in allowOptions.write)
 
   const rules = P(
-    $allow,
-    EntriesStrict,
+    array,
     R.map(([op, condition]) => {
       if (op in allowOptions.write) {
-        return [op, $and([condition!, validationRule])]
+        return [op, $and([condition!, validator('request.resource.data')])]
       }
       return [op, condition]
     }),
@@ -72,7 +62,10 @@ export const renderRules = (
     join('\n'),
   )
 
-  index++
-
-  return join('\n\n')([functions, rules])
+  if (hasWriteRules) {
+    index++
+    return join('\n\n')([functions, rules])
+  } else {
+    return rules
+  }
 }

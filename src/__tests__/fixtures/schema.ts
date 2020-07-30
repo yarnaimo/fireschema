@@ -1,6 +1,7 @@
 import {
   $adapter,
   $allow,
+  $collectionGroups,
   $docLabel,
   $functions,
   $or,
@@ -71,6 +72,17 @@ export const schema = createFireschema({
     [isUserScope('uid')]: `
       return request.auth.uid == uid;
     `,
+  },
+
+  [$collectionGroups]: {
+    users: {
+      [$docLabel]: 'uid',
+      [$schema]: UserSchema,
+      [$adapter]: UserAdapter,
+      [$allow]: {
+        read: true,
+      },
+    },
   },
 
   versions: {

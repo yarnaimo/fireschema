@@ -5,15 +5,16 @@ import { STypes } from '../types/Fireschema'
 import { join, _ } from '../utils/_string'
 import { renderRules } from './rules'
 
-export const renderCollections = (
-  collections: STypes.CollectionOptions.Children,
-  pIndent: number,
-): string | null => {
+const renderFromArray = (pIndent: number) => (
+  array: (readonly [
+    string,
+    STypes.CollectionOptions.Meta & STypes.CollectionOptions.Children,
+  ])[],
+) => {
   const indent = pIndent + 2
 
   return P(
-    collections,
-    EntriesStrict,
+    array,
     R.map(
       ([
         collectionPath,
@@ -36,5 +37,27 @@ export const renderCollections = (
       },
     ),
     join('\n\n'),
+  )
+}
+
+export const renderCollections = (
+  collections: STypes.CollectionOptions.Children,
+  pIndent: number,
+): string | null => {
+  return P(collections, EntriesStrict, renderFromArray(pIndent))
+}
+
+export const renderCollectionGroups = (
+  collections: STypes.CollectionOptions.Children,
+  pIndent: number,
+): string | null => {
+  return P(
+    collections,
+    EntriesStrict,
+    R.map(
+      ([collectionPath, options]) =>
+        [`{path=**}/${collectionPath}`, options] as const,
+    ),
+    renderFromArray(pIndent),
   )
 }

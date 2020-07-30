@@ -1,6 +1,7 @@
 import {
   $adapter,
   $allow,
+  $collectionGroups,
   $docLabel,
   $functions,
   $schema,
@@ -73,6 +74,7 @@ export declare namespace STypes {
   export namespace RootOptions {
     export type Meta = {
       [$functions]: FunctionsOptions
+      [$collectionGroups]: CollectionOptions.Children
     }
     export type Children = {
       [K in string]: CollectionOptions.All
