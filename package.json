@@ -7,7 +7,7 @@
   "main": "dist/index.js",
   "bin": "src/bin/cli.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
     "debug": "node --inspect -r ts-node/register",
     "dev": "yarn ts-node src/index.ts",
     "prepare": "yarn build",
