@@ -88,7 +88,7 @@ export declare namespace STypes {
       [$schema]:
         | DataSchemaOptionsWithType<unknown>
         | DataSchemaOptionsWithType<unknown>[]
-      [$adapter]: Adapter<any, any, any>
+      [$adapter]: Adapter<any, any, any> | null
       [$docLabel]: string
       // [$collectionGroup]?: boolean
       [$allow]: AllowOptions

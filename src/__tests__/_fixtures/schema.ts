@@ -88,7 +88,7 @@ export const schema = createFireschema({
   versions: {
     [$docLabel]: 'version',
     [$schema]: VersionSchema,
-    [$adapter]: VersionAdapter,
+    [$adapter]: null,
     [$allow]: {},
 
     users: {

@@ -1,5 +1,6 @@
 import { _createdAt, _updatedAt } from '../constants'
 import { $adapter, $schema } from '../constants/symbols'
+import { adapter } from '../factories'
 import { STypes } from '../types/Fireschema'
 import { FTypes } from '../types/FTypes'
 import { fadmin, fweb } from '../types/_firestore'
@@ -29,12 +30,10 @@ const getAdapted = <
   collectionOptions: Options,
   collectionRef: FTypes.Query<any, F>,
 ) => {
-  const adapted = collectionOptions[$adapter](collectionRef)
+  const adapted =
+    collectionOptions[$adapter]?.(collectionRef) ?? adapter()({})(collectionRef)
 
-  const select = adapted.select as STypes.Selectors<
-    Options[typeof $adapter]['__SL__'],
-    F
-  >
+  const select = adapted.select as STypes.Selectors<GetSL<Options>, F>
 
   return {
     select,
@@ -49,6 +48,12 @@ type EnsureOptions<_Options> = _Options extends STypes.CollectionOptions.Meta
 
 type GetL<P extends Parent, C> = [...GetPL<P>, C]
 type GetPL<P extends Parent> = P extends 'root' ? [] : GetDocT<P>['__loc__']
+
+type GetSL<
+  Options extends STypes.CollectionOptions.Meta
+> = Options[typeof $adapter] extends null
+  ? {}
+  : NonNullable<Options[typeof $adapter]>['__SL__']
 
 type CollectionController<
   F extends FTypes.FirestoreApp,
@@ -66,19 +71,13 @@ type CollectionController<
       SchemaTWithLoc<EnsureOptions<POptions[C]>, GetL<P, C>>,
       F
     >
-    select: STypes.Selectors<
-      EnsureOptions<POptions[C]>[typeof $adapter]['__SL__'],
-      F
-    >
+    select: STypes.Selectors<GetSL<EnsureOptions<POptions[C]>>, F>
   }
   collectionGroup: <L extends Loc<S>, _Options = GetDeep<S, L>>(
     loc: L,
   ) => {
     query: FTypes.Query<SchemaTWithLoc<EnsureOptions<_Options>, L>, F>
-    select: STypes.Selectors<
-      EnsureOptions<_Options>[typeof $adapter]['__SL__'],
-      F
-    >
+    select: STypes.Selectors<GetSL<EnsureOptions<_Options>>, F>
   }
 }
 
