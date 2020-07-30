@@ -18,7 +18,6 @@ const posts = store.app.collection('posts')
 test('exceeded', async () => {
   const { result, rerender, unmount } = renderHook(() => {
     const date = dayjs().toDate()
-    console.log(date)
     return useRefChangeLimitExceeded(posts.where('date', '==', date))
   })
 
@@ -29,14 +28,12 @@ test('exceeded', async () => {
   rerender()
   await sleep(500)
 
-  logTimestamps(result.current.timestamps.current)
-
   expect(result.current.timestamps.current.length).toBeGreaterThan(1)
   expect(result.current.exceeded()).toBe(true)
 
   await sleep(5100)
 
-  logTimestamps(result.current.timestamps.current)
+  // logTimestamps(result.current.timestamps.current)
 
   expect(result.current.timestamps.current.length).toBeGreaterThan(1)
   expect(result.current.exceeded()).toBe(false)
@@ -48,7 +45,6 @@ test('not exceeded', async () => {
   const date = dayjs().toDate()
 
   const { result, rerender, unmount } = renderHook(() => {
-    console.log(date)
     return useRefChangeLimitExceeded(posts.where('date', '==', date))
   })
 

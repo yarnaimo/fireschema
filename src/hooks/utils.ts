@@ -30,7 +30,6 @@ const isEqual = <T extends HasIsEqual<T>>(
 ): boolean => {
   const bothNull: boolean = !v1 && !v2
   const equal: boolean = !!v1 && !!v2 && v1.isEqual(v2)
-  console.log(bothNull, equal)
 
   return bothNull || equal
 }
