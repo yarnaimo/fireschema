@@ -1,5 +1,5 @@
 import { renderSchema } from '../_renderers/root'
-import { schema } from './fixtures/schema'
+import { schema } from './_fixtures/schema'
 
 const expected = `
 rules_version = '2';

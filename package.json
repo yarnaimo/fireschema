@@ -20,14 +20,22 @@
     "@sindresorhus/is": "^3.0.0",
     "dayjs": "^1.8.30",
     "lifts": "^0.1.4",
+    "react-firebase-hooks": "^2.2.0",
     "remeda": "^0.0.20"
   },
   "devDependencies": {
     "@firebase/testing": "^0.20.9",
+    "@testing-library/react-hooks": "^3.4.1",
+    "@types/react": "^16.9.43",
+    "@types/testing-library__react-hooks": "^3.4.0",
     "@yarnaimo/eslint-config": "^0.0.4",
     "@yarnaimo/tss": "^0.3.2",
     "firebase": "^7.16.1",
     "firebase-admin": "^9.0.0",
+    "jest": "^26.1.0",
+    "react": "^16.13.1",
+    "react-test-renderer": "^16.13.1",
+    "ts-jest": "^26.1.4",
     "typescript": "^4.0.0-beta"
   }
 }

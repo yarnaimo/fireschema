@@ -1,19 +1,9 @@
-import { assertFails, firestore } from '@firebase/testing'
+import { assertFails } from '@firebase/testing'
 import { expectType } from 'tsd'
-import { FirestoreController } from '../controller'
-import { IUser, schema } from './fixtures/schema'
-import { authedStore, collections } from './infrastructure/firestore'
-import { expectEqualRef } from './utils/firestore'
-
-export const store: FirestoreController<
-  firestore.Firestore,
-  typeof schema
-> = authedStore('user')
-
-export const unauthedStore: FirestoreController<
-  firestore.Firestore,
-  typeof schema
-> = authedStore('unauthed')
+import { IUser } from './_fixtures/schema'
+import { collections } from './_infrastructure/firestore'
+import { store, unauthedStore } from './_infrastructure/store'
+import { expectEqualRef } from './_utils/firestore'
 
 const r = collections(store)
 const ur = collections(unauthedStore)
