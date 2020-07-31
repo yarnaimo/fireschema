@@ -41,6 +41,20 @@ const getAdapted = <
   }
 }
 
+type OmitLast<T extends any[]> = T extends [
+  ...(infer U extends any[] ? infer U : never),
+  unknown,
+]
+  ? U
+  : never
+
+type GetParentT<
+  S extends STypes.RootOptions.All,
+  T extends STypes.HasLoc<string[]>,
+  L extends string[] = OmitLast<T['__loc__']>,
+  _Options = GetDeep<S, L>
+> = SchemaTWithLoc<EnsureOptions<_Options>, L>
+
 type Parent = 'root' | FTypes.DocumentRef<STypes.HasLoc<string[]>>
 
 type EnsureOptions<_Options> = _Options extends STypes.CollectionOptions.Meta
@@ -196,6 +210,15 @@ export const initFirestore = <
       [_updatedAt]: FieldValue.serverTimestamp(),
     } as any) as T)
 
+  const parentOfCollection = <T extends STypes.HasLoc<string[]>>(
+    collectionRef: FTypes.CollectionRef<T, F>,
+  ) => {
+    return (collectionRef.parent as unknown) as FTypes.DocumentRef<
+      GetParentT<S, T>,
+      F
+    >
+  }
+
   const { collection, collectionGroup } = buildCollectionController(
     app,
     schemaOptions,
@@ -243,6 +266,8 @@ export const initFirestore = <
     collection,
     collectionGroup,
 
+    parentOfCollection: parentOfCollection as any,
+
     create,
     $create,
     setMerge,
@@ -257,6 +282,10 @@ export type FirestoreController<
   app: F
   FieldValue: FTypes.FieldValueClass<F>
   Timestamp: FTypes.TimestampClass<F>
+
+  parentOfCollection: <T extends STypes.HasLoc<string[]>>(
+    collectionRef: FTypes.CollectionRef<T, F>,
+  ) => FTypes.DocumentRef<GetParentT<S, T>, F>
 
   create: <T>(
     docRef: FTypes.DocumentRef<T, F>,

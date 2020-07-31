@@ -40,6 +40,17 @@ describe('refs', () => {
       r.usersGroup.select.teen(),
     )
   })
+
+  test('parentOfCollection', () => {
+    const user = store.parentOfCollection(r.posts.ref)
+
+    expectType<
+      firebase.firestore.DocumentReference<
+        IUser & { __loc__: ['versions', 'users'] }
+      >
+    >(user)
+    expectEqualRef(user, r.user)
+  })
 })
 
 const userData = {
