@@ -1,5 +1,6 @@
 import { assertFails } from '@firebase/testing'
 import { expectType } from 'tsd'
+import { STypes } from '..'
 import { IUser } from './_fixtures/schema'
 import { collections } from './_infrastructure/firestore'
 import { store, unauthedStore } from './_infrastructure/store'
@@ -73,7 +74,7 @@ describe('read', () => {
     expect(snap.docs).toHaveLength(1)
     const data = snap.docs[0].data()
 
-    expectType<IUser>(data)
+    expectType<IUser & STypes.HasLoc<['versions', 'users']>>(data)
     expect(data).toMatchObject({
       ...userData,
       timestamp: expect.any(store.Timestamp),

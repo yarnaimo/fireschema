@@ -25,6 +25,7 @@ type GetSchemaT<
 
 const getAdapted = <
   F extends FTypes.FirestoreApp,
+  L extends string[],
   Options extends STypes.CollectionOptions.Meta
 >(
   collectionOptions: Options,
@@ -33,14 +34,14 @@ const getAdapted = <
   const adapted =
     collectionOptions[$adapter]?.(collectionRef) ?? adapter()({})(collectionRef)
 
-  const select = adapted.select as STypes.Selectors<GetSL<Options>, F>
+  const select = adapted.select as STypes.Selectors<L, GetSL<Options>, F>
 
   return {
     select,
   }
 }
 
-type Parent = 'root' | FTypes.DocumentRef<STypes.DocumentSchemaLoc<string[]>>
+type Parent = 'root' | FTypes.DocumentRef<STypes.HasLoc<string[]>>
 
 type EnsureOptions<_Options> = _Options extends STypes.CollectionOptions.Meta
   ? _Options
@@ -71,13 +72,13 @@ type CollectionController<
       SchemaTWithLoc<EnsureOptions<POptions[C]>, GetL<P, C>>,
       F
     >
-    select: STypes.Selectors<GetSL<EnsureOptions<POptions[C]>>, F>
+    select: STypes.Selectors<GetL<P, C>, GetSL<EnsureOptions<POptions[C]>>, F>
   }
   collectionGroup: <L extends Loc<S>, _Options = GetDeep<S, L>>(
     loc: L,
   ) => {
     query: FTypes.Query<SchemaTWithLoc<EnsureOptions<_Options>, L>, F>
-    select: STypes.Selectors<GetSL<EnsureOptions<_Options>>, F>
+    select: STypes.Selectors<L, GetSL<EnsureOptions<_Options>>, F>
   }
 }
 
@@ -133,7 +134,7 @@ const buildCollectionController = <
       GetL<P, C>
     >(app, parent, schemaOptions, collectionPath)
 
-    const { select } = getAdapted<F, EnsureOptions<POptions[C]>>(
+    const { select } = getAdapted<F, GetL<P, C>, EnsureOptions<POptions[C]>>(
       collectionOptions,
       collectionRef,
     )
@@ -159,7 +160,7 @@ const buildCollectionController = <
       SchemaTWithLoc<Options, L>,
       F
     >
-    const { select } = getAdapted<F, Options>(collectionOptions, query)
+    const { select } = getAdapted<F, L, Options>(collectionOptions, query)
 
     return { query, select }
   }
@@ -170,7 +171,7 @@ const buildCollectionController = <
 type SchemaTWithLoc<
   Options extends STypes.CollectionOptions.Meta,
   L extends string[]
-> = GetSchemaT<Options> & STypes.DocumentSchemaLoc<L>
+> = GetSchemaT<Options> & STypes.HasLoc<L>
 
 export const initFirestore = <
   F extends FTypes.FirestoreApp,

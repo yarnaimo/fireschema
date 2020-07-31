@@ -88,7 +88,7 @@ export declare namespace STypes {
       [$schema]:
         | DataSchemaOptionsWithType<unknown>
         | DataSchemaOptionsWithType<unknown>[]
-      [$adapter]: Adapter<any, any, any> | null
+      [$adapter]: Adapter<any, any, any, any> | null
       [$docLabel]: string
       // [$collectionGroup]?: boolean
       [$allow]: AllowOptions
@@ -108,23 +108,34 @@ export declare namespace STypes {
 
   // export type CollectionInterface<T> = null
 
-  export type Selectors<SL, F extends FTypes.FirestoreApp> = {
+  export type Selectors<
+    L extends string[] | null,
+    SL,
+    F extends FTypes.FirestoreApp
+  > = {
     [K in keyof SL]: SL[K] extends (...args: infer A) => FTypes.Query<infer U>
-      ? (...args: A) => FTypes.Query<U, F>
+      ? (...args: A) => FTypes.Query<U & HasLoc<NonNullable<L>>, F>
       : SL[K]
   }
 
-  export type Adapter<T, SL, F extends FTypes.FirestoreApp> = ((
-    q: FTypes.Query<T>,
-  ) => Adapted<SL, F>) & {
+  export type Adapter<
+    T,
+    L extends string[] | null,
+    SL,
+    F extends FTypes.FirestoreApp
+  > = ((q: FTypes.Query<T>) => Adapted<L, SL, F>) & {
     __SL__: SL
   }
 
-  export type Adapted<SL, F extends FTypes.FirestoreApp> = {
-    select: Selectors<SL, F>
+  export type Adapted<
+    L extends string[] | null,
+    SL,
+    F extends FTypes.FirestoreApp
+  > = {
+    select: Selectors<L, SL, F>
   }
 
-  export type DocumentSchemaLoc<L extends string[]> = {
+  export type HasLoc<L extends string[]> = {
     __loc__: L
   }
 
@@ -133,9 +144,7 @@ export declare namespace STypes {
     F extends FTypes.FirestoreApp = FTypes.FirestoreApp
   > = T extends FTypes.Timestamp ? FTypes.Timestamp<F> : T
 
-  type WithoutLoc<T> = T extends DocumentSchemaLoc<any>
-    ? Type.Except<T, '__loc__'>
-    : T
+  type WithoutLoc<T> = T extends HasLoc<any> ? Type.Except<T, '__loc__'> : T
 
   export type DocDataToWrite<
     T,
