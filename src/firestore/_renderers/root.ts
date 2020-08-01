@@ -1,5 +1,5 @@
 import { $collectionGroups, $functions } from '../constants'
-import { STypes } from '../Fireschema'
+import { STypes } from '../STypes'
 import { renderCollectionGroups, renderCollections } from './collections'
 import { renderFunctions } from './functions'
 

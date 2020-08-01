@@ -1,29 +1,26 @@
 import { assertFails } from '@firebase/testing'
 import { expectType } from 'tsd'
 import { STypes } from '..'
+import { fadmin } from '../types/_firestore'
 import { IUser } from './_fixtures/schema'
 import { collections } from './_infrastructure/firestore'
-import { store, unauthedStore } from './_infrastructure/store'
+import { $web, $webUnauthed } from './_infrastructure/store'
 import { expectEqualRef } from './_utils/firestore'
 
-const r = collections(store)
-const ur = collections(unauthedStore)
+const r = collections($web)
+const ur = collections($webUnauthed)
 
 describe('refs', () => {
   test('collection', () => {
     expectEqualRef(
-      store.app
-        .collection('versions')
-        .doc('v1')
-        .collection('users')
-        .doc('user'),
+      $web.app.collection('versions').doc('v1').collection('users').doc('user'),
       r.user,
     )
   })
 
   test('query', () => {
     expectEqualRef(
-      store.app
+      $web.app
         .collection('versions')
         .doc('v1')
         .collection('users')
@@ -33,7 +30,7 @@ describe('refs', () => {
     )
 
     expectEqualRef(
-      store.app
+      $web.app
         .collectionGroup('users')
         .where('age', '>=', 10)
         .where('age', '<', 20),
@@ -42,7 +39,7 @@ describe('refs', () => {
   })
 
   test('parentOfCollection', () => {
-    const user = store.parentOfCollection(r.posts.ref)
+    const user = $web.parentOfCollection(r.posts.ref)
 
     expectType<
       firebase.firestore.DocumentReference<
@@ -57,11 +54,11 @@ const userData = {
   name: 'umi',
   displayName: null,
   age: 16,
-  timestamp: store.FieldValue.serverTimestamp(),
+  timestamp: $web.FieldValue.serverTimestamp(),
   tags: ['tag0', 'tag1'],
 }
 
-const usersRaw = store.app.collection('versions').doc('v1').collection('users')
+const usersRaw = $web.app.collection('versions').doc('v1').collection('users')
 
 describe('read', () => {
   beforeEach(async () => {
@@ -72,10 +69,10 @@ describe('read', () => {
     const snap = await r.user.get()
     const data = snap.data()!
 
-    expectType<IUser>(data)
+    expectType<IUser & STypes.DocumentMeta<fadmin.Firestore>>(data)
     expect(data).toMatchObject({
       ...userData,
-      timestamp: expect.any(store.Timestamp),
+      timestamp: expect.any($web.Timestamp),
     })
   })
 
@@ -85,10 +82,14 @@ describe('read', () => {
     expect(snap.docs).toHaveLength(1)
     const data = snap.docs[0].data()
 
-    expectType<IUser & STypes.HasLoc<['versions', 'users']>>(data)
+    expectType<
+      IUser &
+        STypes.DocumentMeta<fadmin.Firestore> &
+        STypes.HasLoc<['versions', 'users']>
+    >(data)
     expect(data).toMatchObject({
       ...userData,
-      timestamp: expect.any(store.Timestamp),
+      timestamp: expect.any($web.Timestamp),
     })
   })
 })
@@ -96,32 +97,32 @@ describe('read', () => {
 describe('write', () => {
   describe('create', () => {
     test('normal', async () => {
-      await store.create(r.user, userData)
+      await $web.create(r.user, userData)
 
       const snapRaw = await usersRaw.doc('user').get()
       expect(snapRaw.data()).toMatchObject({
         ...userData,
-        _createdAt: expect.any(store.Timestamp),
-        _updatedAt: expect.any(store.Timestamp),
-        timestamp: expect.any(store.Timestamp),
+        _createdAt: expect.any($web.Timestamp),
+        _updatedAt: expect.any($web.Timestamp),
+        timestamp: expect.any($web.Timestamp),
       })
     })
 
     test('normal (unauthed, fails)', async () => {
-      await assertFails(unauthedStore.create(ur.user, userData))
+      await assertFails($webUnauthed.create(ur.user, userData))
     })
 
     test('transaction', async () => {
-      await store.app.runTransaction(async ($) => {
-        store.$create($, r.user, userData)
+      await $web.app.runTransaction(async ($) => {
+        $web.$create($, r.user, userData)
       })
 
       const snapRaw = await usersRaw.doc('user').get()
       expect(snapRaw.data()).toMatchObject({
         ...userData,
-        _createdAt: expect.any(store.Timestamp),
-        _updatedAt: expect.any(store.Timestamp),
-        timestamp: expect.any(store.Timestamp),
+        _createdAt: expect.any($web.Timestamp),
+        _updatedAt: expect.any($web.Timestamp),
+        timestamp: expect.any($web.Timestamp),
       })
     })
   })
@@ -132,9 +133,9 @@ describe('write', () => {
     })
 
     test('normal', async () => {
-      await store.setMerge(r.user, {
+      await $web.setMerge(r.user, {
         name: 'umi-kousaka',
-        tags: store.FieldValue.arrayUnion('tag2'),
+        tags: $web.FieldValue.arrayUnion('tag2'),
       })
 
       const snapRaw = await usersRaw.doc('user').get()
@@ -142,16 +143,16 @@ describe('write', () => {
         ...userData,
         name: 'umi-kousaka',
         tags: ['tag0', 'tag1', 'tag2'],
-        _updatedAt: expect.any(store.Timestamp),
-        timestamp: expect.any(store.Timestamp),
+        _updatedAt: expect.any($web.Timestamp),
+        timestamp: expect.any($web.Timestamp),
       })
     })
 
     test('transaction', async () => {
-      await store.app.runTransaction(async ($) => {
+      await $web.app.runTransaction(async ($) => {
         const tsnap = await $.get(r.user)
 
-        store.$setMerge($, r.user, {
+        $web.$setMerge($, r.user, {
           age: tsnap.data()!.age + 1,
         })
       })
@@ -160,8 +161,8 @@ describe('write', () => {
       expect(snapRaw.data()).toMatchObject({
         ...userData,
         age: userData.age + 1,
-        _updatedAt: expect.any(store.Timestamp),
-        timestamp: expect.any(store.Timestamp),
+        _updatedAt: expect.any($web.Timestamp),
+        timestamp: expect.any($web.Timestamp),
       })
     })
   })

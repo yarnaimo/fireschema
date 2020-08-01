@@ -3,12 +3,12 @@ import { FirestoreController } from '../..'
 import { schema } from '../_fixtures/schema'
 import { authedStore } from './firestore'
 
-export const store: FirestoreController<
+export const $web: FirestoreController<
   firestore.Firestore,
   typeof schema
 > = authedStore('user')
 
-export const unauthedStore: FirestoreController<
+export const $webUnauthed: FirestoreController<
   firestore.Firestore,
   typeof schema
 > = authedStore('unauthed')

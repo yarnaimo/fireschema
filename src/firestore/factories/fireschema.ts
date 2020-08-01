@@ -1,4 +1,4 @@
-import { STypes } from '../Fireschema'
+import { STypes } from '../STypes'
 
 export const dataSchema = <T>(options: STypes.DataSchemaOptions<T>) =>
   options as STypes.DataSchemaOptionsWithType<T>

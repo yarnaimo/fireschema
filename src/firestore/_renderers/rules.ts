@@ -3,7 +3,7 @@ import { R } from '../../lib/fp'
 import { is } from '../../lib/type'
 import { $and, $or } from '../../utils/operators'
 import { join, _ } from '../../utils/_string'
-import { allowOptions, STypes } from '../Fireschema'
+import { allowOptions, STypes } from '../STypes'
 import { renderFunctions } from './functions'
 
 let index = 0

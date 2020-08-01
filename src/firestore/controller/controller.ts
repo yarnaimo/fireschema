@@ -4,7 +4,7 @@ import { GetDeep, Loc } from '../../types/_object'
 import { getDeep } from '../../utils/_object'
 import { $adapter, $schema, _createdAt, _updatedAt } from '../constants'
 import { adapter } from '../factories'
-import { STypes } from '../Fireschema'
+import { STypes } from '../STypes'
 
 const getLoc = (parentOrRoot: FTypes.DocumentRef<unknown>) =>
   parentOrRoot.path.split('/').filter((_, i) => i % 2 === 0)
@@ -87,7 +87,8 @@ type CollectionController<
     collectionPath: C,
   ) => {
     ref: FTypes.CollectionRef<
-      SchemaTWithLoc<EnsureOptions<POptions[C]>, GetL<P, C>>,
+      STypes.DocumentMeta<F> &
+        SchemaTWithLoc<EnsureOptions<POptions[C]>, GetL<P, C>>,
       F
     >
     select: STypes.Selectors<GetL<P, C>, GetSL<EnsureOptions<POptions[C]>>, F>
@@ -95,7 +96,10 @@ type CollectionController<
   collectionGroup: <L extends Loc<S>, _Options = GetDeep<S, L>>(
     loc: L,
   ) => {
-    query: FTypes.Query<SchemaTWithLoc<EnsureOptions<_Options>, L>, F>
+    query: FTypes.Query<
+      STypes.DocumentMeta<F> & SchemaTWithLoc<EnsureOptions<_Options>, L>,
+      F
+    >
     select: STypes.Selectors<L, GetSL<EnsureOptions<_Options>>, F>
   }
 }
@@ -125,7 +129,10 @@ const getCollection = <
 
   const collectionRef = appOrParent.collection(
     collectionPath,
-  ) as FTypes.CollectionRef<SchemaTWithLoc<Options, L>, F>
+  ) as FTypes.CollectionRef<
+    STypes.DocumentMeta<F> & SchemaTWithLoc<Options, L>,
+    F
+  >
 
   return { collectionOptions, collectionRef }
 }
@@ -175,7 +182,7 @@ const buildCollectionController = <
     ) as unknown) as Options
 
     const query = app.collectionGroup(collectionId) as FTypes.Query<
-      SchemaTWithLoc<Options, L>,
+      STypes.DocumentMeta<F> & SchemaTWithLoc<Options, L>,
       F
     >
     const { select } = getAdapted<F, L, Options>(collectionOptions, query)

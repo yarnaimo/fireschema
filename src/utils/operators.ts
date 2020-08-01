@@ -1,4 +1,4 @@
-import { STypes } from '../firestore/Fireschema'
+import { STypes } from '../firestore/STypes'
 
 const $join = (separator: string) => (conditions: STypes.ConditionExp[]) => {
   return conditions.length === 0

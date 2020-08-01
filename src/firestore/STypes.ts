@@ -114,7 +114,12 @@ export declare namespace STypes {
     F extends FTypes.FirestoreApp
   > = {
     [K in keyof SL]: SL[K] extends (...args: infer A) => FTypes.Query<infer U>
-      ? (...args: A) => FTypes.Query<U & HasLoc<NonNullable<L>>, F>
+      ? (
+          ...args: A
+        ) => FTypes.Query<
+          U & STypes.DocumentMeta<F> & HasLoc<NonNullable<L>>,
+          F
+        >
       : SL[K]
   }
 
@@ -144,12 +149,22 @@ export declare namespace STypes {
     F extends FTypes.FirestoreApp = FTypes.FirestoreApp
   > = T extends FTypes.Timestamp ? FTypes.Timestamp<F> : T
 
+  export type DocumentMeta<
+    F extends FTypes.FirestoreApp = FTypes.FirestoreApp
+  > = {
+    _createdAt: FTypes.Timestamp<F>
+    _updatedAt: FTypes.Timestamp<F>
+  }
+
   type WithoutLoc<T> = T extends HasLoc<any> ? Type.Except<T, '__loc__'> : T
+  type WithoutMeta<T> = T extends DocumentMeta
+    ? Type.Except<T, keyof DocumentMeta>
+    : T
 
   export type DocDataToWrite<
     T,
     F extends FTypes.FirestoreApp = FTypes.FirestoreApp,
-    _T = WithoutLoc<T>
+    _T = WithoutMeta<WithoutLoc<T>>
   > = {
     [K in keyof _T]: DocFieldToWrite<_T[K], F> | FTypes.FieldValue<F>
   }
