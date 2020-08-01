@@ -1,4 +1,4 @@
-import { renderSchema } from '../_renderers/root'
+import { renderSchema } from '../firestore/_renderers/root'
 import { schema } from './_fixtures/schema'
 
 const expected = `

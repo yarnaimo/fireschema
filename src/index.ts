@@ -1,5 +1,3 @@
-export * from './constants'
-export * from './controller'
-export * from './factories'
+export * from './firestore'
 export * from './types'
 export * from './utils'

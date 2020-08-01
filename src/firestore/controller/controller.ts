@@ -1,11 +1,10 @@
-import { _createdAt, _updatedAt } from '../constants'
-import { $adapter, $schema } from '../constants/symbols'
+import { FTypes } from '../../types/FTypes'
+import { fadmin, fweb } from '../../types/_firestore'
+import { GetDeep, Loc } from '../../types/_object'
+import { getDeep } from '../../utils/_object'
+import { $adapter, $schema, _createdAt, _updatedAt } from '../constants'
 import { adapter } from '../factories'
-import { STypes } from '../types/Fireschema'
-import { FTypes } from '../types/FTypes'
-import { fadmin, fweb } from '../types/_firestore'
-import { GetDeep, Loc } from '../types/_object'
-import { getDeep } from '../utils/_object'
+import { STypes } from '../Fireschema'
 
 const getLoc = (parentOrRoot: FTypes.DocumentRef<unknown>) =>
   parentOrRoot.path.split('/').filter((_, i) => i % 2 === 0)
@@ -69,6 +68,11 @@ type GetSL<
 > = Options[typeof $adapter] extends null
   ? {}
   : NonNullable<Options[typeof $adapter]>['__SL__']
+
+type SchemaTWithLoc<
+  Options extends STypes.CollectionOptions.Meta,
+  L extends string[]
+> = GetSchemaT<Options> & STypes.HasLoc<L>
 
 type CollectionController<
   F extends FTypes.FirestoreApp,
@@ -181,11 +185,6 @@ const buildCollectionController = <
 
   return { collection, collectionGroup }
 }
-
-type SchemaTWithLoc<
-  Options extends STypes.CollectionOptions.Meta,
-  L extends string[]
-> = GetSchemaT<Options> & STypes.HasLoc<L>
 
 export const initFirestore = <
   F extends FTypes.FirestoreApp,

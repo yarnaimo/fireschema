@@ -1,8 +1,8 @@
 import dayjs from 'dayjs'
 import { P } from 'lifts'
-import { _createdAt } from '../constants/firestore'
-import { Type } from '../lib/type'
-import { FTypes } from '../types'
+import { Type } from '../../lib/type'
+import { FTypes } from '../../types'
+import { _createdAt } from '../constants'
 
 type _SpanOption = { since: dayjs.Dayjs; until: dayjs.Dayjs }
 export type SpanQueryOption =

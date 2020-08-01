@@ -1,5 +1,5 @@
-import { STypes } from '../types/Fireschema'
-import { FTypes } from '../types/FTypes'
+import { FTypes } from '../../types/FTypes'
+import { STypes } from '../Fireschema'
 
 // export const adapter = <T, S = unknown>({
 //   selectors,

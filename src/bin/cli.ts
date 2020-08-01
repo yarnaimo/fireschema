@@ -2,7 +2,7 @@
 
 import { writeFileSync } from 'fs'
 import { resolve } from 'path'
-import { renderSchema } from '../_renderers/root'
+import { renderSchema } from '../firestore/_renderers/root'
 
 const rulesPath = 'firestore.rules'
 

@@ -1,3 +1,5 @@
+import { Type } from '../lib/type'
+import { FTypes } from '../types/FTypes'
 import {
   $adapter,
   $allow,
@@ -5,9 +7,7 @@ import {
   $docLabel,
   $functions,
   $schema,
-} from '../constants/symbols'
-import { Type } from '../lib/type'
-import { FTypes } from './FTypes'
+} from './constants/symbols'
 
 export const allowOptions = {
   read: {

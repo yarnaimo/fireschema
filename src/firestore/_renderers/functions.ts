@@ -1,7 +1,7 @@
 import { EntriesStrict, P } from 'lifts'
-import { R } from '../lib/fp'
-import { STypes } from '../types/Fireschema'
-import { _ } from '../utils/_string'
+import { R } from '../../lib/fp'
+import { _ } from '../../utils/_string'
+import { STypes } from '../Fireschema'
 
 export const renderFunctions = (
   $functions: STypes.FunctionsOptions,

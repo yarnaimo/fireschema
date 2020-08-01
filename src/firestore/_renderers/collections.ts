@@ -1,8 +1,8 @@
 import { EntriesStrict, P } from 'lifts'
-import { $allow, $docLabel, $schema } from '../constants/symbols'
-import { R } from '../lib/fp'
-import { STypes } from '../types/Fireschema'
-import { join, _ } from '../utils/_string'
+import { R } from '../../lib/fp'
+import { join, _ } from '../../utils/_string'
+import { $allow, $docLabel, $schema } from '../constants'
+import { STypes } from '../Fireschema'
 import { renderRules } from './rules'
 
 const renderFromArray = (pIndent: number) => (

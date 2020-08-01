@@ -1,9 +1,9 @@
 import { EntriesStrict, P } from 'lifts'
-import { R } from '../lib/fp'
-import { is } from '../lib/type'
-import { allowOptions, STypes } from '../types/Fireschema'
-import { $and, $or } from '../utils/operators'
-import { join, _ } from '../utils/_string'
+import { R } from '../../lib/fp'
+import { is } from '../../lib/type'
+import { $and, $or } from '../../utils/operators'
+import { join, _ } from '../../utils/_string'
+import { allowOptions, STypes } from '../Fireschema'
 import { renderFunctions } from './functions'
 
 let index = 0

@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react-hooks'
 import dayjs from 'dayjs'
-import { useRefChangeLimitExceeded } from '../../hooks/utils'
+import { useRefChangeLimitExceeded } from '../../firestore/hooks/utils'
 import { store } from '../_infrastructure/store'
 
 const sleep = (ms: number) =>
