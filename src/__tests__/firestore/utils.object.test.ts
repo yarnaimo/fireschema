@@ -1,5 +1,5 @@
 import { expectType } from 'tsd'
-import { getDeep, getDeepByKey } from '../utils/_object'
+import { getDeep, getDeepByKey } from '../../utils/_object'
 
 const obj = {
   a: {

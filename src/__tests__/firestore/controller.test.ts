@@ -1,11 +1,11 @@
 import { assertFails } from '@firebase/testing'
 import { expectType } from 'tsd'
-import { STypes } from '..'
-import { fadmin } from '../types/_firestore'
-import { IUser } from './_fixtures/schema'
-import { collections } from './_infrastructure/firestore'
-import { $web, $webUnauthed } from './_infrastructure/store'
-import { expectEqualRef } from './_utils/firestore'
+import { STypes } from '../..'
+import { fadmin } from '../../types/_firestore'
+import { IUser } from '../_fixtures/schema'
+import { collections } from '../_infrastructure/firestore'
+import { $web, $webUnauthed } from '../_infrastructure/store'
+import { expectEqualRef } from '../_utils/firestore'
 
 const r = collections($web)
 const ur = collections($webUnauthed)

@@ -1,5 +1,5 @@
-import { renderSchema } from '../firestore/_renderers/root'
-import { schema } from './_fixtures/schema'
+import { renderSchema } from '../../firestore/_renderers/root'
+import { schema } from '../_fixtures/schema'
 
 const expected = `
 rules_version = '2';
