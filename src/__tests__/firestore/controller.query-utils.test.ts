@@ -1,8 +1,8 @@
 import dayjs from 'dayjs'
 import { Combine, CreatedWithin } from '../..'
 import { FTypes } from '../../types'
-import { IUser } from '../_fixtures/schema'
-import { $web } from '../_infrastructure/store'
+import { IUser } from '../_fixtures/firestore-schema'
+import { $web } from '../_infrastructure/firestore-controller'
 import { expectEqualRef } from '../_utils/firestore'
 
 const users = $web.app.collection('users') as FTypes.CollectionRef<IUser>

@@ -1,7 +1,7 @@
 import dayjs, { Dayjs } from 'dayjs'
-import { firestore } from 'firebase/app'
 import { useEffect, useRef } from 'react'
 import { HasIsEqual } from 'react-firebase-hooks/firestore/dist/util'
+import { fweb } from '../../types/_firestore'
 
 type RefHook<T> = {
   current: T
@@ -43,7 +43,7 @@ const isEqual = <T extends HasIsEqual<T>>(
 
 export type UseTDocument<T> = {
   data: T | undefined
-  snap: firestore.DocumentSnapshot<T> | undefined
+  snap: fweb.DocumentSnapshot<T> | undefined
   loading: boolean
   error: Error | undefined
 }

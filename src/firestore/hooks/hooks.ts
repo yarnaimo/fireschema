@@ -1,12 +1,12 @@
-import { firestore } from 'firebase/app'
 import { useEffect, useMemo } from 'react'
 import { useCollection, useDocument } from 'react-firebase-hooks/firestore'
+import { fweb } from '../../types/_firestore'
 import { useRefChangeLimitExceeded } from './utils'
 
 export const useTypedDocument = <T>(
-  docRef: firestore.DocumentReference<T> | null | undefined,
+  docRef: fweb.DocumentReference<T> | null | undefined,
   options?: {
-    snapshotListenOptions?: firestore.SnapshotListenOptions
+    snapshotListenOptions?: fweb.SnapshotListenOptions
   },
 ) => {
   const { exceeded } = useRefChangeLimitExceeded(docRef)
@@ -26,16 +26,16 @@ export const useTypedDocument = <T>(
 
   return {
     data,
-    snap: snap as firestore.DocumentSnapshot<T> | undefined,
+    snap: snap as fweb.DocumentSnapshot<T> | undefined,
     loading,
     error,
   }
 }
 
 export const useTypedQuery = <T>(
-  query: firestore.Query<T> | null | undefined,
+  query: fweb.Query<T> | null | undefined,
   options?: {
-    snapshotListenOptions?: firestore.SnapshotListenOptions
+    snapshotListenOptions?: fweb.SnapshotListenOptions
   },
 ) => {
   const { exceeded } = useRefChangeLimitExceeded(query)
@@ -55,7 +55,7 @@ export const useTypedQuery = <T>(
 
   return {
     data,
-    snap: snap as firestore.QuerySnapshot<T> | undefined,
+    snap: snap as fweb.QuerySnapshot<T> | undefined,
     loading,
     error,
   }

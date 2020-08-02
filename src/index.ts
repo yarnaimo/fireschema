@@ -1,3 +1,4 @@
 export * from './firestore'
+export * from './functions'
 export * from './types'
 export * from './utils'

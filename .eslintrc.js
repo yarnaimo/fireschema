@@ -11,6 +11,7 @@ const config = {
         patterns: ['**/__mocks__/**'],
       },
     ],
+    '@typescript-eslint/ban-ts-comment': 'off',
   },
 }
 

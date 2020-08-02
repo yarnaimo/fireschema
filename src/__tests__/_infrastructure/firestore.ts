@@ -1,38 +1,24 @@
-import {
-  apps,
-  clearFirestoreData,
-  firestore,
-  initializeTestApp,
-  loadFirestoreRules,
-} from '@firebase/testing'
-import { MapAsync } from 'lifts'
+import { firestore } from '@firebase/testing'
 import { FirestoreController, initFirestore } from '../..'
-import { renderSchema } from '../../firestore/_renderers/root'
-import { schema } from '../_fixtures/schema'
-
-const projectId = 'fireschema-test'
-const rules = renderSchema(schema)
-loadFirestoreRules({ projectId, rules })
-
-export const authedApp = (uid: string): firebase.app.App =>
-  initializeTestApp({ projectId, auth: { uid } })
+import { firestoreSchema } from '../_fixtures/firestore-schema'
+import { authedApp } from './_app'
 
 export const authedStore = (
   uid: string,
-): FirestoreController<firestore.Firestore, typeof schema> => {
+): FirestoreController<firestore.Firestore, typeof firestoreSchema> => {
   const app = authedApp(uid)
   const firestoreApp = app.firestore()
 
   const store: FirestoreController<
     firestore.Firestore,
-    typeof schema
-  > = initFirestore(firestore, firestoreApp, schema)
+    typeof firestoreSchema
+  > = initFirestore(firestore, firestoreApp, firestoreSchema)
 
   return store
 }
 
 export const collections = (
-  store: FirestoreController<firestore.Firestore, typeof schema>,
+  store: FirestoreController<firestore.Firestore, typeof firestoreSchema>,
 ) => {
   const versions = store.collection('root', 'versions')
   const v1 = versions.ref.doc('v1')
@@ -55,11 +41,3 @@ export const collections = (
     usersGroup,
   }
 }
-
-afterEach(async () => {
-  await clearFirestoreData({ projectId })
-})
-
-afterAll(async () => {
-  await MapAsync(apps(), (app) => app.delete())
-})

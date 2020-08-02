@@ -1,5 +1,5 @@
 import { renderSchema } from '../../firestore/_renderers/root'
-import { schema } from '../_fixtures/schema'
+import { firestoreSchema } from '../_fixtures/firestore-schema'
 
 const expected = `
 rules_version = '2';
@@ -50,6 +50,6 @@ service cloud.firestore {
 }`.trim()
 
 test('render', () => {
-  const result = renderSchema(schema)
+  const result = renderSchema(firestoreSchema)
   expect(result).toBe(expected)
 })

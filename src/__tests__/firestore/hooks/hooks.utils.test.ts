@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react-hooks'
 import dayjs from 'dayjs'
 import { useRefChangeLimitExceeded } from '../../../firestore/hooks/utils'
-import { $web } from '../../_infrastructure/store'
+import { $web } from '../../_infrastructure/firestore-controller'
 
 const sleep = (ms: number) =>
   new Promise<void>((resolve) => setTimeout(resolve, ms))

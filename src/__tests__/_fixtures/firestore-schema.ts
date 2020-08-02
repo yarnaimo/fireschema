@@ -61,7 +61,7 @@ const getCurrentAuthUser = () => `getCurrentAuthUser()`
 const isAdmin = () => `isAdmin()`
 const isUserScope = (arg: string) => `isUserScope(${arg})`
 
-export const schema = createFireschema({
+export const firestoreSchema = createFireschema({
   [$functions]: {
     // [getCurrentAuthUser()]: `
     //   return get(/databases/$(database)/documents/authUsers/$(request.auth.uid));

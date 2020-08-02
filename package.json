@@ -4,14 +4,14 @@
   "repository": "github:yarnaimo/fireschema",
   "license": "MIT",
   "author": "yamaimo <yarnaimo@gmail.com>",
-  "main": "dist/index.js",
+  "main": "dist/__tests__/_infrastructure/functions-server.js",
   "bin": "src/bin/cli.ts",
   "scripts": {
     "build": "rm -rf dist && tsc",
     "debug": "node --inspect -r ts-node/register",
     "dev": "yarn ts-node src/index.ts",
     "prepare": "yarn build",
-    "serve": "firebase emulators:start --only firestore",
+    "serve": "tsc && firebase emulators:start --only firestore,functions",
     "start": "NODE_ENV=production node dist/index.js",
     "test": "NODE_ENV=test jest",
     "ts-node": "ts-node"
@@ -21,7 +21,9 @@
     "dayjs": "^1.8.30",
     "lifts": "^0.1.4",
     "react-firebase-hooks": "^2.2.0",
-    "remeda": "^0.0.20"
+    "remeda": "^0.0.20",
+    "runtypes": "^5.0.1",
+    "type-fest": "^0.16.0"
   },
   "devDependencies": {
     "@firebase/testing": "^0.20.9",
@@ -32,6 +34,7 @@
     "@yarnaimo/tss": "^0.3.2",
     "firebase": "^7.16.1",
     "firebase-admin": "^9.0.0",
+    "firebase-functions": "^3.9.0",
     "jest": "^26.1.0",
     "react": "^16.13.1",
     "react-test-renderer": "^16.13.1",
