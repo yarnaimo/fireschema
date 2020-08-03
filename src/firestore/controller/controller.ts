@@ -14,26 +14,26 @@ type GetDocT<
 > = D extends FTypes.DocumentRef<infer T> ? T : never
 
 type GetSchemaT<
-  Options extends STypes.CollectionOptions.Meta,
-  SOptions = Options[typeof $schema]
-> = SOptions extends STypes.DataSchemaOptionsWithType<unknown>
-  ? SOptions['__T__']
-  : SOptions extends STypes.DataSchemaOptionsWithType<unknown>[]
-  ? SOptions[number]['__T__']
+  C extends STypes.CollectionOptions.Meta,
+  CS = C[typeof $schema]
+> = CS extends STypes.DataSchemaOptionsWithType<unknown>
+  ? CS['__T__']
+  : CS extends STypes.DataSchemaOptionsWithType<unknown>[]
+  ? CS[number]['__T__']
   : never
 
 const getAdapted = <
   F extends FTypes.FirestoreApp,
   L extends string[],
-  Options extends STypes.CollectionOptions.Meta
+  C extends STypes.CollectionOptions.Meta
 >(
-  collectionOptions: Options,
+  collectionOptions: C,
   collectionRef: FTypes.Query<any, F>,
 ) => {
   const adapted =
     collectionOptions[$adapter]?.(collectionRef) ?? adapter()({})(collectionRef)
 
-  const select = adapted.select as STypes.Selectors<L, GetSL<Options>, F>
+  const select = adapted.select as STypes.Selectors<L, GetSL<C>, F>
 
   return {
     select,
@@ -51,28 +51,26 @@ type GetParentT<
   S extends STypes.RootOptions.All,
   T extends STypes.HasLoc<string[]>,
   L extends string[] = OmitLast<T['__loc__']>,
-  _Options = GetDeep<S, L>
-> = SchemaTWithLoc<EnsureOptions<_Options>, L>
+  _C = GetDeep<S, L>
+> = SchemaTWithLoc<EnsureOptions<_C>, L>
 
 type Parent = 'root' | FTypes.DocumentRef<STypes.HasLoc<string[]>>
 
-type EnsureOptions<_Options> = _Options extends STypes.CollectionOptions.Meta
-  ? _Options
-  : never
+type EnsureOptions<_C> = _C extends STypes.CollectionOptions.Meta ? _C : never
 
-type GetL<P extends Parent, C> = [...GetPL<P>, C]
+type GetL<P extends Parent, N> = [...GetPL<P>, N]
 type GetPL<P extends Parent> = P extends 'root' ? [] : GetDocT<P>['__loc__']
 
 type GetSL<
-  Options extends STypes.CollectionOptions.Meta
-> = Options[typeof $adapter] extends null
+  C extends STypes.CollectionOptions.Meta
+> = C[typeof $adapter] extends null
   ? {}
-  : NonNullable<Options[typeof $adapter]>['__SL__']
+  : NonNullable<C[typeof $adapter]>['__SL__']
 
 type SchemaTWithLoc<
-  Options extends STypes.CollectionOptions.Meta,
+  C extends STypes.CollectionOptions.Meta,
   L extends string[]
-> = GetSchemaT<Options> & STypes.HasLoc<L>
+> = GetSchemaT<C> & STypes.HasLoc<L>
 
 type CollectionController<
   F extends FTypes.FirestoreApp,
@@ -80,40 +78,39 @@ type CollectionController<
 > = {
   collection: <
     P extends Parent,
-    C extends keyof POptions & string,
-    POptions = GetDeep<S, GetPL<P>>
+    N extends keyof PC & string,
+    PC = GetDeep<S, GetPL<P>>
   >(
     parent: P,
-    collectionPath: C,
+    collectionName: N,
   ) => {
     ref: FTypes.CollectionRef<
-      STypes.DocumentMeta<F> &
-        SchemaTWithLoc<EnsureOptions<POptions[C]>, GetL<P, C>>,
+      STypes.DocumentMeta<F> & SchemaTWithLoc<EnsureOptions<PC[N]>, GetL<P, N>>,
       F
     >
-    select: STypes.Selectors<GetL<P, C>, GetSL<EnsureOptions<POptions[C]>>, F>
+    select: STypes.Selectors<GetL<P, N>, GetSL<EnsureOptions<PC[N]>>, F>
   }
-  collectionGroup: <L extends Loc<S>, _Options = GetDeep<S, L>>(
+  collectionGroup: <L extends Loc<S>, _C = GetDeep<S, L>>(
     loc: L,
   ) => {
     query: FTypes.Query<
-      STypes.DocumentMeta<F> & SchemaTWithLoc<EnsureOptions<_Options>, L>,
+      STypes.DocumentMeta<F> & SchemaTWithLoc<EnsureOptions<_C>, L>,
       F
     >
-    select: STypes.Selectors<L, GetSL<EnsureOptions<_Options>>, F>
+    select: STypes.Selectors<L, GetSL<EnsureOptions<_C>>, F>
   }
 }
 
 const getCollection = <
   F extends FTypes.FirestoreApp,
   P extends Parent,
-  Options extends STypes.CollectionOptions.Meta,
+  C extends STypes.CollectionOptions.Meta,
   L extends string[]
 >(
   app: F,
   parent: P,
   schemaOptions: STypes.RootOptions.All,
-  collectionPath: string,
+  collectionName: string,
 ) => {
   const appOrParent = (parent === 'root' ? app : parent) as P extends 'root'
     ? F
@@ -121,18 +118,12 @@ const getCollection = <
 
   const parentLoc = (parent === 'root' ? [] : getLoc(parent as any)) as GetPL<P>
 
-  const loc = [...parentLoc, collectionPath] as L
-  const collectionOptions = (getDeep(
-    schemaOptions,
-    loc as any,
-  ) as unknown) as Options
+  const loc = [...parentLoc, collectionName] as L
+  const collectionOptions = (getDeep(schemaOptions, loc as any) as unknown) as C
 
   const collectionRef = appOrParent.collection(
-    collectionPath,
-  ) as FTypes.CollectionRef<
-    STypes.DocumentMeta<F> & SchemaTWithLoc<Options, L>,
-    F
-  >
+    collectionName,
+  ) as FTypes.CollectionRef<STypes.DocumentMeta<F> & SchemaTWithLoc<C, L>, F>
 
   return { collectionOptions, collectionRef }
 }
@@ -146,20 +137,20 @@ const buildCollectionController = <
 ): CollectionController<F, S> => {
   const collection = (<
     P extends Parent,
-    C extends keyof POptions & string,
-    POptions = GetDeep<S, GetPL<P>>
+    N extends keyof PC & string,
+    PC = GetDeep<S, GetPL<P>>
   >(
     parent: P,
-    collectionPath: C,
+    collectionName: N,
   ) => {
     const { collectionOptions, collectionRef } = getCollection<
       F,
       P,
-      EnsureOptions<POptions[C]>,
-      GetL<P, C>
-    >(app, parent, schemaOptions, collectionPath)
+      EnsureOptions<PC[N]>,
+      GetL<P, N>
+    >(app, parent, schemaOptions, collectionName)
 
-    const { select } = getAdapted<F, GetL<P, C>, EnsureOptions<POptions[C]>>(
+    const { select } = getAdapted<F, GetL<P, N>, EnsureOptions<PC[N]>>(
       collectionOptions,
       collectionRef,
     )
@@ -169,23 +160,20 @@ const buildCollectionController = <
 
   const collectionGroup: CollectionController<F, S>['collectionGroup'] = <
     L extends Loc<S>,
-    _Options = GetDeep<S, L>
+    _C = GetDeep<S, L>
   >(
     loc: L,
   ) => {
-    type Options = EnsureOptions<_Options>
+    type C = EnsureOptions<_C>
 
     const collectionId = loc[loc.length - 1]
-    const collectionOptions = (getDeep(
-      schemaOptions,
-      loc,
-    ) as unknown) as Options
+    const collectionOptions = (getDeep(schemaOptions, loc) as unknown) as C
 
     const query = app.collectionGroup(collectionId) as FTypes.Query<
-      STypes.DocumentMeta<F> & SchemaTWithLoc<Options, L>,
+      STypes.DocumentMeta<F> & SchemaTWithLoc<C, L>,
       F
     >
-    const { select } = getAdapted<F, L, Options>(collectionOptions, query)
+    const { select } = getAdapted<F, L, C>(collectionOptions, query)
 
     return { query, select }
   }

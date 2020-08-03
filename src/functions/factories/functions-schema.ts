@@ -7,7 +7,7 @@ export const callableSchema = <
 >(
   input: I,
   output: O,
-): FunTypes.CallableOption<I, O> => ({
+): FunTypes.Callable.Options<I, O> => ({
   [$input]: input,
   [$output]: output,
 })

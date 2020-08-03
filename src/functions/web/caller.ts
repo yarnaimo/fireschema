@@ -10,23 +10,21 @@ export const initCaller = <S extends FunTypes.SchemaOptions>(
 ) => {
   const call = async <
     L extends Loc<S['callable']>,
-    _Options = GetDeep<S['callable'], L>,
-    Options extends FunTypes.EnsureCallaleOptions<
-      _Options
-    > = FunTypes.EnsureCallaleOptions<_Options>
+    _C = GetDeep<S['callable'], L>,
+    C extends FunTypes.Callable.EnsureOption<
+      _C
+    > = FunTypes.Callable.EnsureOption<_C>
   >(
     loc: L,
-    data: FunTypes.InputType<Options>,
+    data: FunTypes.Callable.InputType<C>,
     options?: firebase.functions.HttpsCallableOptions,
-  ): Promise<
-    IResult<Options[typeof $output], firebase.functions.HttpsError>
-  > => {
+  ): Promise<IResult<C[typeof $output], firebase.functions.HttpsError>> => {
     const name = [prefix, 'callable', ...loc].join('-')
     const callable = functionsApp.httpsCallable(name, options)
 
     try {
       const result = await callable(data)
-      return Result.ok(result.data as FunTypes.OutputType<Options>)
+      return Result.ok(result.data as FunTypes.Callable.OutputType<C>)
     } catch (error) {
       return Result.err(error as firebase.functions.HttpsError)
     }

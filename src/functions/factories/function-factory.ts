@@ -11,19 +11,19 @@ export const createFunctionFactory = <S extends FunTypes.SchemaOptions>(
 ) => {
   const callable = <
     L extends Loc<S['callable']>,
-    _Options = GetDeep<S['callable'], L>,
-    Options extends FunTypes.EnsureCallaleOptions<
-      _Options
-    > = FunTypes.EnsureCallaleOptions<_Options>
+    _C = GetDeep<S['callable'], L>,
+    C extends FunTypes.Callable.EnsureOption<
+      _C
+    > = FunTypes.Callable.EnsureOption<_C>
   >(
     loc: L,
     builder: FunctionBuilder,
-    handler: FunTypes.CallableHandler<Options>,
+    handler: FunTypes.Callable.Handler<C>,
   ) => {
-    type I = Options[typeof $input]
-    type O = Options[typeof $output]
+    type I = C[typeof $input]
+    type O = C[typeof $output]
 
-    const options = (getDeep(schemaOptions.callable, loc) as any) as Options
+    const options = (getDeep(schemaOptions.callable, loc) as any) as C
     const input = options[$input] as I
     const output = options[$output] as O
     const inputSchema = t.Record(input)

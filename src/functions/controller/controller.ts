@@ -2,11 +2,11 @@ import { createFunctionFactory } from '../factories'
 import { FunTypes } from '../FunTypes'
 
 type GetCallableRunnables<
-  Options extends FunTypes.NestedCallableOptions
-> = Options extends FunTypes.CallableOption<any, any>
+  CN extends FunTypes.Callable.NestedOptions
+> = CN extends FunTypes.Callable.Options<any, any>
   ? ReturnType<ReturnType<typeof createFunctionFactory>['callable']>
   : {
-      [K in keyof Options]: GetCallableRunnables<Options[K]>
+      [K in keyof CN]: GetCallableRunnables<CN[K]>
     }
 
 type GetFunctionRunnables<S extends FunTypes.SchemaOptions> = {

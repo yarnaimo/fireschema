@@ -10,37 +10,35 @@ export declare namespace FunTypes {
   }
 
   export type SchemaOptions = {
-    callable: NestedCallableOptions
+    callable: Callable.NestedOptions
   }
 
-  export type NestedCallableOptions = {
-    [K in string]: CallableOption<any, any> | NestedCallableOptions
+  export namespace Callable {
+    export type NestedOptions = {
+      [K in string]: Options<any, any> | Callable.NestedOptions
+    }
+
+    export type EnsureOption<_T> = _T extends Options<any, any> ? _T : never
+
+    export type Options<
+      I extends FunTypes.RecordBase,
+      O extends FunTypes.RecordBase
+    > = {
+      [$input]: I
+      [$output]: O
+    }
+
+    export type InputType<
+      C extends Options<any, any>
+    > = FunTypes.RecordStaticType<C[typeof $input]>
+
+    export type OutputType<
+      C extends Options<any, any>
+    > = FunTypes.RecordStaticType<C[typeof $output]>
+
+    export type Handler<C extends FunTypes.Callable.Options<any, any>> = (
+      inputData: InputType<C>,
+      context: https.CallableContext,
+    ) => Promise<OutputType<C>>
   }
-
-  export type EnsureCallaleOptions<
-    _Options
-  > = _Options extends FunTypes.CallableOption<any, any> ? _Options : never
-
-  export type CallableOption<
-    I extends FunTypes.RecordBase,
-    O extends FunTypes.RecordBase
-  > = {
-    [$input]: I
-    [$output]: O
-  }
-
-  export type InputType<
-    Options extends CallableOption<any, any>
-  > = FunTypes.RecordStaticType<Options[typeof $input]>
-
-  export type OutputType<
-    Options extends CallableOption<any, any>
-  > = FunTypes.RecordStaticType<Options[typeof $output]>
-
-  export type CallableHandler<
-    Options extends FunTypes.CallableOption<any, any>
-  > = (
-    inputData: FunTypes.InputType<Options>,
-    context: https.CallableContext,
-  ) => Promise<FunTypes.OutputType<Options>>
 }

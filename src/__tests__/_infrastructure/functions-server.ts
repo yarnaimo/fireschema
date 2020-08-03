@@ -26,7 +26,7 @@ const wrap = async <T, U>(
   }
 }
 
-const handler: FunTypes.CallableHandler<
+const handler: FunTypes.Callable.Handler<
   typeof functionsSchema['callable']['createUser']
 > = async (data, context) => {
   return wrap(data, context, async () => {
