@@ -16,6 +16,10 @@ const callable = {
   ),
 }
 
+const http = {
+  getKeys: functionInterface.http(),
+}
+
 const topic = {
   publishMessage: functionInterface.topic({
     text: t.String,
@@ -28,6 +32,7 @@ const schedule = {
 
 export const functionsSchema = createFunctionsSchema({
   callable,
+  http,
   topic,
   schedule,
 })

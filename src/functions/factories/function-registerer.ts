@@ -50,6 +50,21 @@ export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
     return Object.assign(callableFunction, { handler })
   }
 
+  const http = <L extends Loc<S['http']>>(
+    loc: L,
+    {
+      builder,
+      handler,
+    }: {
+      builder: FunctionBuilder
+      handler: FunTypes.Http.Handler
+    },
+  ) => {
+    const callableFunction = builder.https.onRequest(handler)
+
+    return Object.assign(callableFunction, { handler })
+  }
+
   const topic = <
     L extends Loc<S['topic']>,
     _C = GetDeep<S['topic'], L>,
@@ -98,5 +113,5 @@ export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
     return Object.assign(scheduleFunction, { handler })
   }
 
-  return { callable, topic, schedule }
+  return { callable, http, topic, schedule }
 }

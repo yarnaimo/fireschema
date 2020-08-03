@@ -9,6 +9,11 @@ const callable = <I extends FunTypes.RecordBase, O extends FunTypes.RecordBase>(
   [$output]: output,
 })
 
+const http = (): FunTypes.IO<{}, {}> => ({
+  [$input]: {},
+  [$output]: {},
+})
+
 const topic = <I extends FunTypes.RecordBase>(
   input: I,
 ): FunTypes.IO<I, {}> => ({
@@ -21,7 +26,7 @@ const schedule = (): FunTypes.IO<{}, {}> => ({
   [$output]: {},
 })
 
-export const functionInterface = { callable, topic, schedule }
+export const functionInterface = { callable, http, topic, schedule }
 
 export const createFunctionsSchema = <S extends FunTypes.SchemaOptions>(
   options: S,

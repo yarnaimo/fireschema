@@ -8,7 +8,15 @@ import { MapAsync } from 'lifts'
 import { renderSchema } from '../../firestore/_renderers/root'
 import { firestoreSchema } from '../_fixtures/firestore-schema'
 
+export const region = 'asia-northeast1'
+
+export const emulatorOrigin = {
+  functions: 'http://localhost:5001',
+  pubsub: 'http://localhost:8085',
+}
+
 export const projectId = 'fireschema'
+
 const rules = renderSchema(firestoreSchema)
 loadFirestoreRules({ projectId, rules })
 

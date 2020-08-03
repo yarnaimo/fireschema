@@ -5,11 +5,12 @@ import { FunTypes } from '../../functions'
 import { Type } from '../../lib/type'
 import { IUser } from '../_fixtures/firestore-schema'
 import { functionsSchema } from '../_fixtures/functions-schema'
+import { region } from './_app'
 
 const timezone = 'Asia/Tokyo'
 const $register = initFunctionRegisterer(functions, functionsSchema, timezone)
 
-const builder = functions.region('asia-northeast1')
+const builder = functions.region(region)
 
 const wrap = async <T, U>(
   data: T,
@@ -28,7 +29,7 @@ const wrap = async <T, U>(
   }
 }
 
-const handler: FunTypes.Callable.Handler<typeof functionsSchema.callable.createUser> = async (
+const createUserHandler: FunTypes.Callable.Handler<typeof functionsSchema.callable.createUser> = async (
   data,
   context,
 ) => {
@@ -47,7 +48,7 @@ const handler: FunTypes.Callable.Handler<typeof functionsSchema.callable.createU
 const callable = {
   createUser: $register.callable(['createUser'], {
     builder,
-    handler,
+    handler: createUserHandler,
   }),
 }
 
@@ -56,6 +57,19 @@ const _errorExpected = $register.callable(['createUser'], {
   // @ts-expect-error
   handler: async (data, context) => ({ result: null }),
 })
+
+const http = {
+  getKeys: $register.http(['getKeys'], {
+    builder,
+    handler: (req, resp) => {
+      if (req.method !== 'POST') {
+        resp.status(400).send()
+        return
+      }
+      resp.json(Object.keys(req.body))
+    },
+  }),
+}
 
 const topic = {
   publishMessage: $register.topic(['publishMessage'], {
@@ -77,4 +91,4 @@ const schedule = {
   }),
 }
 
-export = initFunctions(functionsSchema, { callable, topic, schedule })
+export = initFunctions(functionsSchema, { callable, http, topic, schedule })

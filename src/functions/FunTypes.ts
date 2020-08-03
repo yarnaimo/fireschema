@@ -1,4 +1,10 @@
-import type { EventContext, https, pubsub } from 'firebase-functions'
+import type {
+  EventContext,
+  https,
+  pubsub,
+  Request,
+  Response,
+} from 'firebase-functions'
 import { t } from '../lib/type'
 import { $input, $output } from './constants'
 
@@ -11,6 +17,7 @@ export declare namespace FunTypes {
 
   export type SchemaOptions = {
     callable: NestedOptions
+    http: NestedOptions
     topic: NestedOptions
     schedule: NestedOptions
   }
@@ -42,6 +49,10 @@ export declare namespace FunTypes {
       inputData: InputType<C>,
       context: https.CallableContext,
     ) => Promise<OutputType<C>>
+  }
+
+  export namespace Http {
+    export type Handler = (req: Request, resp: Response) => void | Promise<void>
   }
 
   export namespace Topic {
