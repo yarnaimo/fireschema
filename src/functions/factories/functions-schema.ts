@@ -1,10 +1,7 @@
 import { $input, $output } from '../constants'
 import { FunTypes } from '../FunTypes'
 
-export const callableSchema = <
-  I extends FunTypes.RecordBase,
-  O extends FunTypes.RecordBase
->(
+const callable = <I extends FunTypes.RecordBase, O extends FunTypes.RecordBase>(
   input: I,
   output: O,
 ): FunTypes.IO<I, O> => ({
@@ -12,12 +9,19 @@ export const callableSchema = <
   [$output]: output,
 })
 
-export const topicSchema = <I extends FunTypes.RecordBase>(
+const topic = <I extends FunTypes.RecordBase>(
   input: I,
 ): FunTypes.IO<I, {}> => ({
   [$input]: input,
   [$output]: {},
 })
+
+const schedule = (): FunTypes.IO<{}, {}> => ({
+  [$input]: {},
+  [$output]: {},
+})
+
+export const functionInterface = { callable, topic, schedule }
 
 export const createFunctionsSchema = <S extends FunTypes.SchemaOptions>(
   options: S,

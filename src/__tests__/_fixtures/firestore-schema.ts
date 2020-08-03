@@ -6,9 +6,9 @@ import {
   $functions,
   $or,
   $schema,
-  adapter,
-  createFireschema,
-  dataSchema,
+  collectionAdapter,
+  createFirestoreSchema,
+  documentSchema,
 } from '../..'
 import { FTypes } from '../../types'
 
@@ -31,37 +31,37 @@ export type IPostB = {
   texts: string[]
 }
 
-const VersionSchema = dataSchema<IVersion>({})
-const VersionAdapter = adapter<IVersion>()({})
+const VersionSchema = documentSchema<IVersion>({})
+const VersionAdapter = collectionAdapter<IVersion>()({})
 
-const UserSchema = dataSchema<IUser>({
+const UserSchema = documentSchema<IUser>({
   name: 'string',
   displayName: 'string | null',
   age: 'int',
   tags: 'list',
   timestamp: 'timestamp',
 })
-const UserAdapter = adapter<IUser>()({
+const UserAdapter = collectionAdapter<IUser>()({
   selectors: (q) => ({
     teen: () => q.where('age', '>=', 10).where('age', '<', 20),
   }),
 })
 
-const PostASchema = dataSchema<IPostA>({
+const PostASchema = documentSchema<IPostA>({
   type: 'string',
   text: 'string',
 })
-const PostBSchema = dataSchema<IPostB>({
+const PostBSchema = documentSchema<IPostB>({
   type: 'string',
   texts: 'list',
 })
-const PostAdapter = adapter<IPostA | IPostB>()({})
+const PostAdapter = collectionAdapter<IPostA | IPostB>()({})
 
 const getCurrentAuthUser = () => `getCurrentAuthUser()`
 const isAdmin = () => `isAdmin()`
 const isUserScope = (arg: string) => `isUserScope(${arg})`
 
-export const firestoreSchema = createFireschema({
+export const firestoreSchema = createFirestoreSchema({
   [$functions]: {
     // [getCurrentAuthUser()]: `
     //   return get(/databases/$(database)/documents/authUsers/$(request.auth.uid));

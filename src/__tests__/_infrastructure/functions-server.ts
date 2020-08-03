@@ -1,5 +1,4 @@
 import * as functions from 'firebase-functions'
-import { Do } from 'lifts'
 import { expectType } from 'tsd'
 import { initFunctionRegisterer, initFunctions, messages } from '../..'
 import { FunTypes } from '../../functions'
@@ -7,7 +6,10 @@ import { Type } from '../../lib/type'
 import { IUser } from '../_fixtures/firestore-schema'
 import { functionsSchema } from '../_fixtures/functions-schema'
 
-const $register = initFunctionRegisterer(functions, functionsSchema)
+const timezone = 'Asia/Tokyo'
+const $register = initFunctionRegisterer(functions, functionsSchema, timezone)
+
+const builder = functions.region('asia-northeast1')
 
 const wrap = async <T, U>(
   data: T,
@@ -42,32 +44,37 @@ const handler: FunTypes.Callable.Handler<typeof functionsSchema.callable.createU
   })
 }
 
-const region = functions.region('asia-northeast1')
+const callable = {
+  createUser: $register.callable(['createUser'], {
+    builder,
+    handler,
+  }),
+}
 
-const callable = Do(() => {
-  const createUser = $register.callable(['createUser'], region, handler)
-
-  const _errorExpected = $register.callable(
-    ['createUser'],
-    region,
-    // @ts-expect-error
-    async (data, context) => ({ result: null }),
-  )
-
-  return { createUser }
+const _errorExpected = $register.callable(['createUser'], {
+  builder,
+  // @ts-expect-error
+  handler: async (data, context) => ({ result: null }),
 })
 
-const topic = Do(() => {
-  const publishMessage = $register.topic(
-    ['publishMessage'],
-    region,
-    async (data) => {
+const topic = {
+  publishMessage: $register.topic(['publishMessage'], {
+    builder,
+    handler: async (data) => {
       expectType<{ text: string }>(data)
       console.log(data.text)
     },
-  )
+  }),
+}
 
-  return { publishMessage }
-})
+const schedule = {
+  cron: $register.schedule(['cron'], {
+    builder,
+    schedule: '0 0 * * *',
+    handler: async (context) => {
+      console.log(context.timestamp)
+    },
+  }),
+}
 
-export = initFunctions(functionsSchema, { callable, topic })
+export = initFunctions(functionsSchema, { callable, topic, schedule })

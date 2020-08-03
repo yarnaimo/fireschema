@@ -12,6 +12,7 @@ export declare namespace FunTypes {
   export type SchemaOptions = {
     callable: NestedOptions
     topic: NestedOptions
+    schedule: NestedOptions
   }
 
   export type NestedOptions = {

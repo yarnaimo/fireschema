@@ -1,2 +1,2 @@
 export * from './adapter'
-export * from './fireschema'
+export * from './firestore-schema'

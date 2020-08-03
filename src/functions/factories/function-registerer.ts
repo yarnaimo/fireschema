@@ -3,6 +3,7 @@ import type {
   FunctionBuilder,
   https,
   pubsub,
+  ScheduleRetryConfig,
 } from 'firebase-functions'
 import { FunTypes } from '..'
 import { t } from '../../lib/type'
@@ -13,6 +14,7 @@ import { $input, messages } from '../constants'
 export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
   { https, logger }: typeof import('firebase-functions'),
   schemaOptions: S,
+  timezone: string,
 ) => {
   const callable = <
     L extends Loc<S['callable']>,
@@ -20,8 +22,13 @@ export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
     C extends FunTypes.EnsureIO<_C> = FunTypes.EnsureIO<_C>
   >(
     loc: L,
-    builder: FunctionBuilder,
-    handler: FunTypes.Callable.Handler<C>,
+    {
+      builder,
+      handler,
+    }: {
+      builder: FunctionBuilder
+      handler: FunTypes.Callable.Handler<C>
+    },
   ) => {
     const options = (getDeep(schemaOptions.callable, loc) as any) as C
     const input = options[$input] as C[typeof $input]
@@ -49,12 +56,14 @@ export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
     C extends FunTypes.EnsureIO<_C> = FunTypes.EnsureIO<_C>
   >(
     loc: L,
-    builder: FunctionBuilder,
-    handler: FunTypes.Topic.Handler<C>,
+    {
+      builder,
+      handler,
+    }: {
+      builder: FunctionBuilder
+      handler: FunTypes.Topic.Handler<C>
+    },
   ) => {
-    const options = (getDeep(schemaOptions.topic, loc) as any) as C
-    const input = options[$input] as C[typeof $input]
-
     const wrapped = async (message: pubsub.Message, context: EventContext) => {
       const input = message.json as FunTypes.RecordStaticType<C[typeof $input]>
       await handler(input, message, context)
@@ -66,5 +75,28 @@ export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
     return Object.assign(topicFunction, { handler })
   }
 
-  return { callable, topic }
+  const schedule = <L extends Loc<S['schedule']>>(
+    loc: L,
+    {
+      builder,
+      schedule,
+      handler,
+      retryConfig = {},
+    }: {
+      builder: FunctionBuilder
+      schedule: string
+      handler: (context: EventContext) => Promise<void>
+      retryConfig?: ScheduleRetryConfig
+    },
+  ) => {
+    const scheduleFunction = builder.pubsub
+      .schedule(schedule)
+      .timeZone(timezone)
+      .retryConfig(retryConfig)
+      .onRun(handler)
+
+    return Object.assign(scheduleFunction, { handler })
+  }
+
+  return { callable, topic, schedule }
 }

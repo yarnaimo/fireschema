@@ -9,7 +9,7 @@ import { STypes } from '../STypes'
 
 // type Selectors<T, S> = (ref: FireTypes.Query<T>) => S
 
-export const adapter = <T>() => {
+export const collectionAdapter = <T>() => {
   return <SL = {}>({
     selectors = () => ({} as SL),
   }: {

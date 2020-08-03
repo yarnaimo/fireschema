@@ -1,9 +1,8 @@
-import { callableSchema, createFunctionsSchema } from '../..'
-import { topicSchema } from '../../functions'
+import { createFunctionsSchema, functionInterface } from '../..'
 import { t } from '../../lib/type'
 
 const callable = {
-  createUser: callableSchema(
+  createUser: functionInterface.callable(
     {
       name: t.String,
       displayName: t.Union(t.String, t.Null),
@@ -18,9 +17,17 @@ const callable = {
 }
 
 const topic = {
-  publishMessage: topicSchema({
+  publishMessage: functionInterface.topic({
     text: t.String,
   }),
 }
 
-export const functionsSchema = createFunctionsSchema({ callable, topic })
+const schedule = {
+  cron: functionInterface.schedule(),
+}
+
+export const functionsSchema = createFunctionsSchema({
+  callable,
+  topic,
+  schedule,
+})

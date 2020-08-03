@@ -3,7 +3,7 @@ import { fadmin, fweb } from '../../types/_firestore'
 import { GetDeep, Loc } from '../../types/_object'
 import { getDeep } from '../../utils/_object'
 import { $adapter, $schema, _createdAt, _updatedAt } from '../constants'
-import { adapter } from '../factories'
+import { collectionAdapter } from '../factories'
 import { STypes } from '../STypes'
 
 const getLoc = (parentOrRoot: FTypes.DocumentRef<unknown>) =>
@@ -31,7 +31,8 @@ const getAdapted = <
   collectionRef: FTypes.Query<any, F>,
 ) => {
   const adapted =
-    collectionOptions[$adapter]?.(collectionRef) ?? adapter()({})(collectionRef)
+    collectionOptions[$adapter]?.(collectionRef) ??
+    collectionAdapter()({})(collectionRef)
 
   const select = adapted.select as STypes.Selectors<L, GetSL<C>, F>
 

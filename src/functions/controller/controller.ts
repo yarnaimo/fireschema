@@ -1,30 +1,26 @@
 import { initFunctionRegisterer } from '../factories'
 import { FunTypes } from '../FunTypes'
 
-type GetCallableRunnables<
-  CN extends FunTypes.NestedOptions
-> = CN extends FunTypes.IO<any, any>
-  ? ReturnType<ReturnType<typeof initFunctionRegisterer>['callable']>
-  : {
-      [K in keyof CN]: GetCallableRunnables<CN[K]>
-    }
+type Registerer = ReturnType<typeof initFunctionRegisterer>
 
-type GetTopicRunnables<
-  CN extends FunTypes.NestedOptions
-> = CN extends FunTypes.IO<any, any>
-  ? ReturnType<ReturnType<typeof initFunctionRegisterer>['topic']>
-  : {
-      [K in keyof CN]: GetTopicRunnables<CN[K]>
-    }
+type Registered<
+  T extends keyof FunTypes.SchemaOptions & keyof Registerer
+> = ReturnType<Registerer[T]>
 
-type GetFunctionRunnables<S extends FunTypes.SchemaOptions> = {
-  callable: GetCallableRunnables<S['callable']>
-  topic: GetTopicRunnables<S['topic']>
+type Runnables<
+  CN extends FunTypes.NestedOptions,
+  T extends keyof FunTypes.SchemaOptions & keyof Registerer
+> = CN extends FunTypes.IO<any, any>
+  ? Registered<T>
+  : { [K in keyof CN]: Runnables<CN[K], T> }
+
+type RegisteredRunnables<S extends FunTypes.SchemaOptions> = {
+  [K in keyof S & keyof Registerer]: Runnables<S[K], K>
 }
 
 export const initFunctions = <S extends FunTypes.SchemaOptions>(
   schemaOptions: S,
-  runnables: GetFunctionRunnables<S>,
+  runnables: RegisteredRunnables<S>,
 ) => {
   return runnables
 }
