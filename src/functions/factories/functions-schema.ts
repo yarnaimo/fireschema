@@ -7,9 +7,16 @@ export const callableSchema = <
 >(
   input: I,
   output: O,
-): FunTypes.Callable.Options<I, O> => ({
+): FunTypes.IO<I, O> => ({
   [$input]: input,
   [$output]: output,
+})
+
+export const topicSchema = <I extends FunTypes.RecordBase>(
+  input: I,
+): FunTypes.IO<I, {}> => ({
+  [$input]: input,
+  [$output]: {},
 })
 
 export const createFunctionsSchema = <S extends FunTypes.SchemaOptions>(

@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import { messages } from '../../functions'
-import { v1Caller } from '../_infrastructure/functions'
+import { $call } from '../_infrastructure/functions-client'
 
 const userData = {
   name: 'umi',
@@ -11,14 +11,14 @@ const userData = {
 }
 
 test('call', async () => {
-  const result = await v1Caller(['createUser'], userData)
+  const result = await $call(['createUser'], userData)
 
   expect(result.isOk).toBeTruthy()
   expect(result.valueOrError).toEqual({ result: userData.age ** 2 })
 })
 
 test('call - invalid-argument', async () => {
-  const result = await v1Caller(['createUser'], {
+  const result = await $call(['createUser'], {
     ...userData,
     // @ts-expect-error
     age: '16',
@@ -32,7 +32,7 @@ test('call - invalid-argument', async () => {
 })
 
 test('call - out-of-range', async () => {
-  const result = await v1Caller(['createUser'], {
+  const result = await $call(['createUser'], {
     ...userData,
     age: -1,
   })
@@ -45,7 +45,7 @@ test('call - out-of-range', async () => {
 })
 
 test('call - internal', async () => {
-  const result = await v1Caller(['createUser'], {
+  const result = await $call(['createUser'], {
     ...userData,
     age: 100,
   })

@@ -8,7 +8,7 @@ import { MapAsync } from 'lifts'
 import { renderSchema } from '../../firestore/_renderers/root'
 import { firestoreSchema } from '../_fixtures/firestore-schema'
 
-const projectId = 'fireschema'
+export const projectId = 'fireschema'
 const rules = renderSchema(firestoreSchema)
 loadFirestoreRules({ projectId, rules })
 

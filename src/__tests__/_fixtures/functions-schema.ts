@@ -1,4 +1,5 @@
 import { callableSchema, createFunctionsSchema } from '../..'
+import { topicSchema } from '../../functions'
 import { t } from '../../lib/type'
 
 const callable = {
@@ -16,4 +17,10 @@ const callable = {
   ),
 }
 
-export const functionsSchema = createFunctionsSchema({ callable })
+const topic = {
+  publishMessage: topicSchema({
+    text: t.String,
+  }),
+}
+
+export const functionsSchema = createFunctionsSchema({ callable, topic })

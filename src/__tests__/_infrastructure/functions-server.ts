@@ -1,12 +1,13 @@
 import * as functions from 'firebase-functions'
+import { Do } from 'lifts'
 import { expectType } from 'tsd'
-import { createFunctionFactory, initFunctions, messages } from '../..'
+import { initFunctionRegisterer, initFunctions, messages } from '../..'
 import { FunTypes } from '../../functions'
 import { Type } from '../../lib/type'
 import { IUser } from '../_fixtures/firestore-schema'
 import { functionsSchema } from '../_fixtures/functions-schema'
 
-const functionFactory = createFunctionFactory(functions, functionsSchema)
+const $register = initFunctionRegisterer(functions, functionsSchema)
 
 const wrap = async <T, U>(
   data: T,
@@ -20,15 +21,15 @@ const wrap = async <T, U>(
     if (error instanceof functions.https.HttpsError) {
       throw error
     } else {
-      functions.logger.error(error)
       throw new functions.https.HttpsError('internal', messages.unknown)
     }
   }
 }
 
-const handler: FunTypes.Callable.Handler<
-  typeof functionsSchema['callable']['createUser']
-> = async (data, context) => {
+const handler: FunTypes.Callable.Handler<typeof functionsSchema.callable.createUser> = async (
+  data,
+  context,
+) => {
   return wrap(data, context, async () => {
     expectType<Type.Merge<IUser, { timestamp: string }>>(data)
 
@@ -41,18 +42,32 @@ const handler: FunTypes.Callable.Handler<
   })
 }
 
-const createUser = functionFactory.callable(
-  ['createUser'],
-  functions.region('asia-northeast1'),
-  handler,
-)
-const _errorExpected = functionFactory.callable(
-  ['createUser'],
-  functions.region('asia-northeast1'),
-  // @ts-expect-error
-  async (data, context) => ({ result: null }),
-)
+const region = functions.region('asia-northeast1')
 
-const callable = { createUser }
+const callable = Do(() => {
+  const createUser = $register.callable(['createUser'], region, handler)
 
-export const v1 = initFunctions(functionsSchema, { callable })
+  const _errorExpected = $register.callable(
+    ['createUser'],
+    region,
+    // @ts-expect-error
+    async (data, context) => ({ result: null }),
+  )
+
+  return { createUser }
+})
+
+const topic = Do(() => {
+  const publishMessage = $register.topic(
+    ['publishMessage'],
+    region,
+    async (data) => {
+      expectType<{ text: string }>(data)
+      console.log(data.text)
+    },
+  )
+
+  return { publishMessage }
+})
+
+export = initFunctions(functionsSchema, { callable, topic })
