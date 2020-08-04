@@ -1,5 +1,5 @@
 import got from 'got'
-import { emulatorOrigin, projectId, region } from '../_infrastructure/_app'
+import { emulatorOrigin, projectId, region } from '../_infrastructure/_config'
 
 test('http', async () => {
   const resp = await got

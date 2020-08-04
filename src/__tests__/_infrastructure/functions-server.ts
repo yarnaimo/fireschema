@@ -5,7 +5,7 @@ import { FunTypes } from '../../functions'
 import { Type } from '../../lib/type'
 import { IUser } from '../_fixtures/firestore-schema'
 import { functionsSchema } from '../_fixtures/functions-schema'
-import { region } from './_app'
+import { region } from './_config'
 
 const timezone = 'Asia/Tokyo'
 const $register = initFunctionRegisterer(functions, functionsSchema, timezone)
