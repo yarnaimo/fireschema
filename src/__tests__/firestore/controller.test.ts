@@ -113,8 +113,8 @@ describe('write', () => {
     })
 
     test('transaction', async () => {
-      await $web.app.runTransaction(async ($) => {
-        $web.$create($, r.user, userData)
+      await $web.app.runTransaction(async (tx) => {
+        $web.$create(tx, r.user, userData)
       })
 
       const snapRaw = await usersRaw.doc('user').get()
@@ -149,10 +149,10 @@ describe('write', () => {
     })
 
     test('transaction', async () => {
-      await $web.app.runTransaction(async ($) => {
-        const tsnap = await $.get(r.user)
+      await $web.app.runTransaction(async (tx) => {
+        const tsnap = await tx.get(r.user)
 
-        $web.$setMerge($, r.user, {
+        $web.$setMerge(tx, r.user, {
           age: tsnap.data()!.age + 1,
         })
       })

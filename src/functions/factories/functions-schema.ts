@@ -1,4 +1,4 @@
-import { t } from '../../lib/type'
+import { $ } from '../../runtypes'
 import { $input, $output } from '../constants'
 import { FunTypes } from '../FunTypes'
 
@@ -11,20 +11,20 @@ const callable = <I extends FunTypes.RecordBase, O extends FunTypes.RecordBase>(
 })
 
 const http = (): FunTypes.IO<FunTypes.RecordBase, FunTypes.RecordBase> => ({
-  [$input]: t.Record({}),
-  [$output]: t.Record({}),
+  [$input]: $.Record({}),
+  [$output]: $.Record({}),
 })
 
 const topic = <I extends FunTypes.RecordBase>(
   input: I,
 ): FunTypes.IO<I, FunTypes.RecordBase> => ({
   [$input]: input,
-  [$output]: t.Record({}),
+  [$output]: $.Record({}),
 })
 
 const schedule = (): FunTypes.IO<FunTypes.RecordBase, FunTypes.RecordBase> => ({
-  [$input]: t.Record({}),
-  [$output]: t.Record({}),
+  [$input]: $.Record({}),
+  [$output]: $.Record({}),
 })
 
 export const functionInterface = { callable, http, topic, schedule }

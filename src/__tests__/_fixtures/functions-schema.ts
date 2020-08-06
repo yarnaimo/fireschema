@@ -1,17 +1,16 @@
-import { createFunctionsSchema, functionInterface } from '../..'
-import { t } from '../../lib/type'
+import { $, createFunctionsSchema, functionInterface } from '../..'
 
 const callable = {
   createUser: functionInterface.callable(
-    t.Record({
-      name: t.String,
-      displayName: t.Union(t.String, t.Null),
-      age: t.Number,
-      tags: t.Array(t.String),
-      timestamp: t.String,
+    $.Record({
+      name: $.String,
+      displayName: $.Union($.String, $.Null),
+      age: $.Number,
+      tags: $.Array($.String),
+      timestamp: $.String,
     }),
-    t.Record({
-      result: t.Number,
+    $.Record({
+      result: $.Number,
     }),
   ),
 }
@@ -22,8 +21,8 @@ const http = {
 
 const topic = {
   publishMessage: functionInterface.topic(
-    t.Record({
-      text: t.String,
+    $.Record({
+      text: $.String,
     }),
   ),
 }

@@ -5,11 +5,11 @@ import type {
   Request,
   Response,
 } from 'firebase-functions'
-import { t } from '../lib/type'
+import { $ } from '../runtypes'
 import { $input, $output } from './constants'
 
 export declare namespace FunTypes {
-  export type RecordBase = t.Record<{}, false>
+  export type RecordBase = $.Record<{}, false>
 
   export type SchemaOptions = {
     callable: NestedOptions
@@ -37,9 +37,9 @@ export declare namespace FunTypes {
     ? _C
     : never
 
-  export type InputType<C extends IO<any, any>> = t.Static<C[typeof $input]>
+  export type InputType<C extends IO<any, any>> = $.Static<C[typeof $input]>
 
-  export type OutputType<C extends IO<any, any>> = t.Static<C[typeof $output]>
+  export type OutputType<C extends IO<any, any>> = $.Static<C[typeof $output]>
 
   export namespace Callable {
     export type Handler<C extends IO<any, any>> = (
