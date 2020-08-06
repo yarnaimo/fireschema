@@ -1,4 +1,5 @@
 import dayjs from 'dayjs'
+import { expectType } from 'tsd'
 import { messages } from '../../functions'
 import { $call } from '../_infrastructure/functions-client'
 
@@ -15,6 +16,9 @@ test('call', async () => {
 
   expect(result.isOk).toBeTruthy()
   expect(result.valueOrError).toEqual({ result: userData.age ** 2 })
+  if (result.isOk) {
+    expectType<{ result: number }>(result.valueOrError)
+  }
 })
 
 test('call - invalid-argument', async () => {

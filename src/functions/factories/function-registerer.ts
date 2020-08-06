@@ -6,7 +6,6 @@ import type {
   ScheduleRetryConfig,
 } from 'firebase-functions'
 import { FunTypes } from '..'
-import { t } from '../../lib/type'
 import { GetDeep, Loc } from '../../types/_object'
 import { getDeep } from '../../utils/_object'
 import { $input, messages } from '../constants'
@@ -31,8 +30,7 @@ export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
     },
   ) => {
     const options = (getDeep(schemaOptions.callable, loc) as any) as C
-    const input = options[$input] as C[typeof $input]
-    const inputSchema = t.Record(input)
+    const inputSchema = options[$input] as C[typeof $input]
 
     const wrapped = async (data: unknown, context: https.CallableContext) => {
       const validated = inputSchema.validate(data)
@@ -46,8 +44,7 @@ export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
     }
 
     const callableFunction = builder.https.onCall(wrapped)
-
-    return Object.assign(callableFunction, { handler })
+    return callableFunction
   }
 
   const http = <L extends Loc<S['http']>>(
@@ -60,9 +57,8 @@ export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
       handler: FunTypes.Http.Handler
     },
   ) => {
-    const callableFunction = builder.https.onRequest(handler)
-
-    return Object.assign(callableFunction, { handler })
+    const onRequestFunction = builder.https.onRequest(handler)
+    return onRequestFunction
   }
 
   const topic = <
@@ -80,14 +76,13 @@ export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
     },
   ) => {
     const wrapped = async (message: pubsub.Message, context: EventContext) => {
-      const input = message.json as FunTypes.RecordStaticType<C[typeof $input]>
+      const input = message.json as FunTypes.InputType<C>
       await handler(input, message, context)
     }
 
     const name = loc.join('-')
     const topicFunction = builder.pubsub.topic(name).onPublish(wrapped)
-
-    return Object.assign(topicFunction, { handler })
+    return topicFunction
   }
 
   const schedule = <L extends Loc<S['schedule']>>(
@@ -110,7 +105,7 @@ export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
       .retryConfig(retryConfig)
       .onRun(handler)
 
-    return Object.assign(scheduleFunction, { handler })
+    return scheduleFunction
   }
 
   return { callable, http, topic, schedule }

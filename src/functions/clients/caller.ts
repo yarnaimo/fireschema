@@ -1,6 +1,5 @@
 import { IResult, Result } from 'lifts'
 import { GetDeep, Loc } from '../../types/_object'
-import { $output } from '../constants'
 import { FunTypes } from '../FunTypes'
 
 export const initCaller = <S extends FunTypes.SchemaOptions>(
@@ -15,7 +14,9 @@ export const initCaller = <S extends FunTypes.SchemaOptions>(
     loc: L,
     data: FunTypes.InputType<C>,
     options?: firebase.functions.HttpsCallableOptions,
-  ): Promise<IResult<C[typeof $output], firebase.functions.HttpsError>> => {
+  ): Promise<
+    IResult<FunTypes.OutputType<C>, firebase.functions.HttpsError>
+  > => {
     const name = ['callable', ...loc].join('-')
     const callable = functionsApp.httpsCallable(name, options)
 

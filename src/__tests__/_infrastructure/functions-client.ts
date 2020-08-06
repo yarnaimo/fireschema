@@ -11,6 +11,6 @@ functionsApp.useFunctionsEmulator(emulatorOrigin.functions)
 
 export const $call = initCaller(functionsApp, functionsSchema)
 export const $topic = initTopicClient(
-  new PubSub({ apiEndpoint: `http://localhost:8085`, projectId }),
+  new PubSub({ apiEndpoint: emulatorOrigin.pubsub, projectId }),
   functionsSchema,
 )

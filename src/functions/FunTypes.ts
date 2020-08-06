@@ -9,11 +9,7 @@ import { t } from '../lib/type'
 import { $input, $output } from './constants'
 
 export declare namespace FunTypes {
-  export type RecordBase = { [_: string]: t.Runtype<unknown> }
-
-  export type RecordStaticType<O extends RecordBase> = {
-    readonly [K in keyof O]: t.Static<O[K]>
-  }
+  export type RecordBase = t.Record<{}, false>
 
   export type SchemaOptions = {
     callable: NestedOptions
@@ -34,15 +30,16 @@ export declare namespace FunTypes {
     [$output]: O
   }
 
-  export type EnsureIO<_C> = _C extends IO<any, any> ? _C : never
-
-  export type InputType<C extends IO<any, any>> = FunTypes.RecordStaticType<
-    C[typeof $input]
+  export type EnsureIO<_C> = _C extends IO<
+    FunTypes.RecordBase,
+    FunTypes.RecordBase
   >
+    ? _C
+    : never
 
-  export type OutputType<C extends IO<any, any>> = FunTypes.RecordStaticType<
-    C[typeof $output]
-  >
+  export type InputType<C extends IO<any, any>> = t.Static<C[typeof $input]>
+
+  export type OutputType<C extends IO<any, any>> = t.Static<C[typeof $output]>
 
   export namespace Callable {
     export type Handler<C extends IO<any, any>> = (
