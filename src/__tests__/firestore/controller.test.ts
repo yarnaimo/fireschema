@@ -127,43 +127,55 @@ describe('write', () => {
     })
   })
 
-  describe('setMerge', () => {
-    beforeEach(async () => {
-      await usersRaw.doc('user').set(userData as any)
+  describe('write to non-existing doc', () => {
+    test('setMerge succeeds', async () => {
+      await expect($web.setMerge(r.user, userData)).resolves.toBeUndefined()
     })
 
-    test('normal', async () => {
-      await $web.setMerge(r.user, {
-        name: 'umi-kousaka',
-        tags: $web.FieldValue.arrayUnion('tag2'),
-      })
-
-      const snapRaw = await usersRaw.doc('user').get()
-      expect(snapRaw.data()).toMatchObject({
-        ...userData,
-        name: 'umi-kousaka',
-        tags: ['tag0', 'tag1', 'tag2'],
-        _updatedAt: expect.any($web.Timestamp),
-        timestamp: expect.any($web.Timestamp),
-      })
+    test('update fails', async () => {
+      await expect($web.update(r.user, userData)).rejects.toThrowError()
     })
+  })
 
-    test('transaction', async () => {
-      await $web.app.runTransaction(async (tx) => {
-        const tsnap = await tx.get(r.user)
+  for (const op of ['setMerge', 'update'] as const) {
+    describe(op, () => {
+      beforeEach(async () => {
+        await usersRaw.doc('user').set(userData as any)
+      })
 
-        $web.$setMerge(tx, r.user, {
-          age: tsnap.data()!.age + 1,
+      test('normal', async () => {
+        await $web[op](r.user, {
+          name: 'umi-kousaka',
+          tags: $web.FieldValue.arrayUnion('tag2'),
+        })
+
+        const snapRaw = await usersRaw.doc('user').get()
+        expect(snapRaw.data()).toMatchObject({
+          ...userData,
+          name: 'umi-kousaka',
+          tags: ['tag0', 'tag1', 'tag2'],
+          _updatedAt: expect.any($web.Timestamp),
+          timestamp: expect.any($web.Timestamp),
         })
       })
 
-      const snapRaw = await usersRaw.doc('user').get()
-      expect(snapRaw.data()).toMatchObject({
-        ...userData,
-        age: userData.age + 1,
-        _updatedAt: expect.any($web.Timestamp),
-        timestamp: expect.any($web.Timestamp),
+      test('transaction', async () => {
+        await $web.app.runTransaction(async (tx) => {
+          const tsnap = await tx.get(r.user)
+
+          $web[`$${op}` as '$setMerge' | '$update'](tx, r.user, {
+            age: tsnap.data()!.age + 1,
+          })
+        })
+
+        const snapRaw = await usersRaw.doc('user').get()
+        expect(snapRaw.data()).toMatchObject({
+          ...userData,
+          age: userData.age + 1,
+          _updatedAt: expect.any($web.Timestamp),
+          timestamp: expect.any($web.Timestamp),
+        })
       })
     })
-  })
+  }
 })

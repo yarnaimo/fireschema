@@ -253,6 +253,23 @@ export const initFirestore = <
     ;(transaction as fweb.Transaction).set(docRef as any, dataT, _mergeOption)
   }
 
+  const update = <T>(
+    docRef: FTypes.DocumentRef<T, F>,
+    data: Partial<STypes.DocDataToWrite<T, F>>,
+  ) => {
+    const dataT = _toUpdate<T>(data)
+    return docRef.update(dataT) as FTypes.SetResult<F>
+  }
+
+  const $update = <T>(
+    transaction: FTypes.Transaction<F>,
+    docRef: FTypes.DocumentRef<T, F>,
+    data: Partial<STypes.DocDataToWrite<T, F>>,
+  ) => {
+    const dataT = _toUpdate<T>(data)
+    ;(transaction as fweb.Transaction).update(docRef as any, dataT)
+  }
+
   return {
     app,
     FieldValue: FieldValue as any,
@@ -267,6 +284,8 @@ export const initFirestore = <
     $create,
     setMerge,
     $setMerge,
+    update,
+    $update,
   }
 }
 
@@ -296,6 +315,15 @@ export type FirestoreController<
     data: Partial<STypes.DocDataToWrite<T, F>>,
   ) => FTypes.SetResult<F>
   $setMerge: <T>(
+    transaction: FTypes.Transaction<F>,
+    docRef: FTypes.DocumentRef<T, F>,
+    data: Partial<STypes.DocDataToWrite<T, F>>,
+  ) => void
+  update: <T>(
+    docRef: FTypes.DocumentRef<T, F>,
+    data: Partial<STypes.DocDataToWrite<T, F>>,
+  ) => FTypes.SetResult<F>
+  $update: <T>(
     transaction: FTypes.Transaction<F>,
     docRef: FTypes.DocumentRef<T, F>,
     data: Partial<STypes.DocDataToWrite<T, F>>,
