@@ -9,7 +9,7 @@ import { $ } from '../runtypes'
 import { $input, $output } from './constants'
 
 export declare namespace FunTypes {
-  export type RecordBase = $.Record<{}, false>
+  export type RecordBase = $.Runtype<{}>
 
   export type SchemaOptions = {
     callable: NestedOptions
