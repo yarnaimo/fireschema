@@ -182,28 +182,160 @@ const buildCollectionController = <
   return { collection, collectionGroup }
 }
 
+const WithMeta = (FieldValue: FTypes.FieldValueClass) => {
+  return {
+    toCreate: <T>(data: {}) =>
+      (({
+        ...data,
+        [_createdAt]: FieldValue.serverTimestamp(),
+        [_updatedAt]: FieldValue.serverTimestamp(),
+      } as any) as T),
+
+    toUpdate: <T>(data: {}) =>
+      (({
+        ...data,
+        [_updatedAt]: FieldValue.serverTimestamp(),
+      } as any) as T),
+  }
+}
+
+const _mergeOption = { merge: true }
+
+export type Interactor<F extends FTypes.FirestoreApp> = {
+  create: <T>(
+    docRef: FTypes.DocumentRef<T, F>,
+    data: DataToCreate<T, F>,
+  ) => FTypes.SetResult<F>
+  setMerge: <T>(
+    docRef: FTypes.DocumentRef<T, F>,
+    data: DataToUpdate<T, F>,
+  ) => FTypes.SetResult<F>
+  update: <T>(
+    docRef: FTypes.DocumentRef<T, F>,
+    data: DataToUpdate<T, F>,
+  ) => FTypes.SetResult<F>
+  delete: (docRef: FTypes.DocumentRef<any, F>) => FTypes.SetResult<F>
+}
+
+export type TransactionController<F extends FTypes.FirestoreApp> = {
+  get: <T>(
+    docRef: FTypes.DocumentRef<T, F>,
+  ) => Promise<FTypes.DocumentSnap<T, F>>
+  create: <T>(
+    docRef: FTypes.DocumentRef<T, F>,
+    data: DataToCreate<T, F>,
+  ) => void
+  setMerge: <T>(
+    docRef: FTypes.DocumentRef<T, F>,
+    data: DataToUpdate<T, F>,
+  ) => void
+  update: <T>(
+    docRef: FTypes.DocumentRef<T, F>,
+    data: DataToUpdate<T, F>,
+  ) => void
+  delete: (docRef: FTypes.DocumentRef<any, F>) => void
+}
+
+type DataToCreate<T, F extends FTypes.FirestoreApp> = STypes.DocDataToWrite<
+  T,
+  F
+>
+type DataToUpdate<T, F extends FTypes.FirestoreApp> = Partial<
+  DataToCreate<T, F>
+>
+
+const buildInteractor = <F extends FTypes.FirestoreApp>(
+  FieldValue: FTypes.FieldValueClass<F>,
+): Interactor<F> => {
+  const withMeta = WithMeta(FieldValue)
+
+  return {
+    create: <T>(docRef: FTypes.DocumentRef<T, F>, data: DataToCreate<T, F>) => {
+      const dataT = withMeta.toCreate<T>(data)
+      return docRef.set(dataT, {}) as FTypes.SetResult<F>
+    },
+
+    setMerge: <T>(
+      docRef: FTypes.DocumentRef<T, F>,
+      data: DataToUpdate<T, F>,
+    ) => {
+      const dataT = withMeta.toUpdate<T>(data)
+      return docRef.set(dataT, _mergeOption) as FTypes.SetResult<F>
+    },
+
+    update: <T>(docRef: FTypes.DocumentRef<T, F>, data: DataToUpdate<T, F>) => {
+      const dataT = withMeta.toUpdate<T>(data)
+      return docRef.update(dataT) as FTypes.SetResult<F>
+    },
+
+    delete: (docRef: FTypes.DocumentRef<any, F>) =>
+      docRef.delete() as FTypes.SetResult<F>,
+  }
+}
+
+const buildTransactionController = <F extends FTypes.FirestoreApp>(
+  FieldValue: FTypes.FieldValueClass<F>,
+) => {
+  const withMeta = WithMeta(FieldValue)
+
+  return (tx: FTypes.Transaction<F>): TransactionController<F> => {
+    const _tx = tx as fweb.Transaction
+    return {
+      get: <T>(docRef: FTypes.DocumentRef<T, F>) => {
+        return _tx.get(
+          (docRef as unknown) as fweb.DocumentReference<T>,
+        ) as Promise<FTypes.DocumentSnap<T, F>>
+      },
+
+      create: <T>(
+        docRef: FTypes.DocumentRef<T, F>,
+        data: DataToCreate<T, F>,
+      ) => {
+        const dataT = withMeta.toCreate<T>(data)
+        return _tx.set((docRef as unknown) as fweb.DocumentReference<T>, dataT)
+      },
+
+      setMerge: <T>(
+        docRef: FTypes.DocumentRef<T, F>,
+        data: DataToUpdate<T, F>,
+      ) => {
+        const dataT = withMeta.toUpdate<T>(data)
+        return _tx.set(
+          (docRef as unknown) as fweb.DocumentReference<T>,
+          dataT,
+          _mergeOption,
+        )
+      },
+
+      update: <T>(
+        docRef: FTypes.DocumentRef<T, F>,
+        data: DataToUpdate<T, F>,
+      ) => {
+        const dataT = withMeta.toUpdate<T>(data)
+        return _tx.update(
+          (docRef as unknown) as fweb.DocumentReference<T>,
+          dataT,
+        )
+      },
+
+      delete: (docRef: FTypes.DocumentRef<any, F>) =>
+        _tx.delete((docRef as unknown) as fweb.DocumentReference<any>),
+    }
+  }
+}
+
 export const initFirestore = <
   F extends FTypes.FirestoreApp,
   S extends STypes.RootOptions.All
 >(
-  { FieldValue, Timestamp }: typeof fweb | typeof fadmin,
+  firestoreStatic: typeof fweb | typeof fadmin,
   app: F,
   schemaOptions: S,
 ): FirestoreController<F, S> => {
-  const _mergeOption = { merge: true }
-
-  const _toCreate = <T>(data: {}) =>
-    (({
-      ...data,
-      [_createdAt]: FieldValue.serverTimestamp(),
-      [_updatedAt]: FieldValue.serverTimestamp(),
-    } as any) as T)
-
-  const _toUpdate = <T>(data: {}) =>
-    (({
-      ...data,
-      [_updatedAt]: FieldValue.serverTimestamp(),
-    } as any) as T)
+  const { FieldValue, Timestamp } = (firestoreStatic as unknown) as {
+    FieldValue: FTypes.FieldValueClass<F>
+    Timestamp: FTypes.TimestampClass<F>
+  }
 
   const parentOfCollection = <T extends STypes.HasLoc<string[]>>(
     collectionRef: FTypes.CollectionRef<T, F>,
@@ -219,80 +351,37 @@ export const initFirestore = <
     schemaOptions,
   )
 
-  const create = <T>(
-    docRef: FTypes.DocumentRef<T, F>,
-    data: STypes.DocDataToWrite<T, F>,
-  ) => {
-    const dataT = _toCreate<T>(data)
-    return docRef.set(dataT, {}) as FTypes.SetResult<F>
-  }
+  const interactor = buildInteractor(FieldValue)
+  const TransactionController = buildTransactionController<F>(FieldValue)
 
-  const $create = <T>(
-    transaction: FTypes.Transaction<F>,
-    docRef: FTypes.DocumentRef<T, F>,
-    data: STypes.DocDataToWrite<T, F>,
+  const runTransaction = <R>(
+    fn: (tc: TransactionController<F>) => Promise<R>,
   ) => {
-    const dataT = _toCreate<T>(data)
-    ;(transaction as fweb.Transaction).set(docRef as any, dataT, {})
-  }
-
-  const setMerge = <T>(
-    docRef: FTypes.DocumentRef<T, F>,
-    data: Partial<STypes.DocDataToWrite<T, F>>,
-  ) => {
-    const dataT = _toUpdate<T>(data)
-    return docRef.set(dataT, _mergeOption) as FTypes.SetResult<F>
-  }
-
-  const $setMerge = <T>(
-    transaction: FTypes.Transaction<F>,
-    docRef: FTypes.DocumentRef<T, F>,
-    data: Partial<STypes.DocDataToWrite<T, F>>,
-  ) => {
-    const dataT = _toUpdate<T>(data)
-    ;(transaction as fweb.Transaction).set(docRef as any, dataT, _mergeOption)
-  }
-
-  const update = <T>(
-    docRef: FTypes.DocumentRef<T, F>,
-    data: Partial<STypes.DocDataToWrite<T, F>>,
-  ) => {
-    const dataT = _toUpdate<T>(data)
-    return docRef.update(dataT) as FTypes.SetResult<F>
-  }
-
-  const $update = <T>(
-    transaction: FTypes.Transaction<F>,
-    docRef: FTypes.DocumentRef<T, F>,
-    data: Partial<STypes.DocDataToWrite<T, F>>,
-  ) => {
-    const dataT = _toUpdate<T>(data)
-    ;(transaction as fweb.Transaction).update(docRef as any, dataT)
+    return (app as fweb.Firestore).runTransaction(async (tx) => {
+      const tc = TransactionController(tx as FTypes.Transaction<F>)
+      return fn(tc)
+    })
   }
 
   return {
     app,
-    FieldValue: FieldValue as any,
-    Timestamp: Timestamp as any,
+    FieldValue,
+    Timestamp,
 
     collection,
     collectionGroup,
 
     parentOfCollection: parentOfCollection as any,
 
-    create,
-    $create,
-    setMerge,
-    $setMerge,
-    update,
-    $update,
+    ...interactor,
+    runTransaction,
   }
 }
 
 export type FirestoreController<
   F extends FTypes.FirestoreApp,
   S extends STypes.RootOptions.All
-> = CollectionController<F, S> & {
+> = {
   app: F
   FieldValue: FTypes.FieldValueClass<F>
   Timestamp: FTypes.TimestampClass<F>
@@ -300,32 +389,9 @@ export type FirestoreController<
   parentOfCollection: <T extends STypes.HasLoc<string[]>>(
     collectionRef: FTypes.CollectionRef<T, F>,
   ) => FTypes.DocumentRef<GetParentT<S, T>, F>
-
-  create: <T>(
-    docRef: FTypes.DocumentRef<T, F>,
-    data: STypes.DocDataToWrite<T, F>,
-  ) => FTypes.SetResult<F>
-  $create: <T>(
-    transaction: FTypes.Transaction<F>,
-    docRef: FTypes.DocumentRef<T, F>,
-    data: STypes.DocDataToWrite<T, F>,
-  ) => void
-  setMerge: <T>(
-    docRef: FTypes.DocumentRef<T, F>,
-    data: Partial<STypes.DocDataToWrite<T, F>>,
-  ) => FTypes.SetResult<F>
-  $setMerge: <T>(
-    transaction: FTypes.Transaction<F>,
-    docRef: FTypes.DocumentRef<T, F>,
-    data: Partial<STypes.DocDataToWrite<T, F>>,
-  ) => void
-  update: <T>(
-    docRef: FTypes.DocumentRef<T, F>,
-    data: Partial<STypes.DocDataToWrite<T, F>>,
-  ) => FTypes.SetResult<F>
-  $update: <T>(
-    transaction: FTypes.Transaction<F>,
-    docRef: FTypes.DocumentRef<T, F>,
-    data: Partial<STypes.DocDataToWrite<T, F>>,
-  ) => void
-}
+} & CollectionController<F, S> &
+  Interactor<F> & {
+    runTransaction: <R>(
+      fn: (tc: TransactionController<F>) => Promise<R>,
+    ) => Promise<R>
+  }
