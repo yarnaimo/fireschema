@@ -1,3 +1,4 @@
+import { join } from '../../utils/_string'
 import { $collectionGroups, $functions } from '../constants'
 import { STypes } from '../STypes'
 import { renderCollectionGroups, renderCollections } from './collections'
@@ -8,16 +9,17 @@ export const renderRoot = (
   collectionGroups: STypes.CollectionOptions.Children,
   collections: STypes.CollectionOptions.Children,
 ) => {
+  const body = join('\n\n')([
+    renderFunctions($functions, 2),
+    renderCollectionGroups(collectionGroups, 2),
+    renderCollections(collections, 2),
+  ])
   return [
     "rules_version = '2';",
     '',
     'service cloud.firestore {',
     '  match /databases/{database}/documents {',
-    renderFunctions($functions, 2),
-    '',
-    renderCollectionGroups(collectionGroups, 2),
-    '',
-    renderCollections(collections, 2),
+    body,
     '  }',
     '}',
   ]
