@@ -43,27 +43,27 @@ export declare namespace STypes {
       : T[K] extends string
       ? 'string'
       : T[K] extends string | null
-      ? 'string | null'
+      ? ['string', 'null']
       : T[K] extends number
       ? 'int' | 'float'
       : T[K] extends number | null
-      ? 'int' | 'float | null'
+      ? ['int', 'null'] | ['float', 'null']
       : T[K] extends boolean
       ? 'bool'
       : T[K] extends boolean | null
-      ? 'bool | null'
+      ? ['bool', 'null']
       : T[K] extends FTypes.Timestamp
       ? 'timestamp'
       : T[K] extends FTypes.Timestamp | null
-      ? 'timestamp | null'
+      ? ['timestamp', 'null']
       : T[K] extends any[]
       ? 'list'
       : T[K] extends any[] | null
-      ? 'list | null'
-      : T[K] extends {}
-      ? 'map'
-      : T[K] extends {} | null
-      ? 'map | null'
+      ? ['list', 'null']
+      : T[K] extends object
+      ? DataSchemaOptions<T[K]> | 'map'
+      : T[K] extends object | null
+      ? [DataSchemaOptions<T[K]>, 'null'] | ['map', 'null']
       : never
   }
 

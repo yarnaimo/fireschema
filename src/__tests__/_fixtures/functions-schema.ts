@@ -7,6 +7,10 @@ const callable = {
       displayName: $.Union($.String, $.Null),
       age: $.Number,
       tags: $.Array($.String),
+      options: $.Record({
+        a: $.Boolean,
+        b: $.String,
+      }),
     }).And(
       $.Record({
         timestamp: $.String,

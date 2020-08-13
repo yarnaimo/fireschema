@@ -21,7 +21,7 @@ service cloud.firestore {
     match /versions/{version} {
       match /users/{uid} {
         function __validator_0__(data) {
-          return (data.name is string && (data.displayName is string || data.displayName == null) && data.age is int && data.tags is list && data.timestamp is timestamp);
+          return (data.name is string && (data.displayName is string || data.displayName == null) && data.age is int && data.tags is list && data.timestamp is timestamp && (data.options.a is bool && data.options.b is string));
         }
 
         allow read: if true;

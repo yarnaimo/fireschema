@@ -20,6 +20,7 @@ export type IUser = {
   age: number
   tags: string[]
   timestamp: FTypes.Timestamp
+  options: { a: boolean; b: string }
 }
 
 export type IPostA = {
@@ -36,10 +37,11 @@ const VersionAdapter = collectionAdapter<IVersion>()({})
 
 const UserSchema = documentSchema<IUser>({
   name: 'string',
-  displayName: 'string | null',
+  displayName: ['string', 'null'],
   age: 'int',
   tags: 'list',
   timestamp: 'timestamp',
+  options: { a: 'bool', b: 'string' },
 })
 const UserAdapter = collectionAdapter<IUser>()({
   selectors: (q) => ({

@@ -6,6 +6,32 @@ import { join, _ } from '../../utils/_string'
 import { allowOptions, STypes } from '../STypes'
 import { renderFunctions } from './functions'
 
+const renderObjectValidator = (
+  object: STypes.DataSchemaOptions<any>,
+  prefix: string,
+): string => {
+  return P(
+    object,
+    EntriesStrict,
+    R.map(([key, type]) => [key, is.array(type) ? type : [type]] as const),
+    R.map(([key, types]) => {
+      const keyWithPrefix = `${prefix}.${String(key)}`
+      return P(
+        types,
+        R.map((type) => {
+          if (is.object(type)) {
+            return renderObjectValidator(type, `${keyWithPrefix}`)
+          }
+          const op = type === 'null' ? '==' : 'is'
+          return `${keyWithPrefix} ${op} ${type}`
+        }),
+        $or,
+      )
+    }),
+    $and,
+  )
+}
+
 let index = 0
 
 export const renderRules = (
@@ -19,20 +45,7 @@ export const renderRules = (
 
   const validatorBody = P(
     is.array($schema) ? $schema : [$schema],
-    R.map(EntriesStrict),
-    R.map(
-      R.flatMap(([key, type]) => {
-        return P(
-          type.split(' | '),
-          R.map((t) => {
-            const op = t === 'null' ? '==' : 'is'
-            return `data.${String(key)} ${op} ${t}`
-          }),
-          $or,
-        )
-      }),
-    ),
-    R.map($and),
+    R.map((schema) => renderObjectValidator(schema, 'data')),
     $or,
   )
 

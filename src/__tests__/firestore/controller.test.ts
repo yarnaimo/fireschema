@@ -56,6 +56,7 @@ const userData = {
   age: 16,
   timestamp: $web.FieldValue.serverTimestamp(),
   tags: ['tag0', 'tag1'],
+  options: { a: true, b: 'value' },
 }
 
 const usersRaw = $web.app.collection('versions').doc('v1').collection('users')

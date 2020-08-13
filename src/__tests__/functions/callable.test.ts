@@ -9,6 +9,7 @@ const userData = {
   age: 16,
   timestamp: dayjs().toISOString(),
   tags: ['tag0', 'tag1'],
+  options: { a: true, b: 'value' },
 }
 
 test('call', async () => {
