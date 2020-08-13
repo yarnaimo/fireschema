@@ -8,7 +8,10 @@ const userData = {
   displayName: null,
   age: 16,
   timestamp: dayjs().toISOString(),
-  tags: ['tag0', 'tag1'],
+  tags: [
+    { id: 0, name: 'tag0' },
+    { id: 1, name: 'tag1' },
+  ],
   options: { a: true, b: 'value' },
 }
 

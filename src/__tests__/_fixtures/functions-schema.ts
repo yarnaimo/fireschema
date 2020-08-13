@@ -6,7 +6,7 @@ const callable = {
       name: $.String,
       displayName: $.Union($.String, $.Null),
       age: $.Number,
-      tags: $.Array($.String),
+      tags: $.Array($.Record({ id: $.Number, name: $.String })),
       options: $.Record({
         a: $.Boolean,
         b: $.String,
