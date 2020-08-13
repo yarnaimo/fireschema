@@ -1,6 +1,7 @@
 import {
   $adapter,
   $allow,
+  $array,
   $collectionGroups,
   $docLabel,
   $functions,
@@ -18,7 +19,7 @@ export type IUser = {
   name: string
   displayName: string | null
   age: number
-  tags: string[]
+  tags: { id: number; name: string }[]
   timestamp: FTypes.Timestamp
   options: { a: boolean; b: string }
 }
@@ -39,7 +40,7 @@ const UserSchema = documentSchema<IUser>({
   name: 'string',
   displayName: ['string', 'null'],
   age: 'int',
-  tags: 'list',
+  tags: { [$array]: { id: 'int', name: 'string' } },
   timestamp: 'timestamp',
   options: { a: 'bool', b: 'string' },
 })
@@ -55,7 +56,7 @@ const PostASchema = documentSchema<IPostA>({
 })
 const PostBSchema = documentSchema<IPostB>({
   type: 'string',
-  texts: 'list',
+  texts: { [$array]: 'string' },
 })
 const PostAdapter = collectionAdapter<IPostA | IPostB>()({})
 

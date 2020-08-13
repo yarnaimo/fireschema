@@ -1,4 +1,4 @@
-import { assertFails } from '@firebase/testing'
+import { assertFails, assertSucceeds } from '@firebase/testing'
 import { expectType } from 'tsd'
 import { STypes } from '../..'
 import { fadmin } from '../../types/_firestore'
@@ -55,7 +55,10 @@ const userData = {
   displayName: null,
   age: 16,
   timestamp: $web.FieldValue.serverTimestamp(),
-  tags: ['tag0', 'tag1'],
+  tags: [
+    { id: 0, name: 'tag0' },
+    { id: 1, name: 'tag1' },
+  ],
   options: { a: true, b: 'value' },
 }
 
@@ -109,7 +112,29 @@ describe('write', () => {
       })
     })
 
-    test('normal (unauthed, fails)', async () => {
+    test('normal (empty array)', async () => {
+      await assertSucceeds($web.create(r.user, { ...userData, tags: [] }))
+    })
+
+    test('normal (fails due to wrong type)', async () => {
+      await assertFails(
+        $web.create(r.user, {
+          ...userData,
+          // @ts-expect-error
+          tags: [{ id: '0', name: 'tag0' }],
+        }),
+      )
+
+      await assertFails(
+        $web.create(r.user, {
+          ...userData,
+          // @ts-expect-error
+          options: { a: 1, b: 'value' },
+        }),
+      )
+    })
+
+    test('normal (fails due to unauthed)', async () => {
       await assertFails($webUnauthed.create(ur.user, userData))
     })
 
@@ -147,14 +172,14 @@ describe('write', () => {
       test('normal', async () => {
         await $web[op](r.user, {
           name: 'umi-kousaka',
-          tags: $web.FieldValue.arrayUnion('tag2'),
+          tags: $web.FieldValue.arrayUnion({ id: 2, name: 'tag2' }),
         })
 
         const snapRaw = await usersRaw.doc('user').get()
         expect(snapRaw.data()).toMatchObject({
           ...userData,
           name: 'umi-kousaka',
-          tags: ['tag0', 'tag1', 'tag2'],
+          tags: [...userData.tags, { id: 2, name: 'tag2' }],
           _updatedAt: expect.any($web.Timestamp),
           timestamp: expect.any($web.Timestamp),
         })

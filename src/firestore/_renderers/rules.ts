@@ -3,8 +3,11 @@ import { R } from '../../lib/fp'
 import { is } from '../../lib/type'
 import { $and, $or } from '../../utils/operators'
 import { join, _ } from '../../utils/_string'
+import { $array, hasArraySymbol } from '../constants'
 import { allowOptions, STypes } from '../STypes'
 import { renderFunctions } from './functions'
+
+const arrayKey = '__fireschema_array_key__'
 
 const renderObjectValidator = (
   object: STypes.DataSchemaOptions<any>,
@@ -14,19 +17,33 @@ const renderObjectValidator = (
     object,
     EntriesStrict,
     R.map(([key, type]) => [key, is.array(type) ? type : [type]] as const),
+
     R.map(([key, types]) => {
-      const keyWithPrefix = `${prefix}.${String(key)}`
-      return P(
+      const isArray = key === arrayKey
+      const keyWithPrefix = isArray
+        ? `${prefix}[0]`
+        : is.string(key)
+        ? `${prefix}.${key}`
+        : ''
+
+      const rule = P(
         types,
         R.map((type) => {
+          if (hasArraySymbol(type)) {
+            return renderObjectValidator(
+              { [arrayKey]: type[$array] },
+              `${keyWithPrefix}`,
+            )
+          }
           if (is.object(type)) {
-            return renderObjectValidator(type, `${keyWithPrefix}`)
+            return renderObjectValidator(type, keyWithPrefix)
           }
           const op = type === 'null' ? '==' : 'is'
           return `${keyWithPrefix} ${op} ${type}`
         }),
         $or,
       )
+      return isArray ? $or([`${prefix}.size() == 0`, rule]) : rule
     }),
     $and,
   )

@@ -3,6 +3,7 @@ import { FTypes } from '../types/FTypes'
 import {
   $adapter,
   $allow,
+  $array,
   $collectionGroups,
   $docLabel,
   $functions,
@@ -56,10 +57,10 @@ export declare namespace STypes {
       ? 'timestamp'
       : T[K] extends FTypes.Timestamp | null
       ? ['timestamp', 'null']
-      : T[K] extends any[]
-      ? 'list'
-      : T[K] extends any[] | null
-      ? ['list', 'null']
+      : T[K] extends (infer U)[]
+      ? { [$array]: DataSchemaOptions<{ _: U }>['_'] }
+      : T[K] extends (infer U)[] | null
+      ? [{ [$array]: DataSchemaOptions<{ _: U }>['_'] }, 'null']
       : T[K] extends object
       ? DataSchemaOptions<T[K]> | 'map'
       : T[K] extends object | null

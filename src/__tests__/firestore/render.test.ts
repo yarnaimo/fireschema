@@ -21,7 +21,7 @@ service cloud.firestore {
     match /versions/{version} {
       match /users/{uid} {
         function __validator_0__(data) {
-          return (data.name is string && (data.displayName is string || data.displayName == null) && data.age is int && data.tags is list && data.timestamp is timestamp && (data.options.a is bool && data.options.b is string));
+          return (data.name is string && (data.displayName is string || data.displayName == null) && data.age is int && (data.tags.size() == 0 || (data.tags[0].id is int && data.tags[0].name is string)) && data.timestamp is timestamp && (data.options.a is bool && data.options.b is string));
         }
 
         allow read: if true;
@@ -29,7 +29,7 @@ service cloud.firestore {
 
         match /posts/{postId} {
           function __validator_1__(data) {
-            return ((data.type is string && data.text is string) || (data.type is string && data.texts is list));
+            return ((data.type is string && data.text is string) || (data.type is string && (data.texts.size() == 0 || data.texts[0] is string)));
           }
 
           allow read: if true;
