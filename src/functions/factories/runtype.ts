@@ -6,7 +6,7 @@ import { $ } from '../../runtypes'
 import { arrayfy } from '../../utils/_array'
 
 export const schemaToRuntype = (
-  types: STypes.DataSchemaValueType<any>,
+  types: STypes.DataSchemaValueTypes<any>,
 ): $.Runtype<unknown> => {
   return P(
     types,

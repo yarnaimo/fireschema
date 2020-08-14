@@ -6,7 +6,7 @@ const callable = {
   createUser: functionInterface.callable<
     Type.Merge<IUser, { timestamp: string }>,
     { result: number }
-  >([UserSchemaJson, UserSchemaJson], {
+  >([{ ...UserSchemaJson, name: ['string', 'string'] }], {
     result: 'int',
   }),
 }

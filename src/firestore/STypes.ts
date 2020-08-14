@@ -84,8 +84,12 @@ export declare namespace STypes {
     ? N<DataSchemaObject<T>> | N<'map'>
     : never
 
+  export type DataSchemaValueTypes<T> =
+    | DataSchemaValueType<T>
+    | DataSchemaValueType<T>[]
+
   export type DataSchemaObject<T> = {
-    [K in keyof T]: DataSchemaValueType<T[K]>
+    [K in keyof T]: DataSchemaValueTypes<T[K]>
   }
 
   export type DataSchemaOptions<T> =
