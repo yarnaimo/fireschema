@@ -54,7 +54,7 @@ export declare namespace STypes {
     ? T
     : never
 
-  type N<T> = [T, 'null']
+  type N<T> = readonly [T, 'null']
 
   export type DataSchemaValueType<T> = Is<T, null> extends 1
     ? 'null'
@@ -79,16 +79,23 @@ export declare namespace STypes {
     : Is<T, unknown[], 1> extends 1
     ? N<{ [$array]: DataSchemaValueType<EnsureArray<T>[number]> }> | N<'list'>
     : Is<T, object> extends 1
-    ? DataSchemaOptions<T> | 'map'
+    ? DataSchemaObject<T> | 'map'
     : Is<T, object, 1> extends 1
-    ? N<DataSchemaOptions<T>> | N<'map'>
+    ? N<DataSchemaObject<T>> | N<'map'>
     : never
 
-  export type DataSchemaOptions<T> = {
+  export type DataSchemaObject<T> = {
     [K in keyof T]: DataSchemaValueType<T[K]>
   }
 
-  export type DataSchemaOptionsWithType<T> = { __T__: T } & DataSchemaOptions<T>
+  export type DataSchemaOptions<T> =
+    | Extract<DataSchemaValueType<T>, object>
+    | Extract<DataSchemaValueType<T>, object>[]
+
+  export type DataSchemaOptionsWithType<T> = { __T__: T } & Extract<
+    DataSchemaValueType<T>,
+    object
+  >
 
   export type FunctionsOptions = {
     [key: string]: string
@@ -109,8 +116,8 @@ export declare namespace STypes {
   export namespace CollectionOptions {
     export type Meta = {
       [$schema]:
-        | DataSchemaOptionsWithType<unknown>
-        | DataSchemaOptionsWithType<unknown>[]
+        | DataSchemaOptionsWithType<object>
+        | DataSchemaOptionsWithType<object>[]
       [$adapter]: Adapter<any, any, any, any> | null
       [$docLabel]: string
       // [$collectionGroup]?: boolean

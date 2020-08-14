@@ -1,20 +1,14 @@
 import { createFunctionsSchema, functionInterface } from '../..'
 import { Type } from '../../lib/type'
-import { IUser, UserSchema } from './firestore-schema'
+import { IUser, UserSchemaJson } from './firestore-schema'
 
 const callable = {
   createUser: functionInterface.callable<
     Type.Merge<IUser, { timestamp: string }>,
     { result: number }
-  >(
-    {
-      ...UserSchema,
-      timestamp: 'string',
-    },
-    {
-      result: 'int',
-    },
-  ),
+  >([UserSchemaJson, UserSchemaJson], {
+    result: 'int',
+  }),
 }
 
 const http = {

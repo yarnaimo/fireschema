@@ -36,13 +36,18 @@ export type IPostB = {
 const VersionSchema = documentSchema<IVersion>({})
 const VersionAdapter = collectionAdapter<IVersion>()({})
 
-export const UserSchema = documentSchema<IUser>({
+const UserSchemaBase = {
   name: 'string',
   displayName: ['string', 'null'],
   age: 'int',
   tags: { [$array]: { id: 'int', name: 'string' } },
   timestamp: 'timestamp',
   options: { a: 'bool', b: 'string' },
+} as const
+export const UserSchema = documentSchema<IUser>(UserSchemaBase)
+export const UserSchemaJson = documentSchema<IUser & { timestamp: string }>({
+  ...UserSchemaBase,
+  timestamp: 'string',
 })
 const _expectError = documentSchema<IUser>({
   // @ts-expect-error

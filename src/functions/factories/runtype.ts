@@ -3,13 +3,14 @@ import { $array, hasArraySymbol, STypes } from '../../firestore'
 import { R } from '../../lib/fp'
 import { is } from '../../lib/type'
 import { $ } from '../../runtypes'
+import { arrayfy } from '../../utils/_array'
 
 export const schemaToRuntype = (
   types: STypes.DataSchemaValueType<any>,
 ): $.Runtype<unknown> => {
   return P(
     types,
-    (type) => (is.array(type) ? type : [type]),
+    arrayfy,
     R.map((type) => {
       if (hasArraySymbol(type)) {
         return $.Array(schemaToRuntype(type[$array]))
