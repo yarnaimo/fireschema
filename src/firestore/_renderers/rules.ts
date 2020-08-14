@@ -30,7 +30,7 @@ const renderObjectValidator = (
 
           const rule = P(
             types,
-            R.map((type) => {
+            R.flatMap((type) => {
               if (hasArraySymbol(type)) {
                 return renderObjectValidator(
                   { [arrayKey]: type[$array] } as any,
@@ -40,8 +40,10 @@ const renderObjectValidator = (
               if (is.object(type)) {
                 return renderObjectValidator(type, keyWithPrefix)
               }
-              const op = type === 'null' ? '==' : 'is'
-              return `${keyWithPrefix} ${op} ${type}`
+              if (type === 'null') {
+                return [`${keyWithPrefix} == ${type}`, `!(${key} in ${prefix})`]
+              }
+              return `${keyWithPrefix} is ${type}`
             }),
             $or,
           )
