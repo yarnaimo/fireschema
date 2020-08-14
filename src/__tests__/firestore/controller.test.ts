@@ -2,6 +2,7 @@ import { assertFails, assertSucceeds } from '@firebase/testing'
 import { expectType } from 'tsd'
 import { STypes } from '../..'
 import { fadmin } from '../../types/_firestore'
+import { userData } from '../_fixtures/data'
 import { IUser } from '../_fixtures/firestore-schema'
 import { collections } from '../_infrastructure/firestore'
 import { $web, $webUnauthed } from '../_infrastructure/firestore-controller'
@@ -49,18 +50,6 @@ describe('refs', () => {
     expectEqualRef(user, r.user)
   })
 })
-
-const userData = {
-  name: 'umi',
-  displayName: null,
-  age: 16,
-  timestamp: $web.FieldValue.serverTimestamp(),
-  tags: [
-    { id: 0, name: 'tag0' },
-    { id: 1, name: 'tag1' },
-  ],
-  options: { a: true, b: 'value' },
-}
 
 const usersRaw = $web.app.collection('versions').doc('v1').collection('users')
 

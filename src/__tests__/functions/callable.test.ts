@@ -1,25 +1,13 @@
-import dayjs from 'dayjs'
 import { expectType } from 'tsd'
 import { messages } from '../../functions'
+import { userDataJson } from '../_fixtures/data'
 import { $call } from '../_infrastructure/functions-client'
 
-const userData = {
-  name: 'umi',
-  displayName: null,
-  age: 16,
-  timestamp: dayjs().toISOString(),
-  tags: [
-    { id: 0, name: 'tag0' },
-    { id: 1, name: 'tag1' },
-  ],
-  options: { a: true, b: 'value' },
-}
-
 test('call', async () => {
-  const result = await $call(['createUser'], userData)
+  const result = await $call(['createUser'], userDataJson)
 
   expect(result.isOk).toBeTruthy()
-  expect(result.valueOrError).toEqual({ result: userData.age ** 2 })
+  expect(result.valueOrError).toEqual({ result: userDataJson.age ** 2 })
   if (result.isOk) {
     expectType<{ result: number }>(result.valueOrError)
   }
@@ -27,7 +15,7 @@ test('call', async () => {
 
 test('call - invalid-argument', async () => {
   const result = await $call(['createUser'], {
-    ...userData,
+    ...userDataJson,
     // @ts-expect-error
     age: '16',
   })
@@ -41,7 +29,7 @@ test('call - invalid-argument', async () => {
 
 test('call - out-of-range', async () => {
   const result = await $call(['createUser'], {
-    ...userData,
+    ...userDataJson,
     age: -1,
   })
 
@@ -54,7 +42,7 @@ test('call - out-of-range', async () => {
 
 test('call - internal', async () => {
   const result = await $call(['createUser'], {
-    ...userData,
+    ...userDataJson,
     age: 100,
   })
 

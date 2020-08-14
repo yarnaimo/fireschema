@@ -9,6 +9,7 @@ import { FunTypes } from '..'
 import { GetDeep, Loc } from '../../types/_object'
 import { getDeep } from '../../utils/_object'
 import { $input, messages } from '../constants'
+import { schemaToRuntype } from './runtype'
 
 export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
   { https, logger }: typeof import('firebase-functions'),
@@ -31,15 +32,16 @@ export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
   ) => {
     const options = (getDeep(schemaOptions.callable, loc) as any) as C
     const inputSchema = options[$input] as C[typeof $input]
+    const inputRecord = schemaToRuntype(inputSchema as never)
 
     const wrapped = async (data: unknown, context: https.CallableContext) => {
-      const validated = inputSchema.validate(data)
+      const validated = inputRecord.validate(data)
 
       if (!validated.success) {
         throw new https.HttpsError('invalid-argument', messages.invalidRequest)
       }
 
-      const output = await handler(validated.value, context)
+      const output = await handler(validated.value as any, context)
       return output
     }
 

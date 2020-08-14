@@ -3,11 +3,9 @@ import { R } from '../../lib/fp'
 import { is } from '../../lib/type'
 import { $and, $or } from '../../utils/operators'
 import { join, _ } from '../../utils/_string'
-import { $array, hasArraySymbol } from '../constants'
+import { $array, arrayKey, hasArraySymbol } from '../constants'
 import { allowOptions, STypes } from '../STypes'
 import { renderFunctions } from './functions'
-
-const arrayKey = '__fireschema_array_key__'
 
 const renderObjectValidator = (
   object: STypes.DataSchemaOptions<any>,

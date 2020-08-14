@@ -5,6 +5,7 @@ import type {
   Request,
   Response,
 } from 'firebase-functions'
+import { STypes } from '../firestore'
 import { $ } from '../runtypes'
 import { $input, $output } from './constants'
 
@@ -22,24 +23,20 @@ export declare namespace FunTypes {
     [K in string]: IO<any, any> | NestedOptions
   }
 
-  export type IO<
-    I extends FunTypes.RecordBase,
-    O extends FunTypes.RecordBase
-  > = {
-    [$input]: I
-    [$output]: O
+  export type IO<I, O> = {
+    [$input]: STypes.DataSchemaOptions<I>
+    [$output]: STypes.DataSchemaOptions<O>
   }
 
-  export type EnsureIO<_C> = _C extends IO<
-    FunTypes.RecordBase,
-    FunTypes.RecordBase
-  >
-    ? _C
+  export type EnsureIO<_C> = _C extends IO<any, any> ? _C : never
+
+  export type InputType<C extends IO<any, any>> = C extends IO<infer I, any>
+    ? I
     : never
 
-  export type InputType<C extends IO<any, any>> = $.Static<C[typeof $input]>
-
-  export type OutputType<C extends IO<any, any>> = $.Static<C[typeof $output]>
+  export type OutputType<C extends IO<any, any>> = C extends IO<any, infer O>
+    ? O
+    : never
 
   export namespace Callable {
     export type Handler<C extends IO<any, any>> = (

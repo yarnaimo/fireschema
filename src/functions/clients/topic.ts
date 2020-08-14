@@ -19,7 +19,7 @@ export const initTopicClient = <S extends FunTypes.SchemaOptions>(
 
     const messageId = await pubSubClient
       .topic(name)
-      .publishJSON(data, attributes)
+      .publishJSON(data as object, attributes)
 
     return messageId
   }

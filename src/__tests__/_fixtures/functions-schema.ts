@@ -1,25 +1,19 @@
-import { $, createFunctionsSchema, functionInterface } from '../..'
+import { createFunctionsSchema, functionInterface } from '../..'
+import { Type } from '../../lib/type'
+import { IUser, UserSchema } from './firestore-schema'
 
 const callable = {
-  createUser: functionInterface.callable(
-    $.Record({
-      name: $.String,
-      displayName: $.Union($.String, $.Null),
-      age: $.Number,
-      tags: $.Array($.Record({ id: $.Number, name: $.String })),
-      options: $.Record({
-        a: $.Boolean,
-        b: $.String,
-      }),
-    }).And(
-      $.Record({
-        timestamp: $.String,
-      }),
-    ),
-
-    $.Record({
-      result: $.Number,
-    }),
+  createUser: functionInterface.callable<
+    Type.Merge<IUser, { timestamp: string }>,
+    { result: number }
+  >(
+    {
+      ...UserSchema,
+      timestamp: 'string',
+    },
+    {
+      result: 'int',
+    },
   ),
 }
 
@@ -28,11 +22,9 @@ const http = {
 }
 
 const topic = {
-  publishMessage: functionInterface.topic(
-    $.Record({
-      text: $.String,
-    }),
-  ),
+  publishMessage: functionInterface.topic<{ text: string }>({
+    text: 'string',
+  }),
 }
 
 const schedule = {

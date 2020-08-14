@@ -1,30 +1,28 @@
-import { $ } from '../../runtypes'
+import { STypes } from '../../firestore'
 import { $input, $output } from '../constants'
 import { FunTypes } from '../FunTypes'
 
-const callable = <I extends FunTypes.RecordBase, O extends FunTypes.RecordBase>(
-  input: I,
-  output: O,
+const callable = <I, O>(
+  input: STypes.DataSchemaOptions<I>,
+  output: STypes.DataSchemaOptions<O>,
 ): FunTypes.IO<I, O> => ({
   [$input]: input,
   [$output]: output,
 })
 
-const http = (): FunTypes.IO<FunTypes.RecordBase, FunTypes.RecordBase> => ({
-  [$input]: $.Record({}),
-  [$output]: $.Record({}),
+const http = (): FunTypes.IO<{}, {}> => ({
+  [$input]: {},
+  [$output]: {},
 })
 
-const topic = <I extends FunTypes.RecordBase>(
-  input: I,
-): FunTypes.IO<I, FunTypes.RecordBase> => ({
+const topic = <I>(input: STypes.DataSchemaOptions<I>): FunTypes.IO<I, {}> => ({
   [$input]: input,
-  [$output]: $.Record({}),
+  [$output]: {},
 })
 
-const schedule = (): FunTypes.IO<FunTypes.RecordBase, FunTypes.RecordBase> => ({
-  [$input]: $.Record({}),
-  [$output]: $.Record({}),
+const schedule = (): FunTypes.IO<{}, {}> => ({
+  [$input]: {},
+  [$output]: {},
 })
 
 export const functionInterface = { callable, http, topic, schedule }

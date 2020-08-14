@@ -36,37 +36,59 @@ export declare namespace STypes {
   //   | 'list'
   //   | 'map';
 
-  export type DataSchemaOptionsWithType<T> = { __T__: T } & DataSchemaOptions<T>
+  type Is<T, U, Nullable extends 1 | 0 = 0> = Nullable extends 0
+    ? T extends null
+      ? 0
+      : T extends U
+      ? 1
+      : 0
+    : T extends U | null
+    ? 1
+    : 0
+
+  type EnsureArray<T> = T extends unknown[] ? T : never
+
+  type ValueType<T, U> = T extends U | null
+    ? [T, 'null']
+    : T extends U
+    ? T
+    : never
+
+  type N<T> = [T, 'null']
+
+  export type DataSchemaValueType<T> = Is<T, null> extends 1
+    ? 'null'
+    : Is<T, string> extends 1
+    ? 'string'
+    : Is<T, string, 1> extends 1
+    ? N<'string'>
+    : Is<T, number> extends 1
+    ? 'int' | 'float'
+    : Is<T, number, 1> extends 1
+    ? N<'int' | 'float'>
+    : Is<T, boolean> extends 1
+    ? 'bool'
+    : Is<T, boolean, 1> extends 1
+    ? N<'bool'>
+    : Is<T, FTypes.Timestamp> extends 1
+    ? 'timestamp'
+    : Is<T, FTypes.Timestamp, 1> extends 1
+    ? N<'timestamp'>
+    : Is<T, unknown[]> extends 1
+    ? { [$array]: DataSchemaValueType<EnsureArray<T>[number]> } | 'list'
+    : Is<T, unknown[], 1> extends 1
+    ? N<{ [$array]: DataSchemaValueType<EnsureArray<T>[number]> }> | N<'list'>
+    : Is<T, object> extends 1
+    ? DataSchemaOptions<T> | 'map'
+    : Is<T, object, 1> extends 1
+    ? N<DataSchemaOptions<T>> | N<'map'>
+    : never
 
   export type DataSchemaOptions<T> = {
-    [K in keyof T]: T[K] extends null
-      ? 'null'
-      : T[K] extends string
-      ? 'string'
-      : T[K] extends string | null
-      ? ['string', 'null']
-      : T[K] extends number
-      ? 'int' | 'float'
-      : T[K] extends number | null
-      ? ['int', 'null'] | ['float', 'null']
-      : T[K] extends boolean
-      ? 'bool'
-      : T[K] extends boolean | null
-      ? ['bool', 'null']
-      : T[K] extends FTypes.Timestamp
-      ? 'timestamp'
-      : T[K] extends FTypes.Timestamp | null
-      ? ['timestamp', 'null']
-      : T[K] extends (infer U)[]
-      ? { [$array]: DataSchemaOptions<{ _: U }>['_'] }
-      : T[K] extends (infer U)[] | null
-      ? [{ [$array]: DataSchemaOptions<{ _: U }>['_'] }, 'null']
-      : T[K] extends object
-      ? DataSchemaOptions<T[K]> | 'map'
-      : T[K] extends object | null
-      ? [DataSchemaOptions<T[K]>, 'null'] | ['map', 'null']
-      : never
+    [K in keyof T]: DataSchemaValueType<T[K]>
   }
+
+  export type DataSchemaOptionsWithType<T> = { __T__: T } & DataSchemaOptions<T>
 
   export type FunctionsOptions = {
     [key: string]: string

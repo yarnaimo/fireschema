@@ -36,7 +36,7 @@ export type IPostB = {
 const VersionSchema = documentSchema<IVersion>({})
 const VersionAdapter = collectionAdapter<IVersion>()({})
 
-const UserSchema = documentSchema<IUser>({
+export const UserSchema = documentSchema<IUser>({
   name: 'string',
   displayName: ['string', 'null'],
   age: 'int',
@@ -44,17 +44,29 @@ const UserSchema = documentSchema<IUser>({
   timestamp: 'timestamp',
   options: { a: 'bool', b: 'string' },
 })
+const _expectError = documentSchema<IUser>({
+  // @ts-expect-error
+  name: ['string', 'null'],
+  // @ts-expect-error
+  displayName: 'string',
+  age: 'int',
+  // @ts-expect-error
+  tags: { [$array]: { id: 'string', name: 'string' } },
+  timestamp: 'timestamp',
+  // @ts-expect-error
+  options: [{ a: 'bool', b: 'string' }, 'null'],
+})
 const UserAdapter = collectionAdapter<IUser>()({
   selectors: (q) => ({
     teen: () => q.where('age', '>=', 10).where('age', '<', 20),
   }),
 })
 
-const PostASchema = documentSchema<IPostA>({
+export const PostASchema = documentSchema<IPostA>({
   type: 'string',
   text: 'string',
 })
-const PostBSchema = documentSchema<IPostB>({
+export const PostBSchema = documentSchema<IPostB>({
   type: 'string',
   texts: { [$array]: 'string' },
 })
