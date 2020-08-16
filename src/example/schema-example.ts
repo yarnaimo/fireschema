@@ -1,15 +1,14 @@
 import {
   $adapter,
   $allow,
-  $array,
   $collectionGroups,
   $docLabel,
+  $documentSchema,
   $functions,
   $or,
   $schema,
   collectionAdapter,
   createFirestoreSchema,
-  documentSchema,
   FTypes,
 } from '..'
 
@@ -21,13 +20,7 @@ type User = {
   timestamp: FTypes.Timestamp
   options: { a: boolean }
 }
-const UserSchema = documentSchema<User>({
-  name: 'string',
-  displayName: ['string', 'null'],
-  age: 'int',
-  timestamp: 'timestamp',
-  options: { a: 'bool' },
-})
+const UserSchema = $documentSchema<User>()
 const UserAdapter = collectionAdapter<User>()({})
 
 // post
@@ -41,16 +34,7 @@ type PostB = {
   tags: { id: number; name: string }[]
   texts: string[]
 }
-const PostASchema = documentSchema<PostA>({
-  type: 'string',
-  tags: { [$array]: { id: 'int', name: 'string' } },
-  text: 'string',
-})
-const PostBSchema = documentSchema<PostB>({
-  type: 'string',
-  tags: { [$array]: { id: 'int', name: 'string' } },
-  texts: { [$array]: 'string' },
-})
+const PostSchema = $documentSchema<PostA | PostB>()
 const PostAdapter = collectionAdapter<PostA | PostB>()({
   selectors: (q) => ({
     byTag: (tag: string) => q.where('tags', 'array-contains', tag),
@@ -95,7 +79,7 @@ export const schema = createFirestoreSchema({
     // /users/{uid}/posts/{postId}
     posts: {
       [$docLabel]: 'postId',
-      [$schema]: [PostASchema, PostBSchema], // PostASchema or PostBSchema
+      [$schema]: PostSchema,
       [$adapter]: PostAdapter,
       [$allow]: {
         read: true,
