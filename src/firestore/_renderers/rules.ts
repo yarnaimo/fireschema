@@ -1,73 +1,31 @@
 import { EntriesStrict, P } from 'lifts'
 import { R } from '../../lib/fp'
-import { is } from '../../lib/type'
-import { $and, $or } from '../../utils/operators'
-import { arrayfy } from '../../utils/_array'
+import { $and } from '../../utils/operators'
 import { join, _ } from '../../utils/_string'
-import { $array, arrayKey, hasArraySymbol } from '../constants'
 import { allowOptions, STypes } from '../STypes'
 import { renderFunctions } from './functions'
-
-const renderObjectValidator = (
-  options: STypes.DataSchemaOptions<object>,
-  prefix: string,
-): string => {
-  return P(
-    arrayfy(options),
-    R.map((object) => {
-      return P(
-        object,
-        EntriesStrict,
-        R.map(([key, type]) => [key, arrayfy(type)] as const),
-
-        R.map(([key, types]) => {
-          const isArray = key === arrayKey
-          const keyWithPrefix = isArray
-            ? `${prefix}[0]`
-            : is.string(key)
-            ? `${prefix}.${key}`
-            : ''
-
-          const rule = P(
-            types,
-            R.flatMap((type) => {
-              if (hasArraySymbol(type)) {
-                return renderObjectValidator(
-                  { [arrayKey]: type[$array] } as any,
-                  `${keyWithPrefix}`,
-                )
-              }
-              if (is.object(type)) {
-                return renderObjectValidator(type, keyWithPrefix)
-              }
-              if (type === 'null') {
-                return [`${keyWithPrefix} == ${type}`, `!(${key} in ${prefix})`]
-              }
-              return `${keyWithPrefix} is ${type}`
-            }),
-            $or,
-          )
-          return isArray ? $or([`${prefix}.size() == 0`, rule]) : rule
-        }),
-        $and,
-      )
-    }),
-    $or,
-  )
-}
 
 let index = 0
 
 export const renderRules = (
   $allow: STypes.AllowOptions,
-  $schema: STypes.DataSchemaOptions<object>, // | STypes.DataSchemaOptions<any>[],
+  schema: STypes.DocumentSchema<any>,
   pIndent: number,
 ) => {
   const indent = pIndent + 2
 
   const validator = (arg: string) => `__validator_${index}__(${arg})`
 
-  const validatorBody = renderObjectValidator($schema, 'data')
+  const validatorBody = schema
+    .split('\n')
+    .map((line, i, arr) => {
+      return i === 0
+        ? line
+        : i === arr.length - 1 || line === ') || (' || line === ') && ('
+        ? `${_(indent + 2)}${line}`
+        : `${_(indent + 4)}${line}`
+    })
+    .join('\n')
 
   const functions = renderFunctions(
     {

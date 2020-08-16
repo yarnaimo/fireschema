@@ -7,14 +7,17 @@
   "main": "dist/index.js",
   "bin": "src/bin/cli.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "ttsc",
     "debug": "node --inspect -r ts-node/register",
     "dev": "yarn ts-node src/index.ts",
     "prepare": "rm -rf dist && yarn build && ./append-emulator-proxyer.sh",
     "serve": "yarn build && firebase emulators:start --only firestore,functions,pubsub",
     "start": "NODE_ENV=production node dist/index.js",
-    "test": "NODE_ENV=test jest",
-    "ts-node": "ts-node"
+    "test": "NODE_ENV=test jest --no-cache",
+    "ts-node": "ts-node --compiler ttypescript"
+  },
+  "resolutions": {
+    "ts-morph/**/typescript": "^4.0.0-beta"
   },
   "dependencies": {
     "@sindresorhus/is": "^3.0.0",
@@ -23,6 +26,7 @@
     "react-firebase-hooks": "^2.2.0",
     "remeda": "^0.0.20",
     "runtypes": "^5.0.1",
+    "ts-morph": "^7.3.0",
     "type-fest": "^0.16.0"
   },
   "devDependencies": {
@@ -44,6 +48,7 @@
     "react": "^16.13.1",
     "react-test-renderer": "^16.13.1",
     "ts-jest": "^26.1.4",
+    "ttypescript": "^1.5.10",
     "typescript": "^4.0.0-beta"
   },
   "peerDependencies": {

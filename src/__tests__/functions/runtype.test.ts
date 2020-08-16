@@ -1,28 +1,42 @@
-import { schemaToRuntype } from '../../functions/factories'
+import { $jsonSchema } from '../../functions/factories'
+import { Type } from '../../lib/type'
 import { $ } from '../../runtypes'
 import { userDataJson } from '../_fixtures/data'
-import { UserSchemaJson } from '../_fixtures/firestore-schema'
+import { IPostA, IPostB, IUser } from '../_fixtures/firestore-schema'
 
-const UserSchemaJsonA = { ...UserSchemaJson, a: 'string' }
-const UserSchemaJsonB = { ...UserSchemaJson, b: 'string' }
+type IUserJson = Type.Merge<
+  IUser,
+  {
+    timestamp: string
+  }
+>
 
-const UserRecordJsonBase = {
+const UserJsonRuntype = $.Record({
   name: $.String,
-  displayName: $.String.Or($.Null),
+  displayName: $.Null.Or($.String),
   age: $.Number,
   tags: $.Array($.Record({ id: $.Number, name: $.String })),
-  timestamp: $.String,
   options: $.Record({ a: $.Boolean, b: $.String }),
-}
+}).And(
+  $.Record({
+    timestamp: $.String,
+  }),
+)
 
-const UserRecordJson = $.Record(UserRecordJsonBase)
-const UserRecordJsonA = $.Record({ ...UserRecordJsonBase, a: $.String })
-const UserRecordJsonB = $.Record({ ...UserRecordJsonBase, b: $.String })
+const PostRuntype = $.Record({
+  type: $.Literal('a'),
+  text: $.String,
+}).Or(
+  $.Record({
+    type: $.Literal('b'),
+    texts: $.Array($.String),
+  }),
+)
 
-test('runtype', () => {
-  const result = schemaToRuntype(UserSchemaJson as never)
+test('normal', () => {
+  const result = $jsonSchema<IUserJson>()
 
-  expect(result.toString()).toBe(UserRecordJson.toString())
+  expect(result.toString()).toBe(UserJsonRuntype.toString())
   expect(result.guard(userDataJson)).toBeTruthy()
   expect(
     result.guard({
@@ -38,11 +52,21 @@ test('runtype', () => {
   ).toBeFalsy()
 })
 
-test('runtype array', () => {
-  const result = schemaToRuntype([UserSchemaJsonA, UserSchemaJsonB] as never)
+test('union', () => {
+  const result = $jsonSchema<IUserJson & ({ a: string } | { b: number })>()
 
-  expect(result.toString()).toBe(UserRecordJsonA.Or(UserRecordJsonB).toString())
+  const expectedA = UserJsonRuntype.And($.Record({ a: $.String }))
+  const expectedB = UserJsonRuntype.And($.Record({ b: $.Number }))
+
+  expect(result.toString()).toBe(expectedA.Or(expectedB).toString())
   expect(result.guard({ ...userDataJson, a: 'value' })).toBeTruthy()
-  expect(result.guard({ ...userDataJson, b: 'value' })).toBeTruthy()
+  expect(result.guard({ ...userDataJson, b: 0 })).toBeTruthy()
   expect(result.guard({ ...userDataJson, c: 'value' })).toBeFalsy()
+  expect(result.guard({ ...userDataJson })).toBeFalsy()
+})
+
+test('post', () => {
+  const result = $jsonSchema<IPostA | IPostB>()
+
+  expect(result.toString()).toBe(PostRuntype.toString())
 })

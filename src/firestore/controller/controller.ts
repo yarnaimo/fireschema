@@ -16,11 +16,7 @@ type GetDocT<
 type GetSchemaT<
   C extends STypes.CollectionOptions.Meta,
   CS = C[typeof $schema]
-> = CS extends STypes.DataSchemaOptionsWithType<object>
-  ? CS['__T__']
-  : CS extends STypes.DataSchemaOptionsWithType<object>[]
-  ? CS[number]['__T__']
-  : never
+> = CS extends STypes.DocumentSchema<any> ? CS['__T__'] : never
 
 const getAdapted = <
   F extends FTypes.FirestoreApp,
