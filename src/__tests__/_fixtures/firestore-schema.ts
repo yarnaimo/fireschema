@@ -1,13 +1,13 @@
 import {
   $adapter,
   $allow,
+  $collectionAdapter,
   $collectionGroups,
   $docLabel,
   $documentSchema,
   $functions,
   $or,
   $schema,
-  collectionAdapter,
   createFirestoreSchema,
 } from '../..'
 import { Type } from '../../lib/type'
@@ -35,10 +35,10 @@ export type IPostB = {
 }
 
 const VersionSchema = $documentSchema<IVersion>()
-const VersionAdapter = collectionAdapter<IVersion>()({})
+const VersionAdapter = $collectionAdapter<IVersion>()({})
 
 export const UserSchema = $documentSchema<IUser>()
-const UserAdapter = collectionAdapter<IUser>()({
+const UserAdapter = $collectionAdapter<IUser>()({
   selectors: (q) => ({
     teen: () => q.where('age', '>=', 10).where('age', '<', 20),
   }),
@@ -46,7 +46,7 @@ const UserAdapter = collectionAdapter<IUser>()({
 
 export const PostSchema = $documentSchema<IPostA | IPostB>()
 export const PostASchema = $documentSchema<IPostA>()
-const PostAdapter = collectionAdapter<IPostA | IPostB>()({})
+const PostAdapter = $collectionAdapter<IPostA | IPostB>()({})
 
 const getCurrentAuthUser = () => `getCurrentAuthUser()`
 const isAdmin = () => `isAdmin()`

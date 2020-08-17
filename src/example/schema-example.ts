@@ -1,13 +1,13 @@
 import {
   $adapter,
   $allow,
+  $collectionAdapter,
   $collectionGroups,
   $docLabel,
   $documentSchema,
   $functions,
   $or,
   $schema,
-  collectionAdapter,
   createFirestoreSchema,
   FTypes,
 } from '..'
@@ -21,7 +21,7 @@ type User = {
   options: { a: boolean }
 }
 const UserSchema = $documentSchema<User>()
-const UserAdapter = collectionAdapter<User>()({})
+const UserAdapter = $collectionAdapter<User>()({})
 
 // post
 type PostA = {
@@ -35,7 +35,7 @@ type PostB = {
   texts: string[]
 }
 const PostSchema = $documentSchema<PostA | PostB>()
-const PostAdapter = collectionAdapter<PostA | PostB>()({
+const PostAdapter = $collectionAdapter<PostA | PostB>()({
   selectors: (q) => ({
     byTag: (tag: string) => q.where('tags', 'array-contains', tag),
   }),
