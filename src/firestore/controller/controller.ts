@@ -3,7 +3,7 @@ import { fadmin, fweb } from '../../types/_firestore'
 import { GetDeep, Loc } from '../../types/_object'
 import { getDeep } from '../../utils/_object'
 import { $adapter, $schema, _createdAt, _updatedAt } from '../constants'
-import { collectionAdapter } from '../factories'
+import { $collectionAdapter } from '../factories'
 import { STypes } from '../STypes'
 
 const getLoc = (parentOrRoot: FTypes.DocumentRef<unknown>) =>
@@ -16,11 +16,7 @@ type GetDocT<
 type GetSchemaT<
   C extends STypes.CollectionOptions.Meta,
   CS = C[typeof $schema]
-> = CS extends STypes.DataSchemaOptionsWithType<object>
-  ? CS['__T__']
-  : CS extends STypes.DataSchemaOptionsWithType<object>[]
-  ? CS[number]['__T__']
-  : never
+> = CS extends STypes.DocumentSchema<any> ? CS['__T__'] : never
 
 const getAdapted = <
   F extends FTypes.FirestoreApp,
@@ -32,7 +28,7 @@ const getAdapted = <
 ) => {
   const adapted =
     collectionOptions[$adapter]?.(collectionRef) ??
-    collectionAdapter()({})(collectionRef)
+    $collectionAdapter()({})(collectionRef)
 
   const select = adapted.select as STypes.Selectors<L, GetSL<C>, F>
 

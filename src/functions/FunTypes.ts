@@ -5,11 +5,20 @@ import type {
   Request,
   Response,
 } from 'firebase-functions'
-import { STypes } from '../firestore'
 import { $ } from '../runtypes'
 import { $input, $output } from './constants'
 
 export declare namespace FunTypes {
+  // export type Jsonfy<T> = {
+  //   [K in keyof T]: T[K] extends FTypes.Timestamp
+  //     ? string
+  //     : T[K] extends Type.Primitive
+  //     ? T[K]
+  //     : Jsonfy<T[K]>
+  // }
+
+  export type JsonSchema<T> = $.Runtype<unknown> & { __T__: T }
+
   export type RecordBase = $.Runtype<{}>
 
   export type SchemaOptions = {
@@ -24,8 +33,8 @@ export declare namespace FunTypes {
   }
 
   export type IO<I, O> = {
-    [$input]: STypes.DataSchemaOptions<I>
-    [$output]: STypes.DataSchemaOptions<O>
+    [$input]: FunTypes.JsonSchema<I>
+    [$output]: FunTypes.JsonSchema<O>
   }
 
   export type EnsureIO<_C> = _C extends IO<any, any> ? _C : never

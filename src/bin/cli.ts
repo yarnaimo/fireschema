@@ -1,24 +1,38 @@
-#! ./node_modules/.bin/ts-node
+#!/usr/bin/env node
 
 import { writeFileSync } from 'fs'
-import { resolve } from 'path'
-import { renderSchema } from '../firestore/_renderers/root'
+import { relative, resolve } from 'path'
+import { register } from 'ts-node'
+
+register({
+  project: process.env.TS_NODE_PROJECT,
+  compiler: 'ttypescript',
+})
 
 const rulesPath = 'firestore.rules'
+const relativePath = relative(process.cwd(), __dirname)
+const isInsideNodeModules = relativePath.startsWith('node_modules/')
 
-const main = async () => {
+const main = () => {
   const [, , path] = process.argv
+
   if (!path) {
     console.error('Schema path must be specified')
-    return
+    process.exit(1)
   }
 
-  const absolutePath = resolve(path)
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const schemaModule = require(absolutePath)
-  const rendered = renderSchema(schemaModule.schema)
+  const schemaPath = resolve(path)
+  const schemaModule = require(schemaPath) // eslint-disable-line
+
+  const rendererPath = isInsideNodeModules
+    ? '../../dist/firestore/_renderers/root'
+    : '../../src/firestore/_renderers/root'
+  const rendererModule = require(rendererPath) // eslint-disable-line
+
+  const rendered = rendererModule.renderSchema(schemaModule.firestoreSchema)
 
   writeFileSync(rulesPath, rendered)
+  console.log('🎉 Generated firestore.rules')
 }
 
 main()

@@ -1,14 +1,13 @@
 import { createFunctionsSchema, functionInterface } from '../..'
+import { $jsonSchema } from '../../functions'
 import { Type } from '../../lib/type'
-import { IUser, UserSchemaJson } from './firestore-schema'
+import { IUser } from './firestore-schema'
 
 const callable = {
-  createUser: functionInterface.callable<
-    Type.Merge<IUser, { timestamp: string }>,
-    { result: number }
-  >([{ ...UserSchemaJson, name: ['string', 'string'] }], {
-    result: 'int',
-  }),
+  createUser: functionInterface.callable(
+    $jsonSchema<Type.Merge<IUser, { timestamp: string }>>(),
+    $jsonSchema<{ result: number }>(),
+  ),
 }
 
 const http = {
@@ -16,9 +15,7 @@ const http = {
 }
 
 const topic = {
-  publishMessage: functionInterface.topic<{ text: string }>({
-    text: 'string',
-  }),
+  publishMessage: functionInterface.topic($jsonSchema<{ text: string }>()),
 }
 
 const schedule = {

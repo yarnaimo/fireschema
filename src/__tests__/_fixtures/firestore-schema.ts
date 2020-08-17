@@ -1,16 +1,16 @@
 import {
   $adapter,
   $allow,
-  $array,
+  $collectionAdapter,
   $collectionGroups,
   $docLabel,
+  $documentSchema,
   $functions,
   $or,
   $schema,
-  collectionAdapter,
   createFirestoreSchema,
-  documentSchema,
 } from '../..'
+import { Type } from '../../lib/type'
 import { FTypes } from '../../types'
 
 export type IVersion = {}
@@ -23,6 +23,7 @@ export type IUser = {
   timestamp: FTypes.Timestamp
   options: { a: boolean; b: string }
 }
+export type IUserJson = Type.Merge<IUser, { timestamp: string }>
 
 export type IPostA = {
   type: 'a'
@@ -33,49 +34,19 @@ export type IPostB = {
   texts: string[]
 }
 
-const VersionSchema = documentSchema<IVersion>({})
-const VersionAdapter = collectionAdapter<IVersion>()({})
+const VersionSchema = $documentSchema<IVersion>()
+const VersionAdapter = $collectionAdapter<IVersion>()({})
 
-const UserSchemaBase = {
-  name: 'string',
-  displayName: ['string', 'null'],
-  age: 'int',
-  tags: { [$array]: { id: 'int', name: 'string' } },
-  timestamp: 'timestamp',
-  options: { a: 'bool', b: 'string' },
-} as const
-export const UserSchema = documentSchema<IUser>(UserSchemaBase)
-export const UserSchemaJson = documentSchema<IUser & { timestamp: string }>({
-  ...UserSchemaBase,
-  timestamp: 'string',
-})
-const _expectError = documentSchema<IUser>({
-  // @ts-expect-error
-  name: ['string', 'null'],
-  // @ts-expect-error
-  displayName: 'string',
-  age: 'int',
-  // @ts-expect-error
-  tags: { [$array]: { id: 'string', name: 'string' } },
-  timestamp: 'timestamp',
-  // @ts-expect-error
-  options: [{ a: 'bool', b: 'string' }, 'null'],
-})
-const UserAdapter = collectionAdapter<IUser>()({
+export const UserSchema = $documentSchema<IUser>()
+const UserAdapter = $collectionAdapter<IUser>()({
   selectors: (q) => ({
     teen: () => q.where('age', '>=', 10).where('age', '<', 20),
   }),
 })
 
-export const PostASchema = documentSchema<IPostA>({
-  type: 'string',
-  text: 'string',
-})
-export const PostBSchema = documentSchema<IPostB>({
-  type: 'string',
-  texts: { [$array]: 'string' },
-})
-const PostAdapter = collectionAdapter<IPostA | IPostB>()({})
+export const PostSchema = $documentSchema<IPostA | IPostB>()
+export const PostASchema = $documentSchema<IPostA>()
+const PostAdapter = $collectionAdapter<IPostA | IPostB>()({})
 
 const getCurrentAuthUser = () => `getCurrentAuthUser()`
 const isAdmin = () => `isAdmin()`
@@ -122,7 +93,7 @@ export const firestoreSchema = createFirestoreSchema({
 
       posts: {
         [$docLabel]: 'postId',
-        [$schema]: [PostASchema, PostBSchema],
+        [$schema]: PostSchema,
         [$adapter]: PostAdapter,
         [$allow]: {
           read: true,
