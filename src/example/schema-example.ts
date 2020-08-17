@@ -41,7 +41,7 @@ const PostAdapter = collectionAdapter<PostA | PostB>()({
   }),
 })
 
-export const schema = createFirestoreSchema({
+export const firestoreSchema = createFirestoreSchema({
   [$functions]: {
     // /admins/<uid> が存在するかどうか
     ['isAdmin()']: `

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { writeFileSync } from 'fs'
-import { resolve } from 'path'
+import { relative, resolve } from 'path'
 import { register } from 'ts-node'
 
 register({
@@ -10,6 +10,8 @@ register({
 })
 
 const rulesPath = 'firestore.rules'
+const relativePath = relative(process.cwd(), __dirname)
+const isInsideNodeModules = relativePath.startsWith('node_modules/')
 
 const main = () => {
   const [, , path] = process.argv
@@ -19,10 +21,15 @@ const main = () => {
     process.exit(1)
   }
 
-  const schemaModule = require(resolve(path)) // eslint-disable-line
-  const rendererModule = require('../../src/firestore/_renderers/root') // eslint-disable-line
+  const schemaPath = resolve(path)
+  const schemaModule = require(schemaPath) // eslint-disable-line
 
-  const rendered = rendererModule.renderSchema(schemaModule.schema)
+  const rendererPath = isInsideNodeModules
+    ? '../../dist/firestore/_renderers/root'
+    : '../../src/firestore/_renderers/root'
+  const rendererModule = require(rendererPath) // eslint-disable-line
+
+  const rendered = rendererModule.renderSchema(schemaModule.firestoreSchema)
 
   writeFileSync(rulesPath, rendered)
   console.log('🎉 Generated firestore.rules')
