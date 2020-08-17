@@ -7,9 +7,10 @@
   "main": "dist/index.js",
   "bin": "src/bin/cli.ts",
   "scripts": {
-    "build": "ttsc",
+    "build": "ttsc && chmod +x dist/bin/cli.js",
     "debug": "node --inspect -r ts-node/register",
     "dev": "yarn ts-node src/index.ts",
+    "fireschema:rules": "./dist/bin/cli.js src/example/schema-example.ts",
     "prepare": "rm -rf dist && yarn build && ./append-emulator-proxyer.sh",
     "serve": "yarn build && firebase emulators:start --only firestore,functions,pubsub",
     "start": "NODE_ENV=production node dist/index.js",

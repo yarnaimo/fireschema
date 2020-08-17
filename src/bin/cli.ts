@@ -1,24 +1,31 @@
-#! ./node_modules/.bin/ts-node
+#!/usr/bin/env node
 
-import { writeFileSync } from 'fs'
+import { execSync } from 'child_process'
+import { existsSync } from 'fs'
 import { resolve } from 'path'
-import { renderSchema } from '../firestore/_renderers/root'
 
-const rulesPath = 'firestore.rules'
+const devCliPath = resolve('src/cli/rules.ts')
+const installedCliPath = resolve('node_modules/fireschema/src/cli/rules.ts')
+const tsNode = './node_modules/.bin/ts-node --compiler ttypescript'
 
-const main = async () => {
+const main = () => {
   const [, , path] = process.argv
-  if (!path) {
-    console.error('Schema path must be specified')
-    return
+
+  const cliPath = existsSync(devCliPath)
+    ? devCliPath
+    : existsSync(installedCliPath)
+    ? installedCliPath
+    : null
+
+  if (!cliPath) {
+    console.error('Fireschema cli not found')
+    process.exit(1)
   }
 
-  const absolutePath = resolve(path)
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const schemaModule = require(absolutePath)
-  const rendered = renderSchema(schemaModule.schema)
-
-  writeFileSync(rulesPath, rendered)
+  execSync(`${tsNode} ${cliPath} ${path}`, {
+    stdio: 'inherit',
+    env: process.env,
+  })
 }
 
 main()
