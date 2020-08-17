@@ -9,8 +9,8 @@ Firestore のコレクション構造・スキーマ・アクセス制御など�
 ## Install
 
 ```sh
-yarn add fireschema@^4.0.0-beta
-yarn add -D ts-node
+yarn add fireschema
+yarn add -D typescript@^4.0.0-beta ts-node
 ```
 
 ## Setup
