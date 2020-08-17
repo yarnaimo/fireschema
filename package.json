@@ -5,7 +5,7 @@
   "license": "MIT",
   "author": "yamaimo <yarnaimo@gmail.com>",
   "main": "dist/index.js",
-  "bin": "src/bin/cli.ts",
+  "bin": "dist/bin/cli.js",
   "scripts": {
     "build": "ttsc && chmod +x dist/bin/cli.js",
     "debug": "node --inspect -r ts-node/register",

@@ -1,31 +1,31 @@
 #!/usr/bin/env node
 
-import { execSync } from 'child_process'
-import { existsSync } from 'fs'
+import { writeFileSync } from 'fs'
 import { resolve } from 'path'
+import { register } from 'ts-node'
 
-const devCliPath = resolve('src/cli/rules.ts')
-const installedCliPath = resolve('node_modules/fireschema/src/cli/rules.ts')
-const tsNode = './node_modules/.bin/ts-node --compiler ttypescript'
+register({
+  project: process.env.TS_NODE_PROJECT,
+  compiler: 'ttypescript',
+})
+
+const rulesPath = 'firestore.rules'
 
 const main = () => {
   const [, , path] = process.argv
 
-  const cliPath = existsSync(devCliPath)
-    ? devCliPath
-    : existsSync(installedCliPath)
-    ? installedCliPath
-    : null
-
-  if (!cliPath) {
-    console.error('Fireschema cli not found')
+  if (!path) {
+    console.error('Schema path must be specified')
     process.exit(1)
   }
 
-  execSync(`${tsNode} ${cliPath} ${path}`, {
-    stdio: 'inherit',
-    env: process.env,
-  })
+  const schemaModule = require(resolve(path)) // eslint-disable-line
+  const rendererModule = require('../../src/firestore/_renderers/root') // eslint-disable-line
+
+  const rendered = rendererModule.renderSchema(schemaModule.schema)
+
+  writeFileSync(rulesPath, rendered)
+  console.log('🎉 Generated firestore.rules')
 }
 
 main()
