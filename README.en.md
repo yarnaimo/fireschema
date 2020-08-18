@@ -1,8 +1,8 @@
 # Fireschema
 
-- [English (Translated by DeepL)](README.en.md)
+> Translated by [**DeepL**](https://www.deepl.com)
 
-Firestore のコレクション構造・スキーマ・アクセス制御などを定義したオブジェクトから自動で rules の生成やドキュメントの型付けなどを行うライブラリ
+A library that automatically generates rules and types documents from objects that define Firestore collection structures, schemas, and access controls.
 
 ## Requirements
 
@@ -19,13 +19,13 @@ yarn add -D typescript@^4.0.0-beta ts-node
 
 ### Custom Compiler / Transformer
 
-Fireschema では TypeScript の AST から型情報を取得する目的で **Custom Transformer** を使用するため、ビルド時は **ttypescript** という Custom Compiler を使う必要があります。
+Fireschema uses **Custom Transformer** to retrieve type information from TypeScript ASTs, so you will need to use a Custom Compiler **ttypescript** to build it.
 
-Custom Compiler / Transformer を使用するには、設定ファイルに以下の内容を追加してください。
+To use Custom Compiler / Transformer, you must add the following to your configuration file:
 
 **package.json**
 
-`ttsc` / `ts-node` は環境変数 `TS_NODE_PROJECT` を使うと任意の `tsconfig.json` が指定できます。
+`ttsc` / `ts-node` allows you to specify an arbitrary `tsconfig.json` with the environment variable `TS_NODE_PROJECT`.
 
 ```json
 {
@@ -65,7 +65,7 @@ module.exports = {
 
 ### Override Dependencies
 
-fireschema が依存する一部のパッケージは **TypeScript 3.9** に依存しているため、Selective dependency resolutions で**依存関係を上書き**する必要があります。(yarn のみ対応)
+Some packages on which fireschema depends depend on **TypeScript 3.9**, so you need to **override** the dependency with selective dependency resolutions. (Only yarn is supported.)
 
 ```json
 {
@@ -77,9 +77,9 @@ fireschema が依存する一部のパッケージは **TypeScript 3.9** に依�
 
 ## Usage
 
-**注意事項**
+**Note**
 
-- fireschema は変数名に応じてコードを変換するため、**fireschema からのインポート以外で以下の変数名を使用しないでください**。
+- **Do not use the following variable names except for importing from fireschema**, as fireschema translates the code according to the variable names.
   - **`$documentSchema`**
   - **`$collectionAdapter`**
   - **`__$__`**
@@ -87,13 +87,13 @@ fireschema が依存する一部のパッケージは **TypeScript 3.9** に依�
 **Case**
 
 - /users/{uid}
-  - ユーザー (`User`)
+  - Users (`User`)
 - /users/{uid}/posts/{postId}
-  - ユーザーの投稿 (`PostA` または `PostB`)
+  - Posts of User (`PostA` or `PostB`)
 
-### 1. コレクション構造・スキーマ定義
+### 1. Collection structure and schema definition
 
-スキーマ定義は **`firestoreSchema`** として named export してください。
+The schema definition should be named exported as **firestoreSchema`**.
 
 ```ts
 import {
@@ -141,12 +141,12 @@ const PostAdapter = $collectionAdapter<PostA | PostB>()({
 
 export const firestoreSchema = createFirestoreSchema({
   [$functions]: {
-    // /admins/<uid> が存在するかどうか
+    // Whether /admins/<uid> exists or not
     ['isAdmin()']: `
       return exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     `,
 
-    // アクセスしようとするユーザーの uid が {uid} と一致するかどうか
+    // Whether the uid of the user you are trying to access matches the {uid}.
     ['matchesUser(uid)']: `
       return request.auth.uid == uid;
     `,
@@ -165,13 +165,13 @@ export const firestoreSchema = createFirestoreSchema({
 
   // /users/{uid}
   users: {
-    [$docLabel]: 'uid', // {uid} の部分
+    [$docLabel]: 'uid', // The {uid} part
     [$schema]: UserSchema, // documentSchema
     [$adapter]: UserAdapter, // collectionAdapter
     [$allow]: {
-      // アクセス制御
-      read: true, // 誰でも可
-      write: $or(['matchesUser(uid)', 'isAdmin()']), // {uid} と一致するユーザー or 管理者のみ可
+      // Access control
+      read: true, // Anyone
+      write: $or(['matchesUser(uid)', 'isAdmin()']), // Only users matching the {uid} or administrators
     },
 
     // /users/{uid}/posts/{postId}
@@ -181,23 +181,23 @@ export const firestoreSchema = createFirestoreSchema({
       [$adapter]: PostAdapter,
       [$allow]: {
         read: true,
-        write: $or(['matchesUser(uid)']), // {uid} と一致するユーザーのみ可
+        write: $or(['matchesUser(uid)']), // Only users matching the {uid}
       },
     },
   },
 })
 ```
 
-### 2. firestore.rules 生成
+### 2. Generate firestore.rules
 
 ```sh
-yarn fireschema <スキーマのパス>.ts
+yarn fireschema <schema_path>.ts
 ```
 
-`ttsc` / `ts-node` と同じく、環境変数 `TS_NODE_PROJECT` で任意の `tsconfig.json` が指定できます。
+As with `ttsc` / `ts-node`, it allows you to specify an arbitrary `tsconfig.json` with the environment variable `TS_NODE_PROJECT`.
 
 <details>
-  <summary>生成される firestore.rules の例</summary>
+  <summary>Example of generated firestore.rules</summary>
 
 ```rules
 rules_version = '2';
@@ -253,13 +253,13 @@ service cloud.firestore {
 
 </details>
 
-### 3. コレクション・ドキュメントの操作
+### 3. Working with Collections and Documents
 
-#### コントローラの初期化
+#### Initialize Controller
 
 ```ts
-import firebase, { firestore, initializeApp } from 'firebase' // または firebase-admin
-import { firestoreSchema } from '<スキーマファイルのパス>'
+import firebase, { firestore, initializeApp } from 'firebase' // or firebase-admin
+import { firestoreSchema } from '<schema_path>'
 
 const app: firebase.app.App = initializeApp({
   // ...
@@ -272,7 +272,7 @@ const $store: FirestoreController<
 > = initFirestore(firestore, firestoreApp, firestoreSchema)
 ```
 
-#### コレクションの参照・データ取得
+#### Collections
 
 ```ts
 const users = $store.collection('root', 'users') // /users
@@ -287,20 +287,20 @@ const postsSnapshot = await posts.ref.get() // get collection
 const techPostsSnapshot = await posts.select.byTag('tech').get() // get query
 ```
 
-コレクションの親ドキュメントを参照
+Get the collection's parent document
 
 ```ts
 const user = $store.parentOfCollection(posts.ref) // DocumentReference<User>
 ```
 
-#### コレクショングループの参照・データ取得
+#### Collection groups
 
 ```ts
 const postsGroup = $store.collectionGroup(['users', 'posts'])
 const techPostsSnapshot = await postsGroup.select.byTag('tech').get()
 ```
 
-#### ドキュメントの作成・更新
+#### Creating and updating documents
 
 - `create(docRef: DocumentReference<T>, data: T)`
 - `setMerge(docRef: DocumentReference<T>, data: Partial<T>)`
@@ -316,7 +316,7 @@ await $store.create(user, {
 }
 ```
 
-**トランザクション処理**
+**Transactions**
 
 - `get(docRef: DocumentReference<T>) => Promise<DocumentSnapshot<T>>`
 - `create(docRef: DocumentReference<T>, data: T)`
