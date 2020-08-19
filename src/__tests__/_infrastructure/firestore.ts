@@ -21,13 +21,13 @@ export const collections = (
   store: FirestoreController<firestore.Firestore, typeof firestoreSchema>,
 ) => {
   const versions = store.collection('root', 'versions')
-  const v1 = versions.ref.doc('v1')
+  const v1 = versions.doc('v1')
 
   const users = store.collection(v1, 'users')
-  const user = users.ref.doc('user')
+  const user = users.doc('user')
 
   const posts = store.collection(user, 'posts')
-  const post = posts.ref.doc('post')
+  const post = posts.doc('post')
 
   const usersGroup = store.collectionGroup(['versions', 'users'])
 

@@ -86,6 +86,12 @@ type CollectionController<
       F
     >
     select: STypes.Selectors<GetL<P, N>, GetSL<EnsureOptions<PC[N]>>, F>
+    doc: (
+      id: string,
+    ) => FTypes.DocumentRef<
+      STypes.DocumentMeta<F> & SchemaTWithLoc<EnsureOptions<PC[N]>, GetL<P, N>>,
+      F
+    >
   }
   collectionGroup: <L extends Loc<S>, _C = GetDeep<S, L>>(
     loc: L,
@@ -152,7 +158,9 @@ const buildCollectionController = <
       collectionRef,
     )
 
-    return { ref: collectionRef, select }
+    const doc = (id: string) => collectionRef.doc(id)
+
+    return { ref: collectionRef, select, doc }
   }) as CollectionController<F, S>['collection']
 
   const collectionGroup: CollectionController<F, S>['collectionGroup'] = <
