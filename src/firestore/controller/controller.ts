@@ -87,7 +87,7 @@ type CollectionController<
     >
     select: STypes.Selectors<GetL<P, N>, GetSL<EnsureOptions<PC[N]>>, F>
     doc: (
-      id: string,
+      id?: string,
     ) => FTypes.DocumentRef<
       STypes.DocumentMeta<F> & SchemaTWithLoc<EnsureOptions<PC[N]>, GetL<P, N>>,
       F
@@ -158,7 +158,7 @@ const buildCollectionController = <
       collectionRef,
     )
 
-    const doc = (id: string) => collectionRef.doc(id)
+    const doc = (id?: string) => collectionRef.doc(...(id ? [id] : []))
 
     return { ref: collectionRef, select, doc }
   }) as CollectionController<F, S>['collection']
