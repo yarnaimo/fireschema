@@ -76,23 +76,33 @@ type CollectionController<
   collection: <
     P extends Parent,
     N extends keyof PC & string,
-    PC = GetDeep<S, GetPL<P>>
+    PC = GetDeep<S, GetPL<P>>,
+    _C = PC[N]
   >(
     parent: P,
     collectionName: N,
   ) => {
     ref: FTypes.CollectionRef<
-      STypes.DocumentMeta<F> & SchemaTWithLoc<EnsureOptions<PC[N]>, GetL<P, N>>,
+      STypes.DocumentMeta<F> & SchemaTWithLoc<EnsureOptions<_C>, GetL<P, N>>,
       F
     >
-    select: STypes.Selectors<GetL<P, N>, GetSL<EnsureOptions<PC[N]>>, F>
+    select: STypes.Selectors<GetL<P, N>, GetSL<EnsureOptions<_C>>, F>
     doc: (
       id?: string,
     ) => FTypes.DocumentRef<
-      STypes.DocumentMeta<F> & SchemaTWithLoc<EnsureOptions<PC[N]>, GetL<P, N>>,
+      STypes.DocumentMeta<F> & SchemaTWithLoc<EnsureOptions<_C>, GetL<P, N>>,
       F
     >
   }
+
+  documentByPath: <L extends Loc<S>, _C = GetDeep<S, L>>(
+    loc: L,
+    path: string,
+  ) => FTypes.DocumentRef<
+    STypes.DocumentMeta<F> & SchemaTWithLoc<EnsureOptions<_C>, L>,
+    F
+  >
+
   collectionGroup: <L extends Loc<S>, _C = GetDeep<S, L>>(
     loc: L,
   ) => {
@@ -163,6 +173,20 @@ const buildCollectionController = <
     return { ref: collectionRef, select, doc }
   }) as CollectionController<F, S>['collection']
 
+  const documentByPath = (<L extends Loc<S>, _C = GetDeep<S, L>>(
+    loc: L,
+    path: string,
+  ) => {
+    type C = EnsureOptions<_C>
+
+    const docRef = app.doc(path) as FTypes.DocumentRef<
+      STypes.DocumentMeta<F> & SchemaTWithLoc<C, L>,
+      F
+    >
+
+    return docRef
+  }) as CollectionController<F, S>['documentByPath']
+
   const collectionGroup: CollectionController<F, S>['collectionGroup'] = <
     L extends Loc<S>,
     _C = GetDeep<S, L>
@@ -183,7 +207,7 @@ const buildCollectionController = <
     return { query, select }
   }
 
-  return { collection, collectionGroup }
+  return { collection, documentByPath, collectionGroup }
 }
 
 const WithMeta = (FieldValue: FTypes.FieldValueClass) => {
@@ -350,10 +374,11 @@ export const initFirestore = <
     >
   }
 
-  const { collection, collectionGroup } = buildCollectionController(
-    app,
-    schemaOptions,
-  )
+  const {
+    collection,
+    documentByPath,
+    collectionGroup,
+  } = buildCollectionController(app, schemaOptions)
 
   const interactor = buildInteractor(FieldValue)
   const TransactionController = buildTransactionController<F>(FieldValue)
@@ -373,6 +398,7 @@ export const initFirestore = <
     Timestamp,
 
     collection,
+    documentByPath,
     collectionGroup,
 
     parentOfCollection: parentOfCollection as any,

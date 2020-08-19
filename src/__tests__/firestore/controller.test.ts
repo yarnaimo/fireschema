@@ -3,7 +3,7 @@ import { expectType } from 'tsd'
 import { STypes } from '../..'
 import { fadmin } from '../../types/_firestore'
 import { userData } from '../_fixtures/data'
-import { IUser } from '../_fixtures/firestore-schema'
+import { IPostA, IPostB, IUser } from '../_fixtures/firestore-schema'
 import { collections } from '../_infrastructure/firestore'
 import { $web, $webUnauthed } from '../_infrastructure/firestore-controller'
 import { expectEqualRef } from '../_utils/firestore'
@@ -17,6 +17,30 @@ describe('refs', () => {
       $web.app.collection('versions').doc('v1').collection('users').doc('user'),
       r.user,
     )
+  })
+
+  test('documentByPath', () => {
+    const path = 'versions/v1/users/user/posts/post'
+    const actualPostRef = $web.documentByPath(
+      ['versions', 'users', 'posts'],
+      path,
+    )
+
+    expectType<
+      firebase.firestore.DocumentReference<
+        (IPostA | IPostB) & { __loc__: ['versions', 'users', 'posts'] }
+      >
+    >(actualPostRef)
+
+    expectType<
+      firebase.firestore.DocumentReference<
+        IUser & { __loc__: ['versions', 'users', 'posts'] }
+      >
+      // @ts-expect-error
+    >(actualPostRef)
+
+    expect(actualPostRef.path).toBe(path)
+    expectEqualRef(actualPostRef, r.post)
   })
 
   test('query', () => {
