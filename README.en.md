@@ -12,7 +12,7 @@ A library that automatically generates rules and types documents from objects th
 
 ```sh
 yarn add fireschema
-yarn add -D typescript@^4.0.0-beta ts-node
+yarn add -D typescript ts-node
 ```
 
 ## Setup
@@ -70,7 +70,7 @@ Some packages on which fireschema depends depend on **TypeScript 3.9**, so you n
 ```json
 {
   "resolutions": {
-    "fireschema/**/typescript": "^4.0.0-beta"
+    "fireschema/**/typescript": "^4.0.0"
   }
 }
 ```

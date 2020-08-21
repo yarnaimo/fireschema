@@ -12,7 +12,7 @@ Firestore のコレクション構造・スキーマ・アクセス制御など�
 
 ```sh
 yarn add fireschema
-yarn add -D typescript@^4.0.0-beta ts-node
+yarn add -D typescript ts-node
 ```
 
 ## Setup
@@ -70,7 +70,7 @@ fireschema が依存する一部のパッケージは **TypeScript 3.9** に依�
 ```json
 {
   "resolutions": {
-    "fireschema/**/typescript": "^4.0.0-beta"
+    "fireschema/**/typescript": "^4.0.0"
   }
 }
 ```
