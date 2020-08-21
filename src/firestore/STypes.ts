@@ -24,7 +24,7 @@ export const allowOptions = {
 }
 
 export declare namespace STypes {
-  export type ConditionExp = string | true
+  export type ConditionExp = string | boolean
 
   export type FunctionsOptions = {
     [key: string]: string
@@ -60,9 +60,8 @@ export declare namespace STypes {
   }
 
   export type AllowOptions = {
-    [K in keyof (typeof allowOptions.read & typeof allowOptions.write)]+?:
-      | string
-      | true
+    [K in keyof (typeof allowOptions.read &
+      typeof allowOptions.write)]+?: ConditionExp
   }
 
   // export type CollectionInterface<T> = null
