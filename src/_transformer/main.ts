@@ -6,7 +6,9 @@ import { transformJsonSchemaNode } from './json-schema'
 
 const documentSchema = '$documentSchema'
 const jsonSchema = '$jsonSchema'
-const runtypesModulePath = resolve(__dirname, '../runtypes')
+
+const relativePath = relative(process.cwd(), __dirname)
+const isInsideNodeModules = relativePath.startsWith('node_modules/')
 
 export default function transformer(
   program: ts.Program,
@@ -41,7 +43,9 @@ function visitNodeAndChildren(
     ts.isSourceFile(newNode) &&
     runtypesImportFlags.has(newNode.fileName)
   ) {
-    const relativePath = relative(dirname(newNode.fileName), runtypesModulePath)
+    const runtypesModulePath = isInsideNodeModules
+      ? 'fireschema/dist/runtypes'
+      : relative(dirname(newNode.fileName), resolve(__dirname, '../runtypes'))
 
     const requireNode = factory.createVariableStatement(
       [],
@@ -56,7 +60,7 @@ function visitNodeAndChildren(
             factory.createCallExpression(
               factory.createIdentifier('require'),
               undefined,
-              [factory.createStringLiteral(relativePath)],
+              [factory.createStringLiteral(runtypesModulePath)],
             ),
           ),
         ],
