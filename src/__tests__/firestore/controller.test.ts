@@ -36,7 +36,7 @@ describe('refs', () => {
       firebase.firestore.DocumentReference<
         IUser & { __loc__: ['versions', 'users', 'posts'] }
       >
-      // @ts-expect-error
+      // @ts-expect-error: doc data
     >(actualPostRef)
 
     expect(actualPostRef.path).toBe(path)
@@ -84,7 +84,7 @@ describe('read', () => {
 
   test('get', async () => {
     const snap = await r.user.get()
-    const data = snap.data()!
+    const data = snap.data()! // eslint-disable-line @typescript-eslint/no-non-null-assertion
 
     expectType<IUser & STypes.DocumentMeta<fadmin.Firestore>>(data)
     expect(data).toMatchObject({
@@ -133,7 +133,7 @@ describe('write', () => {
       await assertFails(
         $web.create(r.user, {
           ...userData,
-          // @ts-expect-error
+          // @ts-expect-error: tags.id
           tags: [{ id: '0', name: 'tag0' }],
         }),
       )
@@ -141,7 +141,7 @@ describe('write', () => {
       await assertFails(
         $web.create(r.user, {
           ...userData,
-          // @ts-expect-error
+          // @ts-expect-error: options.a
           options: { a: 1, b: 'value' },
         }),
       )
@@ -203,7 +203,7 @@ describe('write', () => {
           const tsnap = await tc.get(r.user)
 
           tc[op](r.user, {
-            age: tsnap.data()!.age + 1,
+            age: tsnap.data()!.age + 1, // eslint-disable-line @typescript-eslint/no-non-null-assertion
           })
         })
 

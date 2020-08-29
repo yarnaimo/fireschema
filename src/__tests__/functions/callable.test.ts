@@ -16,7 +16,7 @@ test('call', async () => {
 test('call - invalid-argument', async () => {
   const result = await $call(['createUser'], {
     ...userDataJson,
-    // @ts-expect-error
+    // @ts-expect-error: age
     age: '16',
   })
 

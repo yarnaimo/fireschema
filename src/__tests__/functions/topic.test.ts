@@ -2,7 +2,7 @@ import { $topic } from '../_infrastructure/functions-client'
 
 test('topic', async () => {
   const _expectError = async () => {
-    // @ts-expect-error
+    // @ts-expect-error: text
     await $topic(['publishMessage'], { text: null })
   }
 

@@ -3,6 +3,9 @@
  */
 const config = {
   extends: '@yarnaimo',
+  parserOptions: {
+    project: `./tsconfig.json`,
+  },
   rules: {
     'no-restricted-imports': [
       'error',
@@ -11,7 +14,6 @@ const config = {
         patterns: ['**/__mocks__/**'],
       },
     ],
-    '@typescript-eslint/ban-ts-comment': 'off',
   },
 }
 

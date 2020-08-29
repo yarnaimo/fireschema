@@ -54,7 +54,7 @@ const callable = {
 
 const _errorExpected = $register.callable(['createUser'], {
   builder,
-  // @ts-expect-error
+  // @ts-expect-error: result
   handler: async (data, context) => ({ result: null }),
 })
 
