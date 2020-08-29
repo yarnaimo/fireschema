@@ -1,9 +1,7 @@
 import { STypes } from '../STypes'
 
 export function $documentSchema<T>(): STypes.DocumentSchema<T> {
-  throw new Error(
-    'documentSchema call expression not transformed and directly called',
-  )
+  return (null as unknown) as STypes.DocumentSchema<T>
 }
 
 export const createFirestoreSchema = <S extends STypes.RootOptions.All>(

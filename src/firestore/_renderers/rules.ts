@@ -1,5 +1,6 @@
 import { EntriesStrict, P } from 'lifts'
 import { R } from '../../lib/fp'
+import { is } from '../../lib/type'
 import { $and } from '../../utils/operators'
 import { join, _ } from '../../utils/_string'
 import { allowOptions, STypes } from '../STypes'
@@ -9,9 +10,15 @@ let index = 0
 
 export const renderRules = (
   $allow: STypes.AllowOptions,
-  schema: STypes.DocumentSchema<any>,
+  schema: STypes.DocumentSchema<any> | null,
   pIndent: number,
 ) => {
+  if (!is.string(schema)) {
+    throw new Error(
+      'documentSchema call expression not transformed and directly called',
+    )
+  }
+
   const indent = pIndent + 2
 
   const validator = (arg: string) => `__validator_${index}__(${arg})`
