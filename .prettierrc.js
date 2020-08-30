@@ -1,4 +1,8 @@
 module.exports = {
-  ...require('@yarnaimo/tss/.prettierrc.js'),
+  printWidth: 80,
   tabWidth: 2,
+  semi: false,
+  singleQuote: true,
+  trailingComma: 'all',
+  endOfLine: 'lf',
 }

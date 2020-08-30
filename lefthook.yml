@@ -1,0 +1,15 @@
+pre-commit:
+  parallel: true
+  commands:
+    package-json:
+      files: git diff --name-only @{push}
+      glob: 'package.json'
+      run: yarn sort-package-json {files} && git add {files}
+    js:
+      files: git diff --name-only @{push}
+      glob: '*.{js,jsx,ts,tsx}'
+      run: yarn prettier --write {files} && yarn eslint {files} && git add {files}
+    others:
+      files: git diff --name-only @{push}
+      glob: '*.{json,css,scss,md}'
+      run: yarn prettier --write {files} && git add {files}

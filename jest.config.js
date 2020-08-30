@@ -1,8 +1,21 @@
 module.exports = {
-  ...require('@yarnaimo/tss/jest.config.js'),
-  setupFilesAfterEnv: ['<rootDir>/node_modules/@yarnaimo/tss/jest.setup.js'],
+  collectCoverage: true,
+  collectCoverageFrom: ['src/**/*.ts?(x)'],
+  coveragePathIgnorePatterns: ['/__tests__/'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  setupFilesAfterEnv: ['./jest.setup.js'],
+  testEnvironment: 'node',
+  testPathIgnorePatterns: ['/node_modules/', '/dist/'],
+  testRegex: '((\\.|/)(test|spec))\\.(jsx?|tsx?)$',
+  transform: {
+    '^.+\\.tsx?$': 'ts-jest',
+  },
+  moduleNameMapper: {
+    '^~/(.+)': '<rootDir>/src/$1',
+  },
   globals: {
     'ts-jest': {
+      diagnostics: false,
       compiler: 'ttypescript',
     },
   },

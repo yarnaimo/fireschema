@@ -1,6 +1,5 @@
-// eslint-disable-next-line
+/* eslint-disable */
 const Module = require('module')
-// eslint-disable-next-line
 const path = require('path')
 
 Module.prototype.require = new Proxy(Module.prototype.require, {
