@@ -1,7 +1,6 @@
 import dayjs, { Dayjs } from 'dayjs'
 import { useEffect, useRef } from 'react'
 import { HasIsEqual } from 'react-firebase-hooks/firestore/dist/util'
-import { fweb } from '../../types/_firestore'
 
 type RefHook<T> = {
   current: T
@@ -40,13 +39,6 @@ const isEqual = <T extends HasIsEqual<T>>(
 // ): RefHook<T | null | undefined> => {
 //   return useComparatorRef(value, isEqual, onChange)
 // }
-
-export type UseTDocument<T> = {
-  data: T | undefined
-  snap: fweb.DocumentSnapshot<T> | undefined
-  loading: boolean
-  error: Error | undefined
-}
 
 export const useRefChangeLimitExceeded = (
   fref: HasIsEqual<any> | null | undefined,
