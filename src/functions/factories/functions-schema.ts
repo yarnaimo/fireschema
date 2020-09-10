@@ -8,41 +8,38 @@ export function $jsonSchema<T>(): FunTypes.JsonSchema<T> {
 
 const EmptyObjectRuntype = $jsonSchema<{}>()
 
-const withGuard = <T extends FunTypes.IO<any, any>>(options: T) => {
+export const assertJsonSchema = <T extends FunTypes.IO<any, any>>(
+  options: T,
+) => {
   if (is.null_(options[$input]) || is.null_(options[$output])) {
     throw new Error(
       'jsonSchema call expression not transformed and directly called',
     )
   }
-  return options
 }
 
 const callable = <I extends Type.JsonObject, O extends Type.JsonObject>(
   input: FunTypes.JsonSchema<I>,
   output: FunTypes.JsonSchema<O>,
-): FunTypes.IO<I, O> =>
-  withGuard({
-    [$input]: input,
-    [$output]: output,
-  })
+): FunTypes.IO<I, O> => ({
+  [$input]: input,
+  [$output]: output,
+})
 
-const http = (): FunTypes.IO<{}, {}> =>
-  withGuard({
-    [$input]: EmptyObjectRuntype,
-    [$output]: EmptyObjectRuntype,
-  })
+const http = (): FunTypes.IO<{}, {}> => ({
+  [$input]: EmptyObjectRuntype,
+  [$output]: EmptyObjectRuntype,
+})
 
-const topic = <I>(input: FunTypes.JsonSchema<I>): FunTypes.IO<I, {}> =>
-  withGuard({
-    [$input]: input,
-    [$output]: EmptyObjectRuntype,
-  })
+const topic = <I>(input: FunTypes.JsonSchema<I>): FunTypes.IO<I, {}> => ({
+  [$input]: input,
+  [$output]: EmptyObjectRuntype,
+})
 
-const schedule = (): FunTypes.IO<{}, {}> =>
-  withGuard({
-    [$input]: EmptyObjectRuntype,
-    [$output]: EmptyObjectRuntype,
-  })
+const schedule = (): FunTypes.IO<{}, {}> => ({
+  [$input]: EmptyObjectRuntype,
+  [$output]: EmptyObjectRuntype,
+})
 
 export const functionInterface = { callable, http, topic, schedule }
 

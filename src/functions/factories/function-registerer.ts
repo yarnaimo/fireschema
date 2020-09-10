@@ -5,7 +5,7 @@ import type {
   pubsub,
   ScheduleRetryConfig,
 } from 'firebase-functions'
-import { FunTypes } from '..'
+import { assertJsonSchema, FunTypes } from '..'
 import { GetDeep, Loc } from '../../types/_object'
 import { getDeep } from '../../utils/_object'
 import { $input, messages } from '../constants'
@@ -30,6 +30,7 @@ export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
     },
   ) => {
     const options = (getDeep(schemaOptions.callable, loc) as any) as C
+    assertJsonSchema(options)
     const inputRuntype = options[$input] as C[typeof $input]
 
     const wrapped = async (data: unknown, context: https.CallableContext) => {
