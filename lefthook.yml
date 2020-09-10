@@ -2,14 +2,11 @@ pre-commit:
   parallel: true
   commands:
     package-json:
-      files: git diff --name-only @{push}
       glob: 'package.json'
-      run: yarn sort-package-json {files} && git add {files}
+      run: yarn sort-package-json {staged_files} && git add {staged_files}
     js:
-      files: git diff --name-only @{push}
       glob: '*.{js,jsx,ts,tsx}'
-      run: yarn prettier --write {files} && yarn eslint {files} && git add {files}
+      run: yarn prettier --write {staged_files} && yarn eslint {staged_files} && git add {staged_files}
     others:
-      files: git diff --name-only @{push}
       glob: '*.{json,css,scss,md}'
-      run: yarn prettier --write {files} && git add {files}
+      run: yarn prettier --write {staged_files} && git add {staged_files}
