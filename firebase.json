@@ -10,13 +10,12 @@
       "port": "8085"
     }
   },
+  "firestore": {
+    "rules": "firestore.rules"
+  },
   "functions": {
     "source": ".",
-    "ignore": [
-      ".git",
-      "node_modules",
-      "tmp"
-    ],
+    "ignore": [".git", "node_modules", "tmp"],
     "predeploy": "yarn build"
   }
 }
