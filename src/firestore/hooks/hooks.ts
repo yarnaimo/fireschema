@@ -1,10 +1,9 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 import { useCollection, useDocument } from 'react-firebase-hooks/firestore'
 import { fweb } from '../../types/_firestore'
 import { useRefChangeLimitExceeded } from './utils'
 
 export type UseTypedDocument<T> = {
-  data: T | undefined
   snap: fweb.DocumentSnapshot<T> | undefined
   loading: boolean
   error: Error | undefined
@@ -29,10 +28,7 @@ export const useTypedDocument = <T>(
     }
   }, [error])
 
-  const data = useMemo(() => snap?.data() as T | undefined, [snap])
-
   return {
-    data,
     snap: snap as fweb.DocumentSnapshot<T> | undefined,
     loading,
     error,
@@ -40,7 +36,6 @@ export const useTypedDocument = <T>(
 }
 
 export type UseTypedQuery<T> = {
-  data: T[] | undefined
   snap: fweb.QuerySnapshot<T> | undefined
   loading: boolean
   error: Error | undefined
@@ -65,10 +60,7 @@ export const useTypedQuery = <T>(
     }
   }, [error])
 
-  const data = useMemo(() => snap?.docs.map((doc) => doc.data() as T), [snap])
-
   return {
-    data,
     snap: snap as fweb.QuerySnapshot<T> | undefined,
     loading,
     error,
