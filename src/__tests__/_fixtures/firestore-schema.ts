@@ -98,6 +98,7 @@ export const firestoreSchema = createFirestoreSchema({
         [$allow]: {
           read: true,
           write: $or([isUserScope('uid')]),
+          delete: isUserScope('uid'),
         },
       },
 

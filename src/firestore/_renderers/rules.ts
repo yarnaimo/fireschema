@@ -49,7 +49,7 @@ export const renderRules = (
   const rules = P(
     array,
     R.map(([op, condition]) => {
-      if (op in allowOptions.write) {
+      if (op in allowOptions.write && op !== 'delete') {
         return [op, $and([condition!, validator('request.resource.data')])] // eslint-disable-line @typescript-eslint/no-non-null-assertion
       }
       return [op, condition]

@@ -47,6 +47,7 @@ service cloud.firestore {
 
           allow read: if true;
           allow write: if (isUserScope(uid) && __validator_1__(request.resource.data));
+          allow delete: if isUserScope(uid);
         }
 
         match /privatePosts/{postId} {
