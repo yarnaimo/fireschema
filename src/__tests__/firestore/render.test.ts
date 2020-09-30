@@ -23,7 +23,7 @@ service cloud.firestore {
         function __validator_0__(data) {
           return (
             data.name is string
-              && ((data.displayName == null || !(displayName in data)) || data.displayName is string)
+              && ((data.displayName == null || !("displayName" in data)) || data.displayName is string)
               && (data.age is int || data.age is float)
               && (data.tags.size() == 0 || ((data.tags[0].id is int || data.tags[0].id is float) && data.tags[0].name is string))
               && data.timestamp is timestamp
