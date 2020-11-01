@@ -42,7 +42,17 @@ export declare namespace STypes {
     export type All = Meta & Children
   }
 
-  export type DocumentSchema<T> = string & { __T__: T }
+  export type Decoder<T, U> = (
+    snapshot: FTypes.QueryDocumentSnap<T>,
+    options: FTypes.SnapshotOptions,
+  ) => U
+
+  export type DocumentSchema<T, U = T> = {
+    __T__: T
+    __U__: U
+    schema: string
+    decoder: Decoder<T, U> | undefined
+  }
 
   export namespace CollectionOptions {
     export type Meta = {
@@ -100,6 +110,9 @@ export declare namespace STypes {
 
   export type HasLoc<L extends string[]> = {
     __loc__: L
+  }
+  export type HasT<T> = {
+    __T__: T
   }
 
   type DocFieldToWrite<

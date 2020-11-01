@@ -1,5 +1,5 @@
 import { dirname, relative, resolve } from 'path'
-import { createWrappedNode } from 'ts-morph'
+import { createWrappedNode, Node } from 'ts-morph'
 import ts, { factory } from 'typescript'
 import { transformDocumentSchemaNode } from './document-schema'
 import { transformJsonSchemaNode } from './json-schema'
@@ -98,7 +98,16 @@ function visitNode(node: ts.Node, program: ts.Program): ts.Node | undefined {
   }
 
   if (expression.type === documentSchema) {
-    return transformDocumentSchemaNode(typeArgument)
+    const firstArgument = wrappedExpression.getArguments()[0] as
+      | Node<ts.Node>
+      | undefined
+    const visitedNode =
+      firstArgument && visitNode(firstArgument.compilerNode, program)
+
+    return transformDocumentSchemaNode(
+      typeArgument,
+      visitedNode && createWrappedNode(visitedNode),
+    )
   } else {
     const file = node.getSourceFile()
     runtypesImportFlags.set(file.fileName, true)

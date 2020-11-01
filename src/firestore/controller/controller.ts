@@ -13,10 +13,10 @@ type GetDocT<
   D extends 'root' | FTypes.DocumentRef<unknown>
 > = D extends FTypes.DocumentRef<infer T> ? T : never
 
-type GetSchemaT<
+type GetSchemaU<
   C extends STypes.CollectionOptions.Meta,
   CS = C[typeof $schema]
-> = CS extends STypes.DocumentSchema<any> ? CS['__T__'] : never
+> = CS extends STypes.DocumentSchema<any> ? CS['__U__'] : never
 
 const getAdapted = <
   F extends FTypes.FirestoreApp,
@@ -49,7 +49,7 @@ type GetParentT<
   T extends STypes.HasLoc<string[]>,
   L extends string[] = OmitLast<T['__loc__']>,
   _C = GetDeep<S, L>
-> = SchemaTWithLoc<EnsureOptions<_C>, L>
+> = SchemaUWithLoc<EnsureOptions<_C>, L>
 
 type Parent = 'root' | FTypes.DocumentRef<STypes.HasLoc<string[]>>
 
@@ -64,10 +64,10 @@ type GetSL<
   ? {}
   : NonNullable<C[typeof $adapter]>['__SL__']
 
-type SchemaTWithLoc<
+type SchemaUWithLoc<
   C extends STypes.CollectionOptions.Meta,
   L extends string[]
-> = GetSchemaT<C> & STypes.HasLoc<L>
+> = GetSchemaU<C> & STypes.HasLoc<L> & STypes.HasT<C[typeof $schema]['__T__']>
 
 type CollectionController<
   F extends FTypes.FirestoreApp,
@@ -83,14 +83,14 @@ type CollectionController<
     collectionName: N,
   ) => {
     ref: FTypes.CollectionRef<
-      STypes.DocumentMeta<F> & SchemaTWithLoc<EnsureOptions<_C>, GetL<P, N>>,
+      STypes.DocumentMeta<F> & SchemaUWithLoc<EnsureOptions<_C>, GetL<P, N>>,
       F
     >
     select: STypes.Selectors<GetL<P, N>, GetSL<EnsureOptions<_C>>, F>
     doc: (
       id?: string,
     ) => FTypes.DocumentRef<
-      STypes.DocumentMeta<F> & SchemaTWithLoc<EnsureOptions<_C>, GetL<P, N>>,
+      STypes.DocumentMeta<F> & SchemaUWithLoc<EnsureOptions<_C>, GetL<P, N>>,
       F
     >
   }
@@ -99,7 +99,7 @@ type CollectionController<
     loc: L,
     path: string,
   ) => FTypes.DocumentRef<
-    STypes.DocumentMeta<F> & SchemaTWithLoc<EnsureOptions<_C>, L>,
+    STypes.DocumentMeta<F> & SchemaUWithLoc<EnsureOptions<_C>, L>,
     F
   >
 
@@ -107,12 +107,17 @@ type CollectionController<
     loc: L,
   ) => {
     query: FTypes.Query<
-      STypes.DocumentMeta<F> & SchemaTWithLoc<EnsureOptions<_C>, L>,
+      STypes.DocumentMeta<F> & SchemaUWithLoc<EnsureOptions<_C>, L>,
       F
     >
     select: STypes.Selectors<L, GetSL<EnsureOptions<_C>>, F>
   }
 }
+
+const createConverter = (decoder: STypes.Decoder<any, any>) => ({
+  fromFirestore: decoder,
+  toFirestore: (data: any) => data,
+})
 
 const getCollection = <
   F extends FTypes.FirestoreApp,
@@ -133,10 +138,17 @@ const getCollection = <
 
   const loc = [...parentLoc, collectionName] as L
   const collectionOptions = (getDeep(schemaOptions, loc as any) as unknown) as C
+  const { decoder } = collectionOptions[$schema]
 
-  const collectionRef = appOrParent.collection(
-    collectionName,
-  ) as FTypes.CollectionRef<STypes.DocumentMeta<F> & SchemaTWithLoc<C, L>, F>
+  const rawCollectionRef = appOrParent.collection(collectionName)
+
+  type CR = FTypes.CollectionRef<
+    STypes.DocumentMeta<F> & SchemaUWithLoc<C, L>,
+    F
+  >
+  const collectionRef = (decoder
+    ? (rawCollectionRef.withConverter as any)(createConverter(decoder))
+    : rawCollectionRef) as CR
 
   return { collectionOptions, collectionRef }
 }
@@ -180,7 +192,7 @@ const buildCollectionController = <
     type C = EnsureOptions<_C>
 
     const docRef = app.doc(path) as FTypes.DocumentRef<
-      STypes.DocumentMeta<F> & SchemaTWithLoc<C, L>,
+      STypes.DocumentMeta<F> & SchemaUWithLoc<C, L>,
       F
     >
 
@@ -197,11 +209,15 @@ const buildCollectionController = <
 
     const collectionId = loc[loc.length - 1]
     const collectionOptions = (getDeep(schemaOptions, loc) as unknown) as C
+    const { decoder } = collectionOptions[$schema]
 
-    const query = app.collectionGroup(collectionId) as FTypes.Query<
-      STypes.DocumentMeta<F> & SchemaTWithLoc<C, L>,
-      F
-    >
+    const rawQuery = app.collectionGroup(collectionId)
+
+    type Q = FTypes.Query<STypes.DocumentMeta<F> & SchemaUWithLoc<C, L>, F>
+    const query = (decoder
+      ? (rawQuery.withConverter as any)(createConverter(decoder))
+      : rawQuery) as Q
+
     const { select } = getAdapted<F, L, C>(collectionOptions, query)
 
     return { query, select }
@@ -212,35 +228,35 @@ const buildCollectionController = <
 
 const WithMeta = (FieldValue: FTypes.FieldValueClass) => {
   return {
-    toCreate: <T>(data: {}) =>
+    toCreate: <U extends STypes.HasT<unknown>>(data: {}) =>
       (({
         ...data,
         [_createdAt]: FieldValue.serverTimestamp(),
         [_updatedAt]: FieldValue.serverTimestamp(),
-      } as any) as T),
+      } as any) as U['__T__']),
 
-    toUpdate: <T>(data: {}) =>
+    toUpdate: <U extends STypes.HasT<unknown>>(data: {}) =>
       (({
         ...data,
         [_updatedAt]: FieldValue.serverTimestamp(),
-      } as any) as T),
+      } as any) as U['__T__']),
   }
 }
 
 const _mergeOption = { merge: true }
 
 export type Interactor<F extends FTypes.FirestoreApp> = {
-  create: <T>(
-    docRef: FTypes.DocumentRef<T, F>,
-    data: DataToCreate<T, F>,
+  create: <U extends STypes.HasT<unknown>>(
+    docRef: FTypes.DocumentRef<U, F>,
+    data: DataToCreate<U, F>,
   ) => FTypes.SetResult<F>
-  setMerge: <T>(
-    docRef: FTypes.DocumentRef<T, F>,
-    data: DataToUpdate<T, F>,
+  setMerge: <U extends STypes.HasT<unknown>>(
+    docRef: FTypes.DocumentRef<U, F>,
+    data: DataToUpdate<U, F>,
   ) => FTypes.SetResult<F>
-  update: <T>(
-    docRef: FTypes.DocumentRef<T, F>,
-    data: DataToUpdate<T, F>,
+  update: <U extends STypes.HasT<unknown>>(
+    docRef: FTypes.DocumentRef<U, F>,
+    data: DataToUpdate<U, F>,
   ) => FTypes.SetResult<F>
   delete: (docRef: FTypes.DocumentRef<any, F>) => FTypes.SetResult<F>
 }
@@ -249,28 +265,29 @@ export type TransactionController<F extends FTypes.FirestoreApp> = {
   get: <T>(
     docRef: FTypes.DocumentRef<T, F>,
   ) => Promise<FTypes.DocumentSnap<T, F>>
-  create: <T>(
-    docRef: FTypes.DocumentRef<T, F>,
-    data: DataToCreate<T, F>,
+  create: <U extends STypes.HasT<unknown>>(
+    docRef: FTypes.DocumentRef<U, F>,
+    data: DataToCreate<U, F>,
   ) => void
-  setMerge: <T>(
-    docRef: FTypes.DocumentRef<T, F>,
-    data: DataToUpdate<T, F>,
+  setMerge: <U extends STypes.HasT<unknown>>(
+    docRef: FTypes.DocumentRef<U, F>,
+    data: DataToUpdate<U, F>,
   ) => void
-  update: <T>(
-    docRef: FTypes.DocumentRef<T, F>,
-    data: DataToUpdate<T, F>,
+  update: <U extends STypes.HasT<unknown>>(
+    docRef: FTypes.DocumentRef<U, F>,
+    data: DataToUpdate<U, F>,
   ) => void
   delete: (docRef: FTypes.DocumentRef<any, F>) => void
 }
 
-type DataToCreate<T, F extends FTypes.FirestoreApp> = STypes.DocDataToWrite<
-  T,
-  F
->
-type DataToUpdate<T, F extends FTypes.FirestoreApp> = Partial<
-  DataToCreate<T, F>
->
+type DataToCreate<
+  U extends STypes.HasT<unknown>,
+  F extends FTypes.FirestoreApp
+> = STypes.DocDataToWrite<U['__T__'], F>
+type DataToUpdate<
+  U extends STypes.HasT<unknown>,
+  F extends FTypes.FirestoreApp
+> = Partial<DataToCreate<U, F>>
 
 const buildInteractor = <F extends FTypes.FirestoreApp>(
   FieldValue: FTypes.FieldValueClass<F>,
@@ -278,22 +295,28 @@ const buildInteractor = <F extends FTypes.FirestoreApp>(
   const withMeta = WithMeta(FieldValue)
 
   return {
-    create: <T>(docRef: FTypes.DocumentRef<T, F>, data: DataToCreate<T, F>) => {
-      const dataT = withMeta.toCreate<T>(data)
-      return docRef.set(dataT, {}) as FTypes.SetResult<F>
-    },
-
-    setMerge: <T>(
-      docRef: FTypes.DocumentRef<T, F>,
-      data: DataToUpdate<T, F>,
+    create: <U extends STypes.HasT<unknown>>(
+      docRef: FTypes.DocumentRef<U, F>,
+      data: DataToCreate<U, F>,
     ) => {
-      const dataT = withMeta.toUpdate<T>(data)
-      return docRef.set(dataT, _mergeOption) as FTypes.SetResult<F>
+      const dataT = withMeta.toCreate<U>(data)
+      return docRef.set(dataT as any, {}) as FTypes.SetResult<F>
     },
 
-    update: <T>(docRef: FTypes.DocumentRef<T, F>, data: DataToUpdate<T, F>) => {
-      const dataT = withMeta.toUpdate<T>(data)
-      return docRef.update(dataT) as FTypes.SetResult<F>
+    setMerge: <U extends STypes.HasT<unknown>>(
+      docRef: FTypes.DocumentRef<U, F>,
+      data: DataToUpdate<U, F>,
+    ) => {
+      const dataT = withMeta.toUpdate<U>(data)
+      return docRef.set(dataT as any, _mergeOption) as FTypes.SetResult<F>
+    },
+
+    update: <U extends STypes.HasT<unknown>>(
+      docRef: FTypes.DocumentRef<U, F>,
+      data: DataToUpdate<U, F>,
+    ) => {
+      const dataT = withMeta.toUpdate<U>(data)
+      return docRef.update(dataT as any) as FTypes.SetResult<F>
     },
 
     delete: (docRef: FTypes.DocumentRef<any, F>) =>
@@ -315,34 +338,37 @@ const buildTransactionController = <F extends FTypes.FirestoreApp>(
         ) as Promise<FTypes.DocumentSnap<T, F>>
       },
 
-      create: <T>(
-        docRef: FTypes.DocumentRef<T, F>,
-        data: DataToCreate<T, F>,
+      create: <U extends STypes.HasT<unknown>>(
+        docRef: FTypes.DocumentRef<U, F>,
+        data: DataToCreate<U, F>,
       ) => {
-        const dataT = withMeta.toCreate<T>(data)
-        return _tx.set((docRef as unknown) as fweb.DocumentReference<T>, dataT)
+        const dataT = withMeta.toCreate<U>(data)
+        return _tx.set(
+          (docRef as unknown) as fweb.DocumentReference<U>,
+          dataT as any,
+        )
       },
 
-      setMerge: <T>(
-        docRef: FTypes.DocumentRef<T, F>,
-        data: DataToUpdate<T, F>,
+      setMerge: <U extends STypes.HasT<unknown>>(
+        docRef: FTypes.DocumentRef<U, F>,
+        data: DataToUpdate<U, F>,
       ) => {
-        const dataT = withMeta.toUpdate<T>(data)
+        const dataT = withMeta.toUpdate<U>(data)
         return _tx.set(
-          (docRef as unknown) as fweb.DocumentReference<T>,
-          dataT,
+          (docRef as unknown) as fweb.DocumentReference<U>,
+          dataT as any,
           _mergeOption,
         )
       },
 
-      update: <T>(
-        docRef: FTypes.DocumentRef<T, F>,
-        data: DataToUpdate<T, F>,
+      update: <U extends STypes.HasT<unknown>>(
+        docRef: FTypes.DocumentRef<U, F>,
+        data: DataToUpdate<U, F>,
       ) => {
-        const dataT = withMeta.toUpdate<T>(data)
+        const dataT = withMeta.toUpdate<U>(data)
         return _tx.update(
-          (docRef as unknown) as fweb.DocumentReference<T>,
-          dataT,
+          (docRef as unknown) as fweb.DocumentReference<U>,
+          dataT as any,
         )
       },
 
