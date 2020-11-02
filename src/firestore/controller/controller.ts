@@ -30,7 +30,7 @@ const getAdapted = <
     collectionOptions[$adapter]?.(collectionRef) ??
     $collectionAdapter()({})(collectionRef)
 
-  const select = adapted.select as STypes.Selectors<L, GetSL<C>, F>
+  const select = adapted.select as STypes.Selectors<GetT<C>, L, GetSL<C>, F>
 
   return {
     select,
@@ -45,11 +45,12 @@ type OmitLast<T extends any[]> = T extends [
   : never
 
 type GetParentT<
+  F extends FTypes.FirestoreApp,
   S extends STypes.RootOptions.All,
   T extends STypes.HasLoc<string[]>,
   L extends string[] = OmitLast<T['__loc__']>,
   _C = GetDeep<S, L>
-> = SchemaUWithLoc<EnsureOptions<_C>, L>
+> = STypes.DocumentMeta<F> & SchemaUWithLoc<EnsureOptions<_C>, L>
 
 type Parent = 'root' | FTypes.DocumentRef<STypes.HasLoc<string[]>>
 
@@ -63,6 +64,8 @@ type GetSL<
 > = C[typeof $adapter] extends null
   ? {}
   : NonNullable<C[typeof $adapter]>['__SL__']
+
+type GetT<C extends STypes.CollectionOptions.Meta> = C[typeof $schema]['__T__']
 
 type SchemaUWithLoc<
   C extends STypes.CollectionOptions.Meta,
@@ -86,7 +89,12 @@ type CollectionController<
       STypes.DocumentMeta<F> & SchemaUWithLoc<EnsureOptions<_C>, GetL<P, N>>,
       F
     >
-    select: STypes.Selectors<GetL<P, N>, GetSL<EnsureOptions<_C>>, F>
+    select: STypes.Selectors<
+      GetT<EnsureOptions<_C>>,
+      GetL<P, N>,
+      GetSL<EnsureOptions<_C>>,
+      F
+    >
     doc: (
       id?: string,
     ) => FTypes.DocumentRef<
@@ -110,7 +118,12 @@ type CollectionController<
       STypes.DocumentMeta<F> & SchemaUWithLoc<EnsureOptions<_C>, L>,
       F
     >
-    select: STypes.Selectors<L, GetSL<EnsureOptions<_C>>, F>
+    select: STypes.Selectors<
+      GetT<EnsureOptions<_C>>,
+      L,
+      GetSL<EnsureOptions<_C>>,
+      F
+    >
   }
 }
 
@@ -395,7 +408,7 @@ export const initFirestore = <
     collectionRef: FTypes.CollectionRef<T, F>,
   ) => {
     return (collectionRef.parent as unknown) as FTypes.DocumentRef<
-      GetParentT<S, T>,
+      GetParentT<F, S, T>,
       F
     >
   }
@@ -444,7 +457,7 @@ export type FirestoreController<
 
   parentOfCollection: <T extends STypes.HasLoc<string[]>>(
     collectionRef: FTypes.CollectionRef<T, F>,
-  ) => FTypes.DocumentRef<GetParentT<S, T>, F>
+  ) => FTypes.DocumentRef<GetParentT<F, S, T>, F>
 } & CollectionController<F, S> &
   Interactor<F> & {
     runTransaction: <R>(

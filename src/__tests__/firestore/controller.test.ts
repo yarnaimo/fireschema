@@ -18,6 +18,16 @@ import { expectEqualRef } from '../_utils/firestore'
 const r = collections($web)
 const ur = collections($webUnauthed)
 
+type UserU = IUserLocal &
+  STypes.DocumentMeta<fadmin.Firestore> &
+  STypes.HasLoc<['versions', 'users']> &
+  STypes.HasT<IUser>
+
+type PostU = (IPostA | IPostB) &
+  STypes.DocumentMeta<fadmin.Firestore> &
+  STypes.HasLoc<['versions', 'users', 'posts']> &
+  STypes.HasT<IPostA | IPostB>
+
 describe('types', () => {
   test('UAt', () => {
     expectType<typeof r.user>(
@@ -64,11 +74,7 @@ describe('refs', () => {
       path,
     )
 
-    expectType<
-      firebase.firestore.DocumentReference<
-        (IPostA | IPostB) & { __loc__: ['versions', 'users', 'posts'] }
-      >
-    >(actualPostRef)
+    expectType<firebase.firestore.DocumentReference<PostU>>(actualPostRef)
 
     expectType<
       firebase.firestore.DocumentReference<
@@ -96,11 +102,7 @@ describe('refs', () => {
   test('parentOfCollection', () => {
     const user = $web.parentOfCollection(r.posts.ref)
 
-    expectType<
-      firebase.firestore.DocumentReference<
-        IUserLocal & { __loc__: ['versions', 'users'] }
-      >
-    >(user)
+    expectType<firebase.firestore.DocumentReference<UserU>>(user)
     expect(user.path).toBe(r.user.path)
   })
 })
@@ -116,7 +118,7 @@ describe('read', () => {
     const snap = await r.user.get()
     const data = snap.data()! // eslint-disable-line @typescript-eslint/no-non-null-assertion
 
-    expectType<IUserLocal & STypes.DocumentMeta<fadmin.Firestore>>(data)
+    expectType<UserU>(data)
     expect(data).toMatchObject({
       ...userData,
       timestamp: expect.anything(),
@@ -130,11 +132,7 @@ describe('read', () => {
     expect(snap.docs).toHaveLength(1)
     const data = snap.docs[0].data()
 
-    expectType<
-      IUser &
-        STypes.DocumentMeta<fadmin.Firestore> &
-        STypes.HasLoc<['versions', 'users']>
-    >(data)
+    expectType<UserU>(data)
     expect(data).toMatchObject({
       ...userData,
       timestamp: expect.anything(),
