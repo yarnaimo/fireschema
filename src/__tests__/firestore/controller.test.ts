@@ -2,9 +2,10 @@ import { assertFails, assertSucceeds } from '@firebase/testing'
 import { isDayjs } from 'dayjs'
 import { expectType } from 'tsd'
 import { STypes } from '../..'
-import { fadmin } from '../../types/_firestore'
+import { fadmin, fweb } from '../../types/_firestore'
 import { userData } from '../_fixtures/data'
 import {
+  firestoreSchema,
   IPostA,
   IPostB,
   IUser,
@@ -16,6 +17,39 @@ import { expectEqualRef } from '../_utils/firestore'
 
 const r = collections($web)
 const ur = collections($webUnauthed)
+
+describe('types', () => {
+  test('UAt', () => {
+    expectType<typeof r.user>(
+      {} as fweb.DocumentReference<
+        STypes.UAt<
+          fweb.Firestore,
+          typeof firestoreSchema,
+          ['versions', 'users']
+        >
+      >,
+    )
+    expectType<
+      fweb.DocumentReference<
+        STypes.UAt<
+          fweb.Firestore,
+          typeof firestoreSchema,
+          ['versions', 'users']
+        >
+      >
+    >(r.user)
+
+    expectType<typeof r.post>(
+      {} as fweb.DocumentReference<
+        STypes.UAt<
+          fweb.Firestore,
+          typeof firestoreSchema,
+          ['versions', 'users', 'posts']
+        >
+      >,
+    )
+  })
+})
 
 describe('refs', () => {
   test('collection', () => {

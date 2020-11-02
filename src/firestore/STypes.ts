@@ -1,5 +1,6 @@
 import { Type } from '../lib/type'
 import { FTypes } from '../types/FTypes'
+import { GetDeep, Loc } from '../types/_object'
 import {
   $adapter,
   $allow,
@@ -108,12 +109,24 @@ export declare namespace STypes {
     select: Selectors<L, SL, F>
   }
 
+  export type EnsureOptions<_C> = _C extends CollectionOptions.Meta ? _C : never
+
   export type HasLoc<L extends string[]> = {
     __loc__: L
   }
   export type HasT<T> = {
     __T__: T
   }
+
+  export type UAt<
+    F extends FTypes.FirestoreApp,
+    S extends STypes.RootOptions.All,
+    L extends Loc<S>,
+    _C = GetDeep<S, L>
+  > = EnsureOptions<_C>[typeof $schema]['__U__'] &
+    DocumentMeta<F> &
+    HasLoc<L> &
+    HasT<EnsureOptions<_C>[typeof $schema]['__T__']>
 
   type DocFieldToWrite<
     T,
