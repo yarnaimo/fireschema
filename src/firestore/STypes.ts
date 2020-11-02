@@ -58,7 +58,7 @@ export declare namespace STypes {
   export namespace CollectionOptions {
     export type Meta = {
       [$schema]: DocumentSchema<any>
-      [$adapter]: Adapter<any, any, any, any> | null
+      [$adapter]: Adapter<any, any, any, any, any> | null
       [$docLabel]: string
       // [$collectionGroup]?: boolean
       [$allow]: AllowOptions
@@ -78,6 +78,7 @@ export declare namespace STypes {
   // export type CollectionInterface<T> = null
 
   export type Selectors<
+    T,
     L extends string[] | null,
     SL,
     F extends FTypes.FirestoreApp
@@ -86,7 +87,7 @@ export declare namespace STypes {
       ? (
           ...args: A
         ) => FTypes.Query<
-          U & STypes.DocumentMeta<F> & HasLoc<NonNullable<L>>,
+          U & STypes.DocumentMeta<F> & HasLoc<NonNullable<L>> & HasT<T>,
           F
         >
       : SL[K]
@@ -94,19 +95,21 @@ export declare namespace STypes {
 
   export type Adapter<
     T,
+    U,
     L extends string[] | null,
     SL,
     F extends FTypes.FirestoreApp
-  > = ((q: FTypes.Query<T>) => Adapted<L, SL, F>) & {
+  > = ((q: FTypes.Query<U>) => Adapted<T, L, SL, F>) & {
     __SL__: SL
   }
 
   export type Adapted<
+    T,
     L extends string[] | null,
     SL,
     F extends FTypes.FirestoreApp
   > = {
-    select: Selectors<L, SL, F>
+    select: Selectors<T, L, SL, F>
   }
 
   export type EnsureOptions<_C> = _C extends CollectionOptions.Meta ? _C : never

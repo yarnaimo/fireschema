@@ -48,7 +48,7 @@ export const UserSchema = $documentSchema<IUser, IUserLocal>({
     }
   },
 })
-const UserAdapter = $collectionAdapter<IUser>()({
+const UserAdapter = $collectionAdapter<IUserLocal>()({
   selectors: (q) => ({
     teen: () => q.where('age', '>=', 10).where('age', '<', 20),
   }),
