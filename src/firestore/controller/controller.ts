@@ -53,7 +53,7 @@ type GetParentT<
 
 type Parent = 'root' | FTypes.DocumentRef<STypes.HasLoc<string[]>>
 
-type EnsureOptions<_C> = _C extends STypes.CollectionOptions.Meta ? _C : never
+type EnsureOptions<_C> = STypes.EnsureOptions<_C>
 
 type GetL<P extends Parent, N> = [...GetPL<P>, N]
 type GetPL<P extends Parent> = P extends 'root' ? [] : GetDocT<P>['__loc__']
