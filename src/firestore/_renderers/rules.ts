@@ -13,7 +13,7 @@ export const renderRules = (
   schema: STypes.DocumentSchema<any> | null,
   pIndent: number,
 ) => {
-  if (!is.string(schema)) {
+  if (!schema || !is.string(schema.schema)) {
     throw new Error(
       'documentSchema call expression not transformed and directly called',
     )
@@ -23,7 +23,7 @@ export const renderRules = (
 
   const validator = (arg: string) => `__validator_${index}__(${arg})`
 
-  const validatorBody = schema
+  const validatorBody = schema.schema
     .split('\n')
     .map((line, i, arr) => {
       return i === 0

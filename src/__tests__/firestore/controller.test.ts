@@ -1,9 +1,16 @@
 import { assertFails, assertSucceeds } from '@firebase/testing'
+import { isDayjs } from 'dayjs'
 import { expectType } from 'tsd'
 import { STypes } from '../..'
-import { fadmin } from '../../types/_firestore'
+import { fadmin, fweb } from '../../types/_firestore'
 import { userData } from '../_fixtures/data'
-import { IPostA, IPostB, IUser } from '../_fixtures/firestore-schema'
+import {
+  firestoreSchema,
+  IPostA,
+  IPostB,
+  IUser,
+  IUserLocal,
+} from '../_fixtures/firestore-schema'
 import { collections } from '../_infrastructure/firestore'
 import { $web, $webUnauthed } from '../_infrastructure/firestore-controller'
 import { expectEqualRef } from '../_utils/firestore'
@@ -11,12 +18,53 @@ import { expectEqualRef } from '../_utils/firestore'
 const r = collections($web)
 const ur = collections($webUnauthed)
 
+type UserU = IUserLocal &
+  STypes.DocumentMeta<fadmin.Firestore> &
+  STypes.HasLoc<['versions', 'users']> &
+  STypes.HasT<IUser>
+
+type PostU = (IPostA | IPostB) &
+  STypes.DocumentMeta<fadmin.Firestore> &
+  STypes.HasLoc<['versions', 'users', 'posts']> &
+  STypes.HasT<IPostA | IPostB>
+
+describe('types', () => {
+  test('UAt', () => {
+    expectType<typeof r.user>(
+      {} as fweb.DocumentReference<
+        STypes.UAt<
+          fweb.Firestore,
+          typeof firestoreSchema,
+          ['versions', 'users']
+        >
+      >,
+    )
+    expectType<
+      fweb.DocumentReference<
+        STypes.UAt<
+          fweb.Firestore,
+          typeof firestoreSchema,
+          ['versions', 'users']
+        >
+      >
+    >(r.user)
+
+    expectType<typeof r.post>(
+      {} as fweb.DocumentReference<
+        STypes.UAt<
+          fweb.Firestore,
+          typeof firestoreSchema,
+          ['versions', 'users', 'posts']
+        >
+      >,
+    )
+  })
+})
+
 describe('refs', () => {
   test('collection', () => {
-    expectEqualRef(
-      $web.app.collection('versions').doc('v1').collection('users').doc('user'),
-      r.user,
-    )
+    expect(r.users.ref.path).toBe('versions/v1/users')
+    expect(r.user.path).toBe('versions/v1/users/user')
   })
 
   test('documentByPath', () => {
@@ -26,11 +74,7 @@ describe('refs', () => {
       path,
     )
 
-    expectType<
-      firebase.firestore.DocumentReference<
-        (IPostA | IPostB) & { __loc__: ['versions', 'users', 'posts'] }
-      >
-    >(actualPostRef)
+    expectType<firebase.firestore.DocumentReference<PostU>>(actualPostRef)
 
     expectType<
       firebase.firestore.DocumentReference<
@@ -45,20 +89,12 @@ describe('refs', () => {
 
   test('query', () => {
     expectEqualRef(
-      $web.app
-        .collection('versions')
-        .doc('v1')
-        .collection('users')
-        .where('age', '>=', 10)
-        .where('age', '<', 20),
+      r.users.ref.where('age', '>=', 10).where('age', '<', 20),
       r.users.select.teen(),
     )
 
     expectEqualRef(
-      $web.app
-        .collectionGroup('users')
-        .where('age', '>=', 10)
-        .where('age', '<', 20),
+      r.usersGroup.query.where('age', '>=', 10).where('age', '<', 20),
       r.usersGroup.select.teen(),
     )
   })
@@ -66,12 +102,8 @@ describe('refs', () => {
   test('parentOfCollection', () => {
     const user = $web.parentOfCollection(r.posts.ref)
 
-    expectType<
-      firebase.firestore.DocumentReference<
-        IUser & { __loc__: ['versions', 'users'] }
-      >
-    >(user)
-    expectEqualRef(user, r.user)
+    expectType<firebase.firestore.DocumentReference<UserU>>(user)
+    expect(user.path).toBe(r.user.path)
   })
 })
 
@@ -86,11 +118,12 @@ describe('read', () => {
     const snap = await r.user.get()
     const data = snap.data()! // eslint-disable-line @typescript-eslint/no-non-null-assertion
 
-    expectType<IUser & STypes.DocumentMeta<fadmin.Firestore>>(data)
+    expectType<UserU>(data)
     expect(data).toMatchObject({
       ...userData,
-      timestamp: expect.any($web.Timestamp),
+      timestamp: expect.anything(),
     })
+    expect(isDayjs(data.timestamp)).toBeTruthy()
   })
 
   test('get collectionGroup', async () => {
@@ -99,15 +132,12 @@ describe('read', () => {
     expect(snap.docs).toHaveLength(1)
     const data = snap.docs[0].data()
 
-    expectType<
-      IUser &
-        STypes.DocumentMeta<fadmin.Firestore> &
-        STypes.HasLoc<['versions', 'users']>
-    >(data)
+    expectType<UserU>(data)
     expect(data).toMatchObject({
       ...userData,
-      timestamp: expect.any($web.Timestamp),
+      timestamp: expect.anything(),
     })
+    expect(isDayjs(data.timestamp)).toBeTruthy()
   })
 })
 

@@ -1,6 +1,6 @@
 import { P } from 'lifts'
-import { Type, TypeNode } from 'ts-morph'
-import ts, { factory } from 'typescript'
+import { Node, Type, TypeNode } from 'ts-morph'
+import ts, { factory as f } from 'typescript'
 import { R } from '../lib/fp'
 import { is } from '../lib/type'
 import { $$and, $and, $or } from '../utils'
@@ -68,7 +68,28 @@ const transformNode = (
 
 export const transformDocumentSchemaNode = (
   typeArgument: TypeNode<ts.TypeNode>,
+  firstArgument: Node<ts.Node> | undefined,
 ) => {
   const transformed = transformNode()(typeArgument.getType())
-  return factory.createStringLiteral(transformed)
+
+  if (firstArgument && !Node.isExpression(firstArgument)) {
+    throw new Error('first argument must be a expression')
+  }
+
+  const targetObject =
+    firstArgument?.compilerNode ?? f.createObjectLiteralExpression([])
+  const sourceObject = f.createObjectLiteralExpression([
+    f.createPropertyAssignment('schema', f.createStringLiteral(transformed)),
+  ])
+
+  const objectAssign = f.createPropertyAccessExpression(
+    f.createIdentifier('Object'),
+    'assign',
+  )
+  const objectAssignCall = f.createCallExpression(objectAssign, undefined, [
+    targetObject,
+    sourceObject,
+  ])
+
+  return objectAssignCall
 }

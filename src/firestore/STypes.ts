@@ -1,5 +1,6 @@
 import { Type } from '../lib/type'
 import { FTypes } from '../types/FTypes'
+import { GetDeep, Loc } from '../types/_object'
 import {
   $adapter,
   $allow,
@@ -42,12 +43,22 @@ export declare namespace STypes {
     export type All = Meta & Children
   }
 
-  export type DocumentSchema<T> = string & { __T__: T }
+  export type Decoder<T, U> = (
+    snapshot: FTypes.QueryDocumentSnap<T>,
+    options: FTypes.SnapshotOptions,
+  ) => U
+
+  export type DocumentSchema<T, U = T> = {
+    __T__: T
+    __U__: U
+    schema: string
+    decoder: Decoder<T, U> | undefined
+  }
 
   export namespace CollectionOptions {
     export type Meta = {
       [$schema]: DocumentSchema<any>
-      [$adapter]: Adapter<any, any, any, any> | null
+      [$adapter]: Adapter<any, any, any, any, any> | null
       [$docLabel]: string
       // [$collectionGroup]?: boolean
       [$allow]: AllowOptions
@@ -67,6 +78,7 @@ export declare namespace STypes {
   // export type CollectionInterface<T> = null
 
   export type Selectors<
+    T,
     L extends string[] | null,
     SL,
     F extends FTypes.FirestoreApp
@@ -75,7 +87,7 @@ export declare namespace STypes {
       ? (
           ...args: A
         ) => FTypes.Query<
-          U & STypes.DocumentMeta<F> & HasLoc<NonNullable<L>>,
+          U & STypes.DocumentMeta<F> & HasLoc<NonNullable<L>> & HasT<T>,
           F
         >
       : SL[K]
@@ -83,24 +95,41 @@ export declare namespace STypes {
 
   export type Adapter<
     T,
+    U,
     L extends string[] | null,
     SL,
     F extends FTypes.FirestoreApp
-  > = ((q: FTypes.Query<T>) => Adapted<L, SL, F>) & {
+  > = ((q: FTypes.Query<U>) => Adapted<T, L, SL, F>) & {
     __SL__: SL
   }
 
   export type Adapted<
+    T,
     L extends string[] | null,
     SL,
     F extends FTypes.FirestoreApp
   > = {
-    select: Selectors<L, SL, F>
+    select: Selectors<T, L, SL, F>
   }
+
+  export type EnsureOptions<_C> = _C extends CollectionOptions.Meta ? _C : never
 
   export type HasLoc<L extends string[]> = {
     __loc__: L
   }
+  export type HasT<T> = {
+    __T__: T
+  }
+
+  export type UAt<
+    F extends FTypes.FirestoreApp,
+    S extends STypes.RootOptions.All,
+    L extends Loc<S>,
+    _C = GetDeep<S, L>
+  > = EnsureOptions<_C>[typeof $schema]['__U__'] &
+    DocumentMeta<F> &
+    HasLoc<L> &
+    HasT<EnsureOptions<_C>[typeof $schema]['__T__']>
 
   type DocFieldToWrite<
     T,

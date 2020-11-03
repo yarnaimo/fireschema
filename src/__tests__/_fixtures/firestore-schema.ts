@@ -1,3 +1,4 @@
+import dayjs, { Dayjs } from 'dayjs'
 import {
   $adapter,
   $allow,
@@ -23,6 +24,7 @@ export type IUser = {
   timestamp: FTypes.Timestamp
   options: { a: boolean; b: string }
 }
+export type IUserLocal = Type.Merge<IUser, { timestamp: Dayjs }>
 export type IUserJson = Type.Merge<IUser, { timestamp: string }>
 
 export type IPostA = {
@@ -37,8 +39,16 @@ export type IPostB = {
 const VersionSchema = $documentSchema<IVersion>()
 const VersionAdapter = $collectionAdapter<IVersion>()({})
 
-export const UserSchema = $documentSchema<IUser>()
-const UserAdapter = $collectionAdapter<IUser>()({
+export const UserSchema = $documentSchema<IUser, IUserLocal>({
+  decoder: (snap: FTypes.QueryDocumentSnap<IUser>): IUserLocal => {
+    const data = snap.data()
+    return {
+      ...data,
+      timestamp: dayjs(data.timestamp.toDate()),
+    }
+  },
+})
+const UserAdapter = $collectionAdapter<IUserLocal>()({
   selectors: (q) => ({
     teen: () => q.where('age', '>=', 10).where('age', '<', 20),
   }),

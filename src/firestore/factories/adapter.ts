@@ -17,10 +17,10 @@ export const $collectionAdapter = <T>() => {
   }) => {
     const adapter = <F extends FTypes.FirestoreApp>(
       q: FTypes.Query<T, F>,
-    ): STypes.Adapted<null, SL, F> => ({
-      select: selectors(q) as STypes.Selectors<null, SL, F>,
+    ): STypes.Adapted<T, null, SL, F> => ({
+      select: selectors(q) as STypes.Selectors<T, null, SL, F>,
     })
 
-    return adapter as STypes.Adapter<T, null, SL, FTypes.FirestoreApp>
+    return adapter as STypes.Adapter<T, unknown, null, SL, FTypes.FirestoreApp>
   }
 }
