@@ -1,14 +1,14 @@
+import { firestore } from '@firebase/testing'
 import dayjs from 'dayjs'
 import { Type } from '../../lib/type'
 import { FTypes } from '../../types'
-import { $web } from '../_infrastructure/firestore-controller'
 import { IUser } from './firestore-schema'
 
 export const userData: Type.Merge<IUser, { timestamp: FTypes.FieldValue }> = {
   name: 'umi',
   displayName: null,
   age: 16,
-  timestamp: $web.FieldValue.serverTimestamp(),
+  timestamp: firestore.FieldValue.serverTimestamp(),
   tags: [
     { id: 0, name: 'tag0' },
     { id: 1, name: 'tag1' },

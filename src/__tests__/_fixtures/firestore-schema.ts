@@ -40,8 +40,8 @@ const VersionSchema = $documentSchema<IVersion>()
 const VersionAdapter = $collectionAdapter<IVersion>()({})
 
 export const UserSchema = $documentSchema<IUser, IUserLocal>({
-  decoder: (snap: FTypes.QueryDocumentSnap<IUser>): IUserLocal => {
-    const data = snap.data()
+  decoder: (snap: FTypes.QueryDocumentSnap<IUser>, options): IUserLocal => {
+    const data = snap.data(options)
     return {
       ...data,
       timestamp: dayjs(data.timestamp.toDate()),
