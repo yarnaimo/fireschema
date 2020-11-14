@@ -10,12 +10,13 @@
     "build": "ttsc && chmod +x dist/bin/cli.js",
     "debug": "node --inspect -r ts-node/register",
     "dev": "yarn ts-node src/index.ts",
+    "emulators:exec": "firebase emulators:exec --only firestore,functions,pubsub",
     "fireschema:rules": "./dist/bin/cli.js src/example/schema-example.ts",
     "lint": "eslint --ignore-path .gitignore '**/*.{js,jsx,ts,tsx}'",
     "prepare": "rm -rf dist && yarn build && ./append-emulator-proxyer.sh",
     "serve": "yarn build && firebase emulators:start --only firestore,functions,pubsub",
     "start": "NODE_ENV=production node dist/index.js",
-    "test": "firebase emulators:exec --only firestore,functions,pubsub 'NODE_ENV=test jest --no-cache --coverage false'",
+    "test": "NODE_ENV=test jest --no-cache",
     "ts-node": "ts-node --compiler ttypescript"
   },
   "resolutions": {
