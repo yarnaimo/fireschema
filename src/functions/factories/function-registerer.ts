@@ -6,9 +6,11 @@ import type {
   ScheduleRetryConfig,
 } from 'firebase-functions'
 import { assertJsonSchema, FunTypes } from '..'
-import { GetDeep, Loc } from '../../types/_object'
+import { GetDeep } from '../../types/_object'
 import { getDeep } from '../../utils/_object'
 import { $input, messages } from '../constants'
+import { FunctionPath, ParseFunctionPath } from '../_types'
+import { parseFunctionPath } from '../_utils'
 
 export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
   { https, logger }: typeof import('firebase-functions'),
@@ -16,11 +18,12 @@ export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
   timezone: string,
 ) => {
   const callable = <
-    L extends Loc<S['callable']>,
+    FP extends FunctionPath<S['callable']>,
+    L extends string[] = ParseFunctionPath<FP>,
     _C = GetDeep<S['callable'], L>,
     C extends FunTypes.EnsureIO<_C> = FunTypes.EnsureIO<_C>
   >(
-    loc: L,
+    functionPath: FP,
     {
       builder,
       handler,
@@ -29,7 +32,8 @@ export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
       handler: FunTypes.Callable.Handler<C>
     },
   ) => {
-    const options = (getDeep(schemaOptions.callable, loc) as any) as C
+    const loc = parseFunctionPath(functionPath)
+    const options = getDeep(schemaOptions.callable, loc) as C
     assertJsonSchema(options)
     const inputRuntype = options[$input] as C[typeof $input]
 
@@ -48,8 +52,8 @@ export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
     return callableFunction
   }
 
-  const http = <L extends Loc<S['http']>>(
-    loc: L,
+  const http = <FP extends FunctionPath<S['http']>>(
+    functionPath: FP,
     {
       builder,
       handler,
@@ -63,11 +67,12 @@ export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
   }
 
   const topic = <
-    L extends Loc<S['topic']>,
+    FP extends FunctionPath<S['topic']>,
+    L extends string[] = ParseFunctionPath<FP>,
     _C = GetDeep<S['topic'], L>,
     C extends FunTypes.EnsureIO<_C> = FunTypes.EnsureIO<_C>
   >(
-    loc: L,
+    functionPath: FP,
     {
       builder,
       handler,
@@ -81,13 +86,12 @@ export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
       await handler(input, message, context)
     }
 
-    const name = loc.join('-')
-    const topicFunction = builder.pubsub.topic(name).onPublish(wrapped)
+    const topicFunction = builder.pubsub.topic(functionPath).onPublish(wrapped)
     return topicFunction
   }
 
-  const schedule = <L extends Loc<S['schedule']>>(
-    loc: L,
+  const schedule = <FP extends FunctionPath<S['schedule']>>(
+    functionPath: FP,
     {
       builder,
       schedule,

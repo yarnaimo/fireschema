@@ -36,6 +36,9 @@ const createUserHandler: FunTypes.Callable.Handler<typeof functionsSchema.callab
   return wrap(data, context, async () => {
     expectType<Type.Merge<IUser, { timestamp: string }>>(data)
 
+    // @ts-expect-error timestamp
+    expectType<Type.Merge<IUser, { timestamp: number }>>(data)
+
     if (data.age < 0) {
       throw new functions.https.HttpsError('out-of-range', 'out of range')
     } else if (100 <= data.age) {
@@ -45,21 +48,52 @@ const createUserHandler: FunTypes.Callable.Handler<typeof functionsSchema.callab
   })
 }
 
+const toUpperCaseHandler: FunTypes.Callable.Handler<typeof functionsSchema.callable.nested.toUpperCase> = async (
+  data,
+  context,
+) => {
+  return wrap(data, context, async () => {
+    expectType<{ text: string }>(data)
+    return { result: data.text.toUpperCase() }
+  })
+}
+
 const callable = {
-  createUser: $register.callable(['createUser'], {
+  createUser: $register.callable('createUser', {
     builder,
     handler: createUserHandler,
   }),
+  nested: {
+    toUpperCase: $register.callable('nested-toUpperCase', {
+      builder,
+      handler: toUpperCaseHandler,
+    }),
+  },
 }
 
-const _errorExpected = $register.callable(['createUser'], {
-  builder,
-  // @ts-expect-error: result
-  handler: async (data, context) => ({ result: null }),
+!(() => {
+  $register.callable(
+    // @ts-expect-error: invalid path
+    '_createUser',
+    { builder, handler: {} as any },
+  )
+  $register.callable('createUser', {
+    builder,
+    handler: async (data, context) =>
+      // @ts-expect-error: result type
+      ({ result: null }),
+  })
+
+  $register.callable('nested-toUpperCase', {
+    builder,
+    handler: async (data, context) =>
+      // @ts-expect-error: result type
+      ({ result: null }),
+  })
 })
 
 const http = {
-  getKeys: $register.http(['getKeys'], {
+  getKeys: $register.http('getKeys', {
     builder,
     handler: (req, resp) => {
       if (req.method !== 'POST') {
@@ -72,7 +106,7 @@ const http = {
 }
 
 const topic = {
-  publishMessage: $register.topic(['publishMessage'], {
+  publishMessage: $register.topic('publishMessage', {
     builder,
     handler: async (data) => {
       expectType<{ text: string }>(data)
@@ -82,7 +116,7 @@ const topic = {
 }
 
 const schedule = {
-  cron: $register.schedule(['cron'], {
+  cron: $register.schedule('cron', {
     builder,
     schedule: '0 0 * * *',
     handler: async (context) => {

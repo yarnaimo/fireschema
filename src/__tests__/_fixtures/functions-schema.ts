@@ -8,6 +8,12 @@ const callable = {
     $jsonSchema<Type.Merge<IUser, { timestamp: string }>>(),
     $jsonSchema<{ result: number }>(),
   ),
+  nested: {
+    toUpperCase: functionInterface.callable(
+      $jsonSchema<{ text: string }>(),
+      $jsonSchema<{ result: string }>(),
+    ),
+  },
 }
 
 const http = {
