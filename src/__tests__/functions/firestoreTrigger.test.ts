@@ -2,7 +2,6 @@ import { firestore } from 'firebase-admin'
 import functionsTest from 'firebase-functions-test'
 import { postAData, userData } from '../_fixtures/data'
 import { decodeUser } from '../_fixtures/firestore-schema'
-// @ts-ignore ts2497
 import { firestoreTrigger } from '../_infrastructure/functions-server'
 
 const ftest = functionsTest()

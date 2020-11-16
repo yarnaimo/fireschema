@@ -1,6 +1,5 @@
 import { PubSub } from '@google-cloud/pubsub'
-import { initCaller, initTopicClient } from '../..'
-import { functionsSchema } from '../_fixtures/functions-schema'
+import { Caller, TopicClient } from '../..'
 import { authedApp } from './_app'
 import { emulatorOrigin, projectId } from './_config'
 
@@ -9,8 +8,9 @@ const functionsApp = app.functions('asia-northeast1')
 
 functionsApp.useFunctionsEmulator(emulatorOrigin.functions)
 
-export const $call = initCaller(functionsApp, functionsSchema)
-export const $topic = initTopicClient(
+type FunctionsModule = typeof import('./functions-server')
+
+export const $call = Caller<FunctionsModule>(functionsApp)
+export const $topic = TopicClient<FunctionsModule>(
   new PubSub({ apiEndpoint: emulatorOrigin.pubsub, projectId }),
-  functionsSchema,
 )

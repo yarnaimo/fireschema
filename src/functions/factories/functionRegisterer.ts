@@ -5,41 +5,30 @@ import {
   pubsub,
   ScheduleRetryConfig,
 } from 'firebase-functions'
-import { assertJsonSchema, FunTypes } from '..'
+import { FunTypes } from '..'
 import { STypes } from '../..'
-import { GetDeep } from '../../types/_object'
-import { getDeep } from '../../utils/_object'
-import { $input, messages } from '../constants'
-import { FunctionPath, ParseFunctionPath } from '../_types'
-import { parseFunctionPath } from '../_utils'
+import { Type } from '../../lib/type'
+import { withType } from '../../utils/_type'
+import { messages } from '../constants'
+import { FirestoreTriggerRegisterer } from './firestoreTriggerRegisterer'
+import { assertJsonSchema } from './functions-schema'
 
-export const FunctionRegisterer = <
-  FS extends FunTypes.SchemaOptions,
-  S extends STypes.RootOptions.All
->(
+export const FunctionRegisterer = <S extends STypes.RootOptions.All>(
+  firestoreSchema: S,
   { https, logger }: typeof import('firebase-functions'),
-  functionsSchema: FS,
   timezone: string,
 ) => {
-  const callable = <
-    FP extends FunctionPath<FS['callable']>,
-    L extends string[] = ParseFunctionPath<FP>,
-    _C = GetDeep<FS['callable'], L>,
-    C extends FunTypes.EnsureIO<_C> = FunTypes.EnsureIO<_C>
-  >(
-    functionPath: FP,
-    {
-      builder,
-      handler,
-    }: {
-      builder: FunctionBuilder
-      handler: FunTypes.Callable.Handler<C>
-    },
-  ) => {
-    const loc = parseFunctionPath(functionPath)
-    const options = getDeep(functionsSchema.callable, loc) as C
-    assertJsonSchema(options)
-    const inputRuntype = options[$input] as C[typeof $input]
+  const callable = <I extends Type.JsonObject, O extends Type.JsonObject>({
+    schema: [inputRuntype, outputRuntype],
+    builder,
+    handler,
+  }: {
+    schema: FunTypes.SchemaTuple<I, O>
+    builder: FunctionBuilder
+    handler: FunTypes.Callable.Handler<I, O>
+  }) => {
+    assertJsonSchema(inputRuntype)
+    assertJsonSchema(outputRuntype)
 
     const wrapped = async (data: unknown, context: https.CallableContext) => {
       const validated = inputRuntype.validate(data)
@@ -52,70 +41,62 @@ export const FunctionRegisterer = <
       return output
     }
 
-    const callableFunction = builder.https.onCall(wrapped)
-    return callableFunction
+    return withType<FunTypes.Callable.Meta<I, O>>()(
+      builder.https.onCall(wrapped),
+    )
   }
 
-  const http = <FP extends FunctionPath<FS['http']>>(
-    functionPath: FP,
+  const http = ({
+    builder,
+    handler,
+  }: {
+    builder: FunctionBuilder
+    handler: FunTypes.Http.Handler
+  }) => {
+    return builder.https.onRequest(handler)
+  }
+
+  const topic = <N extends string, I extends Type.JsonObject>(
+    topicName: N,
     {
+      schema,
       builder,
       handler,
     }: {
+      schema: FunTypes.JsonSchema<I>
       builder: FunctionBuilder
-      handler: FunTypes.Http.Handler
-    },
-  ) => {
-    const onRequestFunction = builder.https.onRequest(handler)
-    return onRequestFunction
-  }
-
-  const topic = <
-    FP extends FunctionPath<FS['topic']>,
-    L extends string[] = ParseFunctionPath<FP>,
-    _C = GetDeep<FS['topic'], L>,
-    C extends FunTypes.EnsureIO<_C> = FunTypes.EnsureIO<_C>
-  >(
-    functionPath: FP,
-    {
-      builder,
-      handler,
-    }: {
-      builder: FunctionBuilder
-      handler: FunTypes.Topic.Handler<C>
+      handler: FunTypes.Topic.Handler<I>
     },
   ) => {
     const wrapped = async (message: pubsub.Message, context: EventContext) => {
-      const input = message.json as FunTypes.InputType<C>
+      const input = message.json as I
       await handler(input, message, context)
     }
 
-    const topicFunction = builder.pubsub.topic(functionPath).onPublish(wrapped)
-    return topicFunction
+    return withType<FunTypes.Topic.Meta<N, I>>()(
+      builder.pubsub.topic(topicName).onPublish(wrapped),
+    )
   }
 
-  const schedule = <FP extends FunctionPath<FS['schedule']>>(
-    functionPath: FP,
-    {
-      builder,
-      schedule,
-      handler,
-      retryConfig = {},
-    }: {
-      builder: FunctionBuilder
-      schedule: string
-      handler: FunTypes.Schedule.Handler
-      retryConfig?: ScheduleRetryConfig
-    },
-  ) => {
-    const scheduleFunction = builder.pubsub
+  const schedule = ({
+    builder,
+    schedule,
+    handler,
+    retryConfig = {},
+  }: {
+    builder: FunctionBuilder
+    schedule: string
+    handler: FunTypes.Schedule.Handler
+    retryConfig?: ScheduleRetryConfig
+  }) => {
+    return builder.pubsub
       .schedule(schedule)
       .timeZone(timezone)
       .retryConfig(retryConfig)
       .onRun(handler)
-
-    return scheduleFunction
   }
 
-  return { callable, http, topic, schedule }
+  const firestoreTrigger = FirestoreTriggerRegisterer(firestoreSchema)
+
+  return { callable, http, topic, schedule, firestoreTrigger }
 }

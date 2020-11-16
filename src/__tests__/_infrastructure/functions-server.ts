@@ -1,9 +1,7 @@
 import * as functions from 'firebase-functions'
 import { Change } from 'firebase-functions'
 import { expectType } from 'tsd'
-import { FunctionRegisterer, initFunctions, messages } from '../..'
-import { FunTypes } from '../../functions'
-import { FirestoreTriggerRegisterer } from '../../functions/factories/firestoreTriggerRegisterer'
+import { $jsonSchema, FunctionRegisterer, FunTypes, messages } from '../..'
 import { Type } from '../../lib/type'
 import { fadmin } from '../../types/_firestore'
 import {
@@ -11,18 +9,13 @@ import {
   IPostA,
   IPostB,
   IUser,
+  IUserJson,
   IUserLocal,
 } from '../_fixtures/firestore-schema'
-import { functionsSchema } from '../_fixtures/functions-schema'
 import { region } from './_config'
 
 const timezone = 'Asia/Tokyo'
-const registerFunction = FunctionRegisterer(
-  functions,
-  functionsSchema,
-  timezone,
-)
-const registerFirestoreTrigger = FirestoreTriggerRegisterer(firestoreSchema)
+const $register = FunctionRegisterer(firestoreSchema, functions, timezone)
 
 const builder = functions.region(region)
 
@@ -43,15 +36,19 @@ const wrap = async <T, U>(
   }
 }
 
-const createUserHandler: FunTypes.Callable.Handler<typeof functionsSchema.callable.createUser> = async (
-  data,
-  context,
-) => {
+const createUserSchema = [
+  $jsonSchema<IUserJson>(),
+  $jsonSchema<{ result: number }>(),
+] as const
+const createUserHandler: FunTypes.Callable.Handler<
+  IUserJson,
+  { result: number }
+> = async (data, context) => {
   return wrap(data, context, async () => {
-    expectType<Type.Merge<IUser, { timestamp: string }>>(data)
+    expectType<IUserJson>(data)
 
     // @ts-expect-error timestamp
-    expectType<Type.Merge<IUser, { timestamp: number }>>(data)
+    expectType<Type.Merge<IUserJson, { timestamp: number }>>(data)
 
     if (data.age < 0) {
       throw new functions.https.HttpsError('out-of-range', 'out of range')
@@ -62,23 +59,30 @@ const createUserHandler: FunTypes.Callable.Handler<typeof functionsSchema.callab
   })
 }
 
-const toUpperCaseHandler: FunTypes.Callable.Handler<typeof functionsSchema.callable.nested.toUpperCase> = async (
-  data,
-  context,
-) => {
+const toUpperCaseSchema = [
+  $jsonSchema<{ text: string }>(),
+  $jsonSchema<{ result: string }>(),
+] as const
+const toUpperCaseHandler: FunTypes.Callable.Handler<
+  { text: string },
+  { result: string }
+> = async (data, context) => {
   return wrap(data, context, async () => {
     expectType<{ text: string }>(data)
     return { result: data.text.toUpperCase() }
   })
 }
 
-const callable = {
-  createUser: registerFunction.callable('createUser', {
+export const callable = {
+  createUser: $register.callable({
+    schema: createUserSchema,
     builder,
     handler: createUserHandler,
   }),
+
   nested: {
-    toUpperCase: registerFunction.callable('nested-toUpperCase', {
+    toUpperCase: $register.callable({
+      schema: toUpperCaseSchema,
       builder,
       handler: toUpperCaseHandler,
     }),
@@ -86,19 +90,16 @@ const callable = {
 }
 
 !(() => {
-  registerFunction.callable(
-    // @ts-expect-error: invalid path
-    '_createUser',
-    { builder, handler: {} as any },
-  )
-  registerFunction.callable('createUser', {
+  $register.callable({
+    schema: createUserSchema,
     builder,
     handler: async (data, context) =>
       // @ts-expect-error: result type
       ({ result: null }),
   })
 
-  registerFunction.callable('nested-toUpperCase', {
+  $register.callable({
+    schema: toUpperCaseSchema,
     builder,
     handler: async (data, context) =>
       // @ts-expect-error: result type
@@ -106,8 +107,8 @@ const callable = {
   })
 })
 
-const http = {
-  getKeys: registerFunction.http('getKeys', {
+export const http = {
+  getKeys: $register.http({
     builder,
     handler: (req, resp) => {
       if (req.method !== 'POST') {
@@ -119,8 +120,9 @@ const http = {
   }),
 }
 
-const topic = {
-  publishMessage: registerFunction.topic('publishMessage', {
+export const topic = {
+  publishMessage: $register.topic('publish_message', {
+    schema: $jsonSchema<{ text: string }>(),
     builder,
     handler: async (data) => {
       expectType<{ text: string }>(data)
@@ -129,8 +131,8 @@ const topic = {
   }),
 }
 
-const schedule = {
-  cron: registerFunction.schedule('cron', {
+export const schedule = {
+  cron: $register.schedule({
     builder,
     schedule: '0 0 * * *',
     handler: async (context) => {
@@ -139,8 +141,8 @@ const schedule = {
   }),
 }
 
-const firestoreTrigger = {
-  onPostCreate: registerFirestoreTrigger.onCreate({
+export const firestoreTrigger = {
+  onPostCreate: $register.firestoreTrigger.onCreate({
     builder,
     path: 'versions/v1/users/{uid}/posts/{postId}',
     handler: async (decodedData, snap, context) => {
@@ -154,7 +156,7 @@ const firestoreTrigger = {
     },
   }),
 
-  onUserCreate: registerFirestoreTrigger.onCreate({
+  onUserCreate: $register.firestoreTrigger.onCreate({
     builder,
     path: 'versions/v1/users/{uid}',
     handler: async (decodedData, snap, context) => {
@@ -168,7 +170,7 @@ const firestoreTrigger = {
     },
   }),
 
-  onUserDelete: registerFirestoreTrigger.onDelete({
+  onUserDelete: $register.firestoreTrigger.onDelete({
     builder,
     path: 'versions/v1/users/{uid}',
     handler: async (decodedData, snap, context) => {
@@ -179,7 +181,7 @@ const firestoreTrigger = {
     },
   }),
 
-  onUserUpdate: registerFirestoreTrigger.onUpdate({
+  onUserUpdate: $register.firestoreTrigger.onUpdate({
     builder,
     path: 'versions/v1/users/{uid}',
     handler: async (decodedData, snap, context) => {
@@ -190,7 +192,7 @@ const firestoreTrigger = {
     },
   }),
 
-  onUserWrite: registerFirestoreTrigger.onWrite({
+  onUserWrite: $register.firestoreTrigger.onWrite({
     builder,
     path: 'versions/v1/users/{uid}',
     handler: async (decodedData, snap, context) => {
@@ -206,11 +208,3 @@ const firestoreTrigger = {
     },
   }),
 }
-
-export = initFunctions(functionsSchema, {
-  callable,
-  http,
-  topic,
-  schedule,
-  firestoreTrigger,
-})

@@ -3,13 +3,14 @@ import type {
   CloudFunction,
   EventContext,
   https,
+  HttpsFunction,
   pubsub,
   Request,
   Response,
 } from 'firebase-functions'
 import { $ } from '../runtypes'
 import { fadmin } from '../types/_firestore'
-import { $input, $output } from './constants'
+import { $input, $output, $topicName } from './constants'
 
 export declare namespace FunTypes {
   // export type Jsonfy<T> = {
@@ -22,39 +23,31 @@ export declare namespace FunTypes {
 
   export type JsonSchema<T> = $.Runtype<unknown> & { __T__: T }
 
-  export type RecordBase = $.Runtype<{}>
-
-  export type SchemaOptions = {
-    callable: NestedOptions
-    http: NestedOptions
-    topic: NestedOptions
-    schedule: NestedOptions
+  export type NestedFunctions = {
+    [K in string]: CloudFunction<any> | HttpsFunction | NestedFunctions
   }
 
-  export type NestedOptions = {
-    [K in string]: IO<any, any> | NestedOptions
+  export type FunctionsModule = {
+    callable: NestedFunctions
+    http: NestedFunctions
+    topic: NestedFunctions
+    schedule: NestedFunctions
+    firestoreTrigger: NestedFunctions
   }
 
-  export type IO<I, O> = {
-    [$input]: FunTypes.JsonSchema<I>
-    [$output]: FunTypes.JsonSchema<O>
-  }
-
-  export type EnsureIO<_C> = _C extends IO<any, any> ? _C : never
-
-  export type InputType<C extends IO<any, any>> = C extends IO<infer I, any>
-    ? I
-    : never
-
-  export type OutputType<C extends IO<any, any>> = C extends IO<any, infer O>
-    ? O
-    : never
+  export type SchemaTuple<I, O> = readonly [
+    input: FunTypes.JsonSchema<I>,
+    output: FunTypes.JsonSchema<O>,
+  ]
 
   export namespace Callable {
-    export type Handler<C extends IO<any, any>> = (
-      inputData: InputType<C>,
+    export type Meta<I, O> = { [$input]: I; [$output]: O }
+    export type EnsureMeta<_C> = _C extends Meta<any, any> ? _C : never
+
+    export type Handler<I, O> = (
+      inputData: I,
       context: https.CallableContext,
-    ) => Promise<OutputType<C>>
+    ) => Promise<O>
   }
 
   export namespace Http {
@@ -62,8 +55,11 @@ export declare namespace FunTypes {
   }
 
   export namespace Topic {
-    export type Handler<C extends IO<any, any>> = (
-      inputData: InputType<C>,
+    export type Meta<N, I> = { [$topicName]: N; [$input]: I }
+    export type EnsureMeta<_C> = _C extends Meta<any, any> ? _C : never
+
+    export type Handler<I> = (
+      inputData: I,
       message: pubsub.Message,
       context: EventContext,
     ) => Promise<void>
