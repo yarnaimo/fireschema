@@ -1,2 +1,2 @@
-export * from './function-registerer'
+export * from './functionRegisterer'
 export * from './functions-schema'

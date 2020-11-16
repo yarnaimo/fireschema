@@ -1,4 +1,4 @@
-import type {
+import {
   EventContext,
   FunctionBuilder,
   https,
@@ -6,21 +6,25 @@ import type {
   ScheduleRetryConfig,
 } from 'firebase-functions'
 import { assertJsonSchema, FunTypes } from '..'
+import { STypes } from '../..'
 import { GetDeep } from '../../types/_object'
 import { getDeep } from '../../utils/_object'
 import { $input, messages } from '../constants'
 import { FunctionPath, ParseFunctionPath } from '../_types'
 import { parseFunctionPath } from '../_utils'
 
-export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
+export const FunctionRegisterer = <
+  FS extends FunTypes.SchemaOptions,
+  S extends STypes.RootOptions.All
+>(
   { https, logger }: typeof import('firebase-functions'),
-  schemaOptions: S,
+  functionsSchema: FS,
   timezone: string,
 ) => {
   const callable = <
-    FP extends FunctionPath<S['callable']>,
+    FP extends FunctionPath<FS['callable']>,
     L extends string[] = ParseFunctionPath<FP>,
-    _C = GetDeep<S['callable'], L>,
+    _C = GetDeep<FS['callable'], L>,
     C extends FunTypes.EnsureIO<_C> = FunTypes.EnsureIO<_C>
   >(
     functionPath: FP,
@@ -33,7 +37,7 @@ export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
     },
   ) => {
     const loc = parseFunctionPath(functionPath)
-    const options = getDeep(schemaOptions.callable, loc) as C
+    const options = getDeep(functionsSchema.callable, loc) as C
     assertJsonSchema(options)
     const inputRuntype = options[$input] as C[typeof $input]
 
@@ -52,7 +56,7 @@ export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
     return callableFunction
   }
 
-  const http = <FP extends FunctionPath<S['http']>>(
+  const http = <FP extends FunctionPath<FS['http']>>(
     functionPath: FP,
     {
       builder,
@@ -67,9 +71,9 @@ export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
   }
 
   const topic = <
-    FP extends FunctionPath<S['topic']>,
+    FP extends FunctionPath<FS['topic']>,
     L extends string[] = ParseFunctionPath<FP>,
-    _C = GetDeep<S['topic'], L>,
+    _C = GetDeep<FS['topic'], L>,
     C extends FunTypes.EnsureIO<_C> = FunTypes.EnsureIO<_C>
   >(
     functionPath: FP,
@@ -90,7 +94,7 @@ export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
     return topicFunction
   }
 
-  const schedule = <FP extends FunctionPath<S['schedule']>>(
+  const schedule = <FP extends FunctionPath<FS['schedule']>>(
     functionPath: FP,
     {
       builder,
@@ -100,7 +104,7 @@ export const initFunctionRegisterer = <S extends FunTypes.SchemaOptions>(
     }: {
       builder: FunctionBuilder
       schedule: string
-      handler: (context: EventContext) => Promise<void>
+      handler: FunTypes.Schedule.Handler
       retryConfig?: ScheduleRetryConfig
     },
   ) => {

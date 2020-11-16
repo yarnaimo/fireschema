@@ -1,4 +1,6 @@
 import type {
+  Change,
+  CloudFunction,
   EventContext,
   https,
   pubsub,
@@ -6,6 +8,7 @@ import type {
   Response,
 } from 'firebase-functions'
 import { $ } from '../runtypes'
+import { fadmin } from '../types/_firestore'
 import { $input, $output } from './constants'
 
 export declare namespace FunTypes {
@@ -62,6 +65,34 @@ export declare namespace FunTypes {
     export type Handler<C extends IO<any, any>> = (
       inputData: InputType<C>,
       message: pubsub.Message,
+      context: EventContext,
+    ) => Promise<void>
+  }
+
+  export namespace Schedule {
+    export type Handler = (context: EventContext) => Promise<void>
+  }
+
+  export namespace FirestoreTrigger {
+    export type NestedOptions = {
+      [K in string]: CloudFunction<any> | NestedOptions
+    }
+
+    export type OnCreateOrDeleteHandler<T, U> = (
+      decodedData: U,
+      snap: fadmin.QueryDocumentSnapshot<T>,
+      context: EventContext,
+    ) => Promise<void>
+
+    export type OnUpdateHandler<T, U> = (
+      decodedData: Change<U>,
+      snap: Change<fadmin.QueryDocumentSnapshot<T>>,
+      context: EventContext,
+    ) => Promise<void>
+
+    export type OnWriteHandler<T, U> = (
+      decodedData: Change<U | undefined>,
+      snap: Change<fadmin.DocumentSnapshot<T>>,
       context: EventContext,
     ) => Promise<void>
   }

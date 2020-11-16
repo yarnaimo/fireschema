@@ -1,7 +1,7 @@
-import { initFunctionRegisterer } from '../factories'
+import { FunctionRegisterer } from '../factories'
 import { FunTypes } from '../FunTypes'
 
-type Registerer = ReturnType<typeof initFunctionRegisterer>
+type Registerer = ReturnType<typeof FunctionRegisterer>
 
 type Registered<
   T extends keyof FunTypes.SchemaOptions & keyof Registerer
@@ -14,13 +14,21 @@ type Runnables<
   ? Registered<T>
   : { [K in keyof CN]: Runnables<CN[K], T> }
 
-type RegisteredRunnables<S extends FunTypes.SchemaOptions> = {
+type RegisteredRunnables<
+  S extends FunTypes.SchemaOptions,
+  FT extends FunTypes.FirestoreTrigger.NestedOptions
+> = {
   [K in keyof S & keyof Registerer]: Runnables<S[K], K>
+} & {
+  firestoreTrigger: FT
 }
 
-export const initFunctions = <S extends FunTypes.SchemaOptions>(
+export const initFunctions = <
+  S extends FunTypes.SchemaOptions,
+  FT extends FunTypes.FirestoreTrigger.NestedOptions
+>(
   schemaOptions: S,
-  runnables: RegisteredRunnables<S>,
+  runnables: RegisteredRunnables<S, FT>,
 ) => {
   return runnables
 }

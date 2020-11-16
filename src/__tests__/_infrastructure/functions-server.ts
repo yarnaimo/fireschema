@@ -1,14 +1,28 @@
 import * as functions from 'firebase-functions'
+import { Change } from 'firebase-functions'
 import { expectType } from 'tsd'
-import { initFunctionRegisterer, initFunctions, messages } from '../..'
+import { FunctionRegisterer, initFunctions, messages } from '../..'
 import { FunTypes } from '../../functions'
+import { FirestoreTriggerRegisterer } from '../../functions/factories/firestoreTriggerRegisterer'
 import { Type } from '../../lib/type'
-import { IUser } from '../_fixtures/firestore-schema'
+import { fadmin } from '../../types/_firestore'
+import {
+  firestoreSchema,
+  IPostA,
+  IPostB,
+  IUser,
+  IUserLocal,
+} from '../_fixtures/firestore-schema'
 import { functionsSchema } from '../_fixtures/functions-schema'
 import { region } from './_config'
 
 const timezone = 'Asia/Tokyo'
-const $register = initFunctionRegisterer(functions, functionsSchema, timezone)
+const registerFunction = FunctionRegisterer(
+  functions,
+  functionsSchema,
+  timezone,
+)
+const registerFirestoreTrigger = FirestoreTriggerRegisterer(firestoreSchema)
 
 const builder = functions.region(region)
 
@@ -59,12 +73,12 @@ const toUpperCaseHandler: FunTypes.Callable.Handler<typeof functionsSchema.calla
 }
 
 const callable = {
-  createUser: $register.callable('createUser', {
+  createUser: registerFunction.callable('createUser', {
     builder,
     handler: createUserHandler,
   }),
   nested: {
-    toUpperCase: $register.callable('nested-toUpperCase', {
+    toUpperCase: registerFunction.callable('nested-toUpperCase', {
       builder,
       handler: toUpperCaseHandler,
     }),
@@ -72,19 +86,19 @@ const callable = {
 }
 
 !(() => {
-  $register.callable(
+  registerFunction.callable(
     // @ts-expect-error: invalid path
     '_createUser',
     { builder, handler: {} as any },
   )
-  $register.callable('createUser', {
+  registerFunction.callable('createUser', {
     builder,
     handler: async (data, context) =>
       // @ts-expect-error: result type
       ({ result: null }),
   })
 
-  $register.callable('nested-toUpperCase', {
+  registerFunction.callable('nested-toUpperCase', {
     builder,
     handler: async (data, context) =>
       // @ts-expect-error: result type
@@ -93,7 +107,7 @@ const callable = {
 })
 
 const http = {
-  getKeys: $register.http('getKeys', {
+  getKeys: registerFunction.http('getKeys', {
     builder,
     handler: (req, resp) => {
       if (req.method !== 'POST') {
@@ -106,7 +120,7 @@ const http = {
 }
 
 const topic = {
-  publishMessage: $register.topic('publishMessage', {
+  publishMessage: registerFunction.topic('publishMessage', {
     builder,
     handler: async (data) => {
       expectType<{ text: string }>(data)
@@ -116,7 +130,7 @@ const topic = {
 }
 
 const schedule = {
-  cron: $register.schedule('cron', {
+  cron: registerFunction.schedule('cron', {
     builder,
     schedule: '0 0 * * *',
     handler: async (context) => {
@@ -125,4 +139,78 @@ const schedule = {
   }),
 }
 
-export = initFunctions(functionsSchema, { callable, http, topic, schedule })
+const firestoreTrigger = {
+  onPostCreate: registerFirestoreTrigger.onCreate({
+    builder,
+    path: 'versions/v1/users/{uid}/posts/{postId}',
+    handler: async (decodedData, snap, context) => {
+      expectType<IPostA | IPostB>(decodedData)
+      expectType<fadmin.QueryDocumentSnapshot<IPostA | IPostB>>(snap)
+
+      // @ts-expect-error IUser
+      expectType<IUser>(decodedData)
+
+      return { decodedData, snap } as any
+    },
+  }),
+
+  onUserCreate: registerFirestoreTrigger.onCreate({
+    builder,
+    path: 'versions/v1/users/{uid}',
+    handler: async (decodedData, snap, context) => {
+      expectType<IUserLocal>(decodedData)
+      expectType<fadmin.QueryDocumentSnapshot<IUser>>(snap)
+
+      // @ts-expect-error IPostA
+      expectType<IPostA>(decodedData)
+
+      return { decodedData, snap } as any
+    },
+  }),
+
+  onUserDelete: registerFirestoreTrigger.onDelete({
+    builder,
+    path: 'versions/v1/users/{uid}',
+    handler: async (decodedData, snap, context) => {
+      expectType<IUserLocal>(decodedData)
+      expectType<fadmin.QueryDocumentSnapshot<IUser>>(snap)
+
+      return { decodedData, snap } as any
+    },
+  }),
+
+  onUserUpdate: registerFirestoreTrigger.onUpdate({
+    builder,
+    path: 'versions/v1/users/{uid}',
+    handler: async (decodedData, snap, context) => {
+      expectType<Change<IUserLocal>>(decodedData)
+      expectType<Change<fadmin.QueryDocumentSnapshot<IUser>>>(snap)
+
+      return { decodedData, snap } as any
+    },
+  }),
+
+  onUserWrite: registerFirestoreTrigger.onWrite({
+    builder,
+    path: 'versions/v1/users/{uid}',
+    handler: async (decodedData, snap, context) => {
+      expectType<Change<IUserLocal | undefined>>(decodedData)
+      expectType<Change<fadmin.DocumentSnapshot<IUser>>>(snap)
+
+      // @ts-expect-error undefined
+      expectType<Change<IUserLocal>>(decodedData)
+      // @ts-expect-error QueryDocumentSnapshot
+      expectType<Change<fadmin.QueryDocumentSnapshot<IUser>>>(snap)
+
+      return { decodedData, snap } as any
+    },
+  }),
+}
+
+export = initFunctions(functionsSchema, {
+  callable,
+  http,
+  topic,
+  schedule,
+  firestoreTrigger,
+})
