@@ -77,12 +77,11 @@ fireschema が依存する一部のパッケージは **TypeScript 3.9** に依�
 
 ## Usage
 
-**注意事項**
-
-- fireschema は変数名に応じてコードを変換するため、**fireschema からのインポート以外で以下の変数名を使用しないでください**。
-  - **`$documentSchema`**
-  - **`$collectionAdapter`**
-  - **`__$__`**
+> 以下の変数名は特殊な意味を持つため、fireschema からのインポート以外で使用しないでください。
+>
+> - `$documentSchema`
+> - `$collectionAdapter`
+> - `__$__`
 
 **Case**
 
@@ -95,20 +94,23 @@ fireschema が依存する一部のパッケージは **TypeScript 3.9** に依�
 
 スキーマ定義は **`firestoreSchema`** として named export してください。
 
+<!-- AUTO-GENERATED-CONTENT:START (CODE:src=./src/example/schema-example.ts) -->
+<!-- The below code snippet is automatically added from ./src/example/schema-example.ts -->
+
 ```ts
 import {
   $adapter,
   $allow,
+  $collectionAdapter,
   $collectionGroups,
   $docLabel,
   $documentSchema,
   $functions,
   $or,
   $schema,
-  $collectionAdapter,
   createFirestoreSchema,
   FTypes,
-} from '..'
+} from 'fireschema'
 
 // user
 type User = {
@@ -181,12 +183,14 @@ export const firestoreSchema = createFirestoreSchema({
       [$adapter]: PostAdapter,
       [$allow]: {
         read: true,
-        write: $or(['matchesUser(uid)']), // {uid} と一致するユーザーのみ可
+        write: 'matchesUser(uid)',
       },
     },
   },
 })
 ```
+
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 ### 2. firestore.rules 生成
 
@@ -198,6 +202,9 @@ yarn fireschema <スキーマのパス>.ts
 
 <details>
   <summary>生成される firestore.rules の例</summary>
+
+<!-- AUTO-GENERATED-CONTENT:START (CODE:src=./firestore.rules) -->
+<!-- The below code snippet is automatically added from ./firestore.rules -->
 
 ```rules
 rules_version = '2';
@@ -220,7 +227,7 @@ service cloud.firestore {
       function __validator_0__(data) {
         return (
           data.name is string
-            && ((data.displayName == null || !(displayName in data)) || data.displayName is string)
+            && ((data.displayName == null || !("displayName" in data)) || data.displayName is string)
             && (data.age is int || data.age is float)
             && data.timestamp is timestamp
             && data.options.a is bool
@@ -251,84 +258,109 @@ service cloud.firestore {
 }
 ```
 
+<!-- AUTO-GENERATED-CONTENT:END -->
+
 </details>
 
 ### 3. コレクション・ドキュメントの操作
 
-#### コントローラの初期化
+fireschema のコントローラは `RefAdapter` と `WriteAdapter` に分かれています。
+
+`RefAdapter` は web/admin 共通で、`WriteAdapter` は web と admin それぞれ作成する必要があります。
+
+<!-- AUTO-GENERATED-CONTENT:START (CODE:src=./src/example/adapter-example.ts) -->
+<!-- The below code snippet is automatically added from ./src/example/adapter-example.ts -->
 
 ```ts
-import firebase, { firestore, initializeApp } from 'firebase' // または firebase-admin
-import { firestoreSchema } from '<スキーマファイルのパス>'
+import firebase, { firestore, initializeApp } from 'firebase/app' // または firebase-admin
+import { createFirestoreRefAdapter, FirestoreRefAdapter } from 'fireschema'
+import {
+  createFirestoreWriteAdapter,
+  FirestoreWriteAdapter,
+} from '../firestore'
+import { firestoreSchema } from './schema-example'
 
+/**
+ * コントローラの初期化
+ */
 const app: firebase.app.App = initializeApp({
   // ...
 })
 const firestoreApp = app.firestore()
 
-const $store: FirestoreController<
-  typeof firestoreApp,
-  typeof schema
-> = initFirestore(firestore, firestoreApp, firestoreSchema)
-```
+export const $: FirestoreRefAdapter<typeof firestoreSchema> = createFirestoreRefAdapter(
+  firestoreSchema,
+)
+export const $web: FirestoreWriteAdapter<firebase.firestore.Firestore> = createFirestoreWriteAdapter(
+  firestore,
+  firestoreApp,
+)
 
-#### コレクションの参照・データ取得
+/**
+ * コレクションの参照・データ取得
+ */
+const users = $.collection(firestoreApp, 'users') // /users
+const user = users.doc('userId') // /users/userId
 
-```ts
-const users = $store.collection('root', 'users') // /users
-const user = users.ref.doc('userId') // /users/userId
+const posts = $.collection(user, 'posts') // /users/userId/posts
+const post = posts.doc('123') // /users/userId/posts/123
+const techPosts = $.collectionQuery(user, 'posts', (q) => q.byTag('tech'))
 
-const posts = $store.collection(user, 'posts') // /users/userId/posts
-const post = posts.ref.doc('123') // /users/userId/posts/123
+post.get() // Promise<DocumentSnapshot<PostA | PostB>>
+posts.get() // Promise<QuerySnapshot<PostA | PostB>>
+techPosts.get() // Promise<QuerySnapshot<PostA | PostB>>
 
-const postSnapshot = await post.get() // DocumentSnapshot<PostA | PostB>
+/**
+ * コレクションの親ドキュメントを参照
+ */
+const _user = $.getParentDocument(posts) // DocumentReference<User>
 
-const postsSnapshot = await posts.ref.get() // get collection
-const techPostsSnapshot = await posts.select.byTag('tech').get() // get query
-```
+/**
+ * DocumentReference に型をつける
+ */
+const untypedPostRef = firestoreApp.doc('users/{uid}/posts/post')
+const _post = $.typeDocument('users/{uid}/posts', untypedPostRef) // DocumentReference<PostA | PostB>
 
-コレクションの親ドキュメントを参照
+/**
+ * コレクショングループの参照・データ取得
+ */
+const postsGroup = $.collectionGroup(firestoreApp, 'users/{uid}/posts')
+const techPostsGroup = $.collectionGroupQuery(
+  firestoreApp,
+  'users/{uid}/posts',
+  (q) => q.byTag('tech'),
+)
 
-```ts
-const user = $store.parentOfCollection(posts.ref) // DocumentReference<User>
-```
+postsGroup.get() // Promise<QuerySnapshot<PostA | PostB>>
+techPostsGroup.get() // Promise<QuerySnapshot<PostA | PostB>>
 
-#### コレクショングループの参照・データ取得
-
-```ts
-const postsGroup = $store.collectionGroup(['users', 'posts'])
-const techPostsSnapshot = await postsGroup.select.byTag('tech').get()
-```
-
-#### ドキュメントの作成・更新
-
-- `create(docRef: DocumentReference<T>, data: T)`
-- `setMerge(docRef: DocumentReference<T>, data: Partial<T>)`
-- `update(docRef: DocumentReference<T>, data: Partial<T>)`
-- `delete(docRef: DocumentReference<T>)`
-
-```ts
-await $store.create(user, {
+/**
+ * ドキュメントの作成・更新
+ */
+$web.create(user, {
   name: 'umi',
   displayName: null,
   age: 16,
-  timestamp: $store.FieldValue.serverTimestamp(),
-}
-```
+  timestamp: firestore.FieldValue.serverTimestamp(),
+  options: { a: true },
+})
+$web.setMerge(user, {
+  age: 17,
+})
+$web.update(user, {
+  age: 17,
+})
+$web.delete(user)
 
-**トランザクション処理**
-
-- `get(docRef: DocumentReference<T>) => Promise<DocumentSnapshot<T>>`
-- `create(docRef: DocumentReference<T>, data: T)`
-- `setMerge(docRef: DocumentReference<T>, data: Partial<T>)`
-- `update(docRef: DocumentReference<T>, data: Partial<T>)`
-- `delete(docRef: DocumentReference<T>)`
-
-```ts
-await $store.runTransaction(async (tc) => {
-  const snapshot = await tc.get(user)
+/**
+ * トランザクション
+ */
+$web.runTransaction(async (tc) => {
+  const snap = await tc.get(user)
   tc.setMerge(user, {
-    age: snapshot.data()!.age + 1,
+    age: snap.data()!.age + 1,
   })
 })
 ```
+
+<!-- AUTO-GENERATED-CONTENT:END -->
