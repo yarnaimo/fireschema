@@ -1,5 +1,5 @@
-import { firestore } from 'firebase-admin'
 import functionsTest from 'firebase-functions-test'
+import { $web } from '../../example/adapter-example'
 import { postAData, userData } from '../_fixtures/data'
 import { decodeUser } from '../_fixtures/firestore-schema'
 import { firestoreTrigger } from '../_infrastructure/functions-server'
@@ -8,7 +8,7 @@ const ftest = functionsTest()
 const userPath = 'versions/v1/users/user'
 const postPath = 'versions/v1/users/user/posts/post'
 
-const timestamp = firestore.Timestamp.fromDate(new Date())
+const timestamp = $web.Timestamp.fromDate(new Date())
 const userDataWithTs = { ...userData, timestamp }
 const userDataWithTsUpdated = { ...userDataWithTs, age: userDataWithTs.age + 1 }
 
