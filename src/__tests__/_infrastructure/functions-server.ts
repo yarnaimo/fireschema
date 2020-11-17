@@ -1,3 +1,4 @@
+import { firestore } from 'firebase-admin'
 import * as functions from 'firebase-functions'
 import { Change } from 'firebase-functions'
 import { expectType } from 'tsd'
@@ -15,7 +16,12 @@ import {
 import { region } from './_config'
 
 const timezone = 'Asia/Tokyo'
-const $register = FunctionRegisterer(firestoreSchema, functions, timezone)
+const $register = FunctionRegisterer(
+  firestoreSchema,
+  firestore,
+  functions,
+  timezone,
+)
 
 const builder = functions.region(region)
 

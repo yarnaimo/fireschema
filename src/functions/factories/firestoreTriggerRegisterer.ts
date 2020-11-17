@@ -1,4 +1,3 @@
-import { firestore } from 'firebase-admin'
 import { Change, CloudFunction, FunctionBuilder } from 'firebase-functions'
 import { FunTypes } from '..'
 import { STypes } from '../..'
@@ -13,6 +12,7 @@ import { GetDeep } from '../../types/_object'
 
 export const FirestoreTriggerRegisterer = <S extends STypes.RootOptions.All>(
   firestoreSchema: S,
+  firestoreStatic: typeof fadmin,
 ) => {
   const buildDecoder = (path: string) => {
     const loc = firestorePathToLoc(path)
@@ -27,7 +27,7 @@ export const FirestoreTriggerRegisterer = <S extends STypes.RootOptions.All>(
     const decode = buildDecoder(path)
 
     return (documentSnap: fadmin.DocumentSnapshot) =>
-      documentSnap instanceof firestore.QueryDocumentSnapshot
+      documentSnap instanceof firestoreStatic.QueryDocumentSnapshot
         ? decode(documentSnap)
         : undefined
   }

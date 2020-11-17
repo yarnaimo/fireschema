@@ -8,6 +8,7 @@ import {
 import { FunTypes } from '..'
 import { STypes } from '../..'
 import { Type } from '../../lib/type'
+import { fadmin } from '../../types/_firestore'
 import { withType } from '../../utils/_type'
 import { messages } from '../constants'
 import { FirestoreTriggerRegisterer } from './firestoreTriggerRegisterer'
@@ -15,6 +16,7 @@ import { assertJsonSchema } from './functions-schema'
 
 export const FunctionRegisterer = <S extends STypes.RootOptions.All>(
   firestoreSchema: S,
+  firestoreStatic: typeof fadmin,
   { https, logger }: typeof import('firebase-functions'),
   timezone: string,
 ) => {
@@ -96,7 +98,10 @@ export const FunctionRegisterer = <S extends STypes.RootOptions.All>(
       .onRun(handler)
   }
 
-  const firestoreTrigger = FirestoreTriggerRegisterer(firestoreSchema)
+  const firestoreTrigger = FirestoreTriggerRegisterer(
+    firestoreSchema,
+    firestoreStatic,
+  )
 
   return { callable, http, topic, schedule, firestoreTrigger }
 }
