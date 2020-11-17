@@ -9,7 +9,7 @@ export type ParseFunctionPath<P extends string> =
 
 export type ExtractFunctionPaths<
   S extends FunTypes.NestedFunctions,
-  D extends number = 10
+  D extends number = 5
 > = [D] extends [never]
   ? never
   : {
@@ -23,7 +23,7 @@ export type ExtractFunctionPaths<
 export type GetTopicMeta<
   S extends FunTypes.NestedFunctions,
   TN extends string,
-  D extends number = 10
+  D extends number = 5
 > = [D] extends [never]
   ? never
   : {
@@ -38,7 +38,7 @@ export type GetTopicMeta<
 
 export type ExtractTopicNames<
   S extends FunTypes.NestedFunctions,
-  D extends number = 10
+  D extends number = 5
 > = [D] extends [never]
   ? never
   : {
