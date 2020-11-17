@@ -8,7 +8,7 @@ import type {
   Request,
   Response,
 } from 'firebase-functions'
-import { $ } from '../runtypes'
+import { $_ } from '../runtypes'
 import { fadmin } from '../types/_firestore'
 import { $input, $output, $topicName } from './constants'
 
@@ -21,7 +21,7 @@ export declare namespace FunTypes {
   //     : Jsonfy<T[K]>
   // }
 
-  export type JsonSchema<T> = $.Runtype<unknown> & { __T__: T }
+  export type JsonSchema<T> = $_.Runtype<unknown> & { __T__: T }
 
   export type NestedFunctions = {
     [K in string]: CloudFunction<any> | HttpsFunction | NestedFunctions

@@ -1,6 +1,6 @@
 import { $jsonSchema } from '../../functions/factories'
 import { Type } from '../../lib/type'
-import { $ } from '../../runtypes'
+import { $_ } from '../../runtypes'
 import { userDataJson } from '../_fixtures/data'
 import { IPostA, IPostB, IUser } from '../_fixtures/firestore-schema'
 
@@ -11,25 +11,25 @@ type IUserJson = Type.Merge<
   }
 >
 
-const UserJsonRuntype = $.Record({
-  name: $.String,
-  displayName: $.Null.Or($.String),
-  age: $.Number,
-  tags: $.Array($.Record({ id: $.Number, name: $.String })),
-  options: $.Record({ a: $.Boolean, b: $.String }),
+const UserJsonRuntype = $_.Record({
+  name: $_.String,
+  displayName: $_.Null.Or($_.String),
+  age: $_.Number,
+  tags: $_.Array($_.Record({ id: $_.Number, name: $_.String })),
+  options: $_.Record({ a: $_.Boolean, b: $_.String }),
 }).And(
-  $.Record({
-    timestamp: $.String,
+  $_.Record({
+    timestamp: $_.String,
   }),
 )
 
-const PostRuntype = $.Record({
-  type: $.Literal('a'),
-  text: $.String,
+const PostRuntype = $_.Record({
+  type: $_.Literal('a'),
+  text: $_.String,
 }).Or(
-  $.Record({
-    type: $.Literal('b'),
-    texts: $.Array($.String),
+  $_.Record({
+    type: $_.Literal('b'),
+    texts: $_.Array($_.String),
   }),
 )
 
@@ -55,8 +55,8 @@ test('normal', () => {
 test('union', () => {
   const result = $jsonSchema<IUserJson & ({ a: string } | { b: number })>()
 
-  const expectedA = UserJsonRuntype.And($.Record({ a: $.String }))
-  const expectedB = UserJsonRuntype.And($.Record({ b: $.Number }))
+  const expectedA = UserJsonRuntype.And($_.Record({ a: $_.String }))
+  const expectedB = UserJsonRuntype.And($_.Record({ b: $_.Number }))
 
   expect(result.toString()).toBe(expectedA.Or(expectedB).toString())
   expect(result.guard({ ...userDataJson, a: 'value' })).toBeTruthy()

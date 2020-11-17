@@ -53,7 +53,7 @@ function visitNodeAndChildren(
         [
           factory.createVariableDeclaration(
             factory.createObjectBindingPattern([
-              factory.createBindingElement(undefined, '$', '__$__'),
+              factory.createBindingElement(undefined, '$_', '__$__'),
             ]),
             undefined,
             undefined,
