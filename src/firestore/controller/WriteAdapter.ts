@@ -138,20 +138,19 @@ export type RunTransactionFn<F extends FTypes.FirestoreApp> = <R>(
 /**
  * all
  */
-export type FirestoreWriteAdapter<F extends FTypes.FirestoreApp> = Interactor<
-  F
-> & {
-  runTransaction: RunTransactionFn<F>
-}
+export type FirestoreWriteAdapter<F extends FTypes.FirestoreApp> = {
+  FieldValue: FTypes.FieldValueClass<F>
+  Timestamp: FTypes.TimestampClass<F>
+} & Interactor<F> & {
+    runTransaction: RunTransactionFn<F>
+  }
 
 export const createFirestoreWriteAdapter = <F extends FTypes.FirestoreApp>(
-  firestoreStatic: typeof fweb | typeof fadmin,
+  { FieldValue, Timestamp }: typeof fweb | typeof fadmin,
   app: F,
 ) => {
-  const interactor = buildInteractor<F>(firestoreStatic.FieldValue as any)
-  const TransactionController = buildTransactionController<F>(
-    firestoreStatic.FieldValue as any,
-  )
+  const interactor = buildInteractor<F>(FieldValue as any)
+  const TransactionController = buildTransactionController<F>(FieldValue as any)
 
   const runTransaction = <R>(
     fn: (
@@ -167,6 +166,8 @@ export const createFirestoreWriteAdapter = <F extends FTypes.FirestoreApp>(
   }
 
   return {
+    FieldValue,
+    Timestamp,
     ...interactor,
     runTransaction,
   } as FirestoreWriteAdapter<F>
