@@ -1,4 +1,4 @@
-import {
+import type {
   EventContext,
   FunctionBuilder,
   https,
@@ -17,7 +17,7 @@ import { assertJsonSchema } from './functions-schema'
 export const FunctionRegisterer = <S extends STypes.RootOptions.All>(
   firestoreSchema: S,
   firestoreStatic: typeof fadmin,
-  { https, logger }: typeof import('firebase-functions'),
+  functions: typeof import('firebase-functions'),
   timezone: string,
 ) => {
   const callable = <I extends Type.JsonObject, O extends Type.JsonObject>({
@@ -36,7 +36,10 @@ export const FunctionRegisterer = <S extends STypes.RootOptions.All>(
       const validated = inputRuntype.validate(data)
 
       if (!validated.success) {
-        throw new https.HttpsError('invalid-argument', messages.invalidRequest)
+        throw new functions.https.HttpsError(
+          'invalid-argument',
+          messages.invalidRequest,
+        )
       }
 
       const output = await handler(validated.value as any, context)
@@ -101,6 +104,7 @@ export const FunctionRegisterer = <S extends STypes.RootOptions.All>(
   const firestoreTrigger = FirestoreTriggerRegisterer(
     firestoreSchema,
     firestoreStatic,
+    functions,
   )
 
   return { callable, http, topic, schedule, firestoreTrigger }

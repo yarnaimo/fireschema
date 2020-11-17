@@ -1,4 +1,4 @@
-import { Change, CloudFunction, FunctionBuilder } from 'firebase-functions'
+import type { Change, CloudFunction, FunctionBuilder } from 'firebase-functions'
 import { FunTypes } from '..'
 import { STypes } from '../..'
 import { $schema, STypeUtils } from '../../firestore'
@@ -13,6 +13,7 @@ import { GetDeep } from '../../types/_object'
 export const FirestoreTriggerRegisterer = <S extends STypes.RootOptions.All>(
   firestoreSchema: S,
   firestoreStatic: typeof fadmin,
+  functions: typeof import('firebase-functions'),
 ) => {
   const buildDecoder = (path: string) => {
     const loc = firestorePathToLoc(path)
@@ -90,7 +91,7 @@ export const FirestoreTriggerRegisterer = <S extends STypes.RootOptions.All>(
     const decode = buildDecoder(path)
 
     return builder.firestore.document(path).onUpdate((change, context) => {
-      const decodedData = new Change(
+      const decodedData = new functions.Change(
         decode(change.before),
         decode(change.after),
       )
@@ -102,7 +103,7 @@ export const FirestoreTriggerRegisterer = <S extends STypes.RootOptions.All>(
     const decode = buildSnapDecoder(path)
 
     return builder.firestore.document(path).onWrite((change, context) => {
-      const decodedData = new Change(
+      const decodedData = new functions.Change(
         decode(change.before),
         decode(change.after),
       )
