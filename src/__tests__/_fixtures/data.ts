@@ -1,7 +1,7 @@
 import { firestore } from '@firebase/testing'
 import dayjs from 'dayjs'
+import { FTypes } from '../../core/types'
 import { Type } from '../../lib/type'
-import { FTypes } from '../../types'
 import { IPostA, IUser } from './firestore-schema'
 
 export const userData: Type.Merge<IUser, { timestamp: FTypes.FieldValue }> = {

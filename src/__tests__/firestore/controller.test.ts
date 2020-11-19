@@ -6,8 +6,8 @@ import {
   createFirestoreWriteAdapter,
   FirestoreRefAdapter,
   STypes,
-} from '../..'
-import { fadmin, fweb } from '../../types/_firestore'
+} from '../../core'
+import { _admin, _web } from '../../lib/firestore-types'
 import { userData } from '../_fixtures/data'
 import {
   firestoreSchema,
@@ -23,7 +23,7 @@ export const $: FirestoreRefAdapter<typeof firestoreSchema> = createFirestoreRef
   firestoreSchema,
 )
 
-const _collections = (app: fweb.Firestore) => {
+const _collections = (app: _web.Firestore) => {
   const versions = $.collection(app, 'versions')
   const v1 = versions.doc('v1')
 
@@ -62,33 +62,33 @@ const r = _collections(app)
 const ur = _collections(appUnauthed)
 
 type UserU = IUserLocal &
-  STypes.DocumentMeta<fadmin.Firestore> &
+  STypes.DocumentMeta<_admin.Firestore> &
   STypes.HasLoc<['versions', 'users']> &
   STypes.HasT<IUser>
 
 type PostU = (IPostA | IPostB) &
-  STypes.DocumentMeta<fadmin.Firestore> &
+  STypes.DocumentMeta<_admin.Firestore> &
   STypes.HasLoc<['versions', 'users', 'posts']> &
   STypes.HasT<IPostA | IPostB>
 
 describe('types', () => {
   test('UAt', () => {
     expectType<typeof r.user>(
-      {} as fweb.DocumentReference<
-        STypes.UAt<typeof firestoreSchema, fweb.Firestore, 'versions/v1/users'>
+      {} as _web.DocumentReference<
+        STypes.UAt<typeof firestoreSchema, _web.Firestore, 'versions/v1/users'>
       >,
     )
     expectType<
-      fweb.DocumentReference<
-        STypes.UAt<typeof firestoreSchema, fweb.Firestore, 'versions/v1/users'>
+      _web.DocumentReference<
+        STypes.UAt<typeof firestoreSchema, _web.Firestore, 'versions/v1/users'>
       >
     >(r.user)
 
     expectType<typeof r.post>(
-      {} as fweb.DocumentReference<
+      {} as _web.DocumentReference<
         STypes.UAt<
           typeof firestoreSchema,
-          fweb.Firestore,
+          _web.Firestore,
           'versions/v1/users/{uid}/posts'
         >
       >,

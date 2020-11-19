@@ -1,5 +1,5 @@
 import { expectType } from 'tsd'
-import { messages } from '../../functions'
+import { messages } from '../../core'
 import { userDataJson } from '../_fixtures/data'
 import { $call } from '../_infrastructure/functions-client'
 

@@ -1,9 +1,10 @@
 import firebase, { firestore, initializeApp } from 'firebase/app' // または firebase-admin
-import { createFirestoreRefAdapter, FirestoreRefAdapter } from '..'
 import {
+  createFirestoreRefAdapter,
   createFirestoreWriteAdapter,
+  FirestoreRefAdapter,
   FirestoreWriteAdapter,
-} from '../firestore'
+} from '..'
 import { firestoreSchema } from './schema-example'
 
 /**

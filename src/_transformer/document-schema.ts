@@ -1,9 +1,9 @@
 import { P } from 'lifts'
 import { Node, Type, TypeNode } from 'ts-morph'
 import ts, { factory as f } from 'typescript'
+import { $$and, $and, $or } from '../core/utils'
 import { R } from '../lib/fp'
 import { is } from '../lib/type'
-import { $$and, $and, $or } from '../utils'
 
 const transformNode = (
   parent: string | null = null,

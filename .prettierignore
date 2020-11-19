@@ -1,2 +1,2 @@
-src/firestore/_types.ts
-src/functions/_types.ts
+src/core/types/_firestore.ts
+src/core/types/_functions.ts
