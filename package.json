@@ -16,11 +16,12 @@
     "fireschema:rules": "./dist/bin/cli.js src/example/schema-example.ts",
     "lint": "eslint --ignore-path .gitignore '**/*.{js,jsx,ts,tsx}'",
     "md-magic": "md-magic && sed -i -e \"s/ from '..'/ from 'fireschema'/g\" README.md",
-    "prepare": "rm -rf dist esm && yarn build && yarn build:esm && ./append-emulator-proxyer.sh",
+    "prepare": "./append-emulator-proxyer.sh",
     "serve": "yarn build && firebase emulators:start --only firestore,functions,pubsub",
     "start": "NODE_ENV=production node dist/index.js",
     "test": "NODE_ENV=test jest --no-cache",
-    "ts-node": "ts-node --compiler ttypescript"
+    "ts-node": "ts-node --compiler ttypescript",
+    "version": "rm -rf dist esm && yarn build && yarn build:esm"
   },
   "resolutions": {
     "ts-morph/**/typescript": "^4.1.1-rc"
