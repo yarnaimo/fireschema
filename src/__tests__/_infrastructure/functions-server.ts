@@ -2,6 +2,7 @@ import { firestore } from 'firebase-admin'
 import * as functions from 'firebase-functions'
 import { expectType } from 'tsd'
 import { $jsonSchema, FunctionRegisterer, FunTypes, messages } from '../..'
+import { STypes } from '../../core'
 import { _admin } from '../../lib/firestore-types'
 import { _ff } from '../../lib/functions-types'
 import { Type } from '../../lib/type'
@@ -147,13 +148,17 @@ export const schedule = {
   }),
 }
 
+type IUserWithL = IUser & STypes.HasLoc<['versions', 'users']>
+type IPostWithL = (IPostA | IPostB) &
+  STypes.HasLoc<['versions', 'users', 'posts']>
+
 export const firestoreTrigger = {
   onPostCreate: $register.firestoreTrigger.onCreate({
     builder,
     path: 'versions/v1/users/{uid}/posts/{postId}',
     handler: async (decodedData, snap, context) => {
-      expectType<IPostA | IPostB>(decodedData)
-      expectType<_admin.QueryDocumentSnapshot<IPostA | IPostB>>(snap)
+      expectType<IPostWithL>(decodedData)
+      expectType<_admin.QueryDocumentSnapshot<IPostWithL>>(snap)
 
       // @ts-expect-error IUser
       expectType<IUser>(decodedData)
@@ -167,7 +172,7 @@ export const firestoreTrigger = {
     path: 'versions/v1/users/{uid}',
     handler: async (decodedData, snap, context) => {
       expectType<IUserLocal>(decodedData)
-      expectType<_admin.QueryDocumentSnapshot<IUser>>(snap)
+      expectType<_admin.QueryDocumentSnapshot<IUserWithL>>(snap)
 
       // @ts-expect-error IPostA
       expectType<IPostA>(decodedData)
@@ -181,7 +186,7 @@ export const firestoreTrigger = {
     path: 'versions/v1/users/{uid}',
     handler: async (decodedData, snap, context) => {
       expectType<IUserLocal>(decodedData)
-      expectType<_admin.QueryDocumentSnapshot<IUser>>(snap)
+      expectType<_admin.QueryDocumentSnapshot<IUserWithL>>(snap)
 
       return { decodedData, snap } as any
     },
@@ -192,7 +197,7 @@ export const firestoreTrigger = {
     path: 'versions/v1/users/{uid}',
     handler: async (decodedData, snap, context) => {
       expectType<_ff.Change<IUserLocal>>(decodedData)
-      expectType<_ff.Change<_admin.QueryDocumentSnapshot<IUser>>>(snap)
+      expectType<_ff.Change<_admin.QueryDocumentSnapshot<IUserWithL>>>(snap)
 
       return { decodedData, snap } as any
     },
@@ -203,12 +208,12 @@ export const firestoreTrigger = {
     path: 'versions/v1/users/{uid}',
     handler: async (decodedData, snap, context) => {
       expectType<_ff.Change<IUserLocal | undefined>>(decodedData)
-      expectType<_ff.Change<_admin.DocumentSnapshot<IUser>>>(snap)
+      expectType<_ff.Change<_admin.DocumentSnapshot<IUserWithL>>>(snap)
 
       // @ts-expect-error undefined
       expectType<_ff.Change<IUserLocal>>(decodedData)
       // @ts-expect-error QueryDocumentSnapshot
-      expectType<_ff.Change<_admin.QueryDocumentSnapshot<IUser>>>(snap)
+      expectType<_ff.Change<_admin.QueryDocumentSnapshot<IUserWithL>>>(snap)
 
       return { decodedData, snap } as any
     },

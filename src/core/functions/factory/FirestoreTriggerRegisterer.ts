@@ -36,7 +36,7 @@ export const FirestoreTriggerRegisterer = <S extends STypes.RootOptions.All>(
     DP extends string,
     L extends string[] = ParseDocumentPath<DP>,
     _C = GetDeep<S, L>,
-    T = STypeUtils.GetT<_C>,
+    T = STypes.HasLoc<L> & STypeUtils.GetT<_C>,
     U = STypeUtils.SchemaUWithLocAndMeta<_admin.Firestore, _C, L>
   >(options: {
     builder: _ff.FunctionBuilder
@@ -48,7 +48,7 @@ export const FirestoreTriggerRegisterer = <S extends STypes.RootOptions.All>(
     DP extends string,
     L extends string[] = ParseDocumentPath<DP>,
     _C = GetDeep<S, L>,
-    T = STypeUtils.GetT<_C>,
+    T = STypes.HasLoc<L> & STypeUtils.GetT<_C>,
     U = STypeUtils.SchemaUWithLocAndMeta<_admin.Firestore, _C, L>
   >(options: {
     builder: _ff.FunctionBuilder
@@ -60,7 +60,7 @@ export const FirestoreTriggerRegisterer = <S extends STypes.RootOptions.All>(
     DP extends string,
     L extends string[] = ParseDocumentPath<DP>,
     _C = GetDeep<S, L>,
-    T = STypeUtils.GetT<_C>,
+    T = STypes.HasLoc<L> & STypeUtils.GetT<_C>,
     U = STypeUtils.SchemaUWithLocAndMeta<_admin.Firestore, _C, L>
   >(options: {
     builder: _ff.FunctionBuilder
