@@ -35,10 +35,9 @@ export declare namespace STypeUtils {
     C extends FTypes.CollectionRef<unknown>
   > = C extends FTypes.CollectionRef<infer T> ? T : never
 
-  export type GetSchemaU<
-    C extends STypes.CollectionOptions.Meta,
-    CS = C[typeof $schema]
-  > = CS extends STypes.DocumentSchema<any> ? CS['__U__'] : never
+  export type GetSchemaU<_C> = EnsureOptions<_C>[typeof $schema]['__U__']
+
+  export type GetSchemaT<_C> = EnsureOptions<_C>[typeof $schema]['__T__']
 
   export type OmitLast<T extends any[]> = T extends [
     ...(infer U extends any[] ? infer U : never),
@@ -82,21 +81,27 @@ export declare namespace STypeUtils {
     ? EnsureOptions<_C>[typeof $adapter]['__SL__']
     : {}
 
-  export type GetT<_C> = EnsureOptions<_C>[typeof $schema]['__T__']
-
-  export type SchemaUWithLoc<
-    C extends STypes.CollectionOptions.Meta,
-    L extends string[]
-  > = GetSchemaU<C> & STypes.HasLoc<L> & STypes.HasT<C[typeof $schema]['__T__']>
-
-  export type SchemaUWithLocAndMeta<
+  export type DocDataFromOptions<
     F extends FTypes.FirestoreApp,
     _C,
     L extends string[]
-  > = STypes.DocumentMeta<F> & SchemaUWithLoc<EnsureOptions<_C>, L>
+  > = STypes.DocData<F, GetSchemaU<_C>, L, GetSchemaT<_C>>
+
+  export type FTDocDataFromOptions<
+    F extends FTypes.FirestoreApp,
+    _C,
+    L extends string[]
+  > = STypes.DocData<F, GetSchemaT<_C>, L, GetSchemaT<_C>>
 }
 
 export declare namespace STypes {
+  export type DocData<
+    F extends FTypes.FirestoreApp,
+    U,
+    L extends string[],
+    T
+  > = STypes.DocumentMeta<F> & U & STypes.HasLoc<L> & STypes.HasT<T>
+
   export type ConditionExp = string | boolean
 
   export type FunctionsOptions = {
@@ -155,8 +160,8 @@ export declare namespace STypes {
     // PC,
     _C
   > = (
-    q: Selectors<STypeUtils.GetT<_C>, L, STypeUtils.GetSL<_C>, F>,
-  ) => FTypes.Query<STypeUtils.SchemaUWithLocAndMeta<F, _C, L>, F>
+    q: Selectors<STypeUtils.GetSchemaT<_C>, L, STypeUtils.GetSL<_C>, F>,
+  ) => FTypes.Query<STypeUtils.DocDataFromOptions<F, _C, L>, F>
 
   export type Selectors<
     T,
@@ -165,12 +170,7 @@ export declare namespace STypes {
     F extends FTypes.FirestoreApp
   > = {
     [K in keyof SL]: SL[K] extends (...args: infer A) => FTypes.Query<infer U>
-      ? (
-          ...args: A
-        ) => FTypes.Query<
-          U & STypes.DocumentMeta<F> & HasLoc<NonNullable<L>> & HasT<T>,
-          F
-        >
+      ? (...args: A) => FTypes.Query<DocData<F, U, NonNullable<L>, T>, F>
       : SL[K]
   }
 
@@ -193,10 +193,7 @@ export declare namespace STypes {
     CP extends string,
     L extends string[] = ParseCollectionPath<CP>,
     _C = GetDeep<S, L>
-  > = STypeUtils.EnsureOptions<_C>[typeof $schema]['__U__'] &
-    DocumentMeta<F> &
-    HasLoc<L> &
-    HasT<STypeUtils.EnsureOptions<_C>[typeof $schema]['__T__']>
+  > = DocData<F, STypeUtils.GetSchemaU<_C>, L, STypeUtils.GetSchemaT<_C>>
 
   type DocFieldToWrite<
     T,

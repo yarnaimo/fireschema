@@ -58,7 +58,7 @@ type CollectionFn<S extends SRoot> = <
   parent: P,
   collectionName: N,
 ) => FTypes.CollectionRef<
-  STypeUtils.SchemaUWithLocAndMeta<F, _C, STypeUtils.GetL<P, N>>,
+  STypeUtils.DocDataFromOptions<F, _C, STypeUtils.GetL<P, N>>,
   F
 >
 
@@ -87,7 +87,7 @@ type CollectionQueryFn<S extends SRoot> = <
   collectionName: N,
   selector: STypes.Select<F, STypeUtils.GetL<P, N>, _C>,
 ) => FTypes.Query<
-  STypeUtils.SchemaUWithLocAndMeta<F, _C, STypeUtils.GetL<P, N>>,
+  STypeUtils.DocDataFromOptions<F, _C, STypeUtils.GetL<P, N>>,
   F
 >
 
@@ -118,7 +118,7 @@ type CollectionGroupFn<S extends SRoot> = <
 >(
   root: F,
   collectionPath: CP,
-) => FTypes.Query<STypeUtils.SchemaUWithLocAndMeta<F, _C, L>, F>
+) => FTypes.Query<STypeUtils.DocDataFromOptions<F, _C, L>, F>
 
 const CollectionGroup = <S extends SRoot>(schemaOptions: S) =>
   ((app: FTypes.FirestoreApp, collectionPath: string) => {
@@ -144,7 +144,7 @@ type CollectionGroupQueryFn<S extends SRoot> = <
   root: F,
   collectionPath: CP,
   selector: STypes.Select<F, L, _C>,
-) => FTypes.Query<STypeUtils.SchemaUWithLocAndMeta<F, _C, L>, F>
+) => FTypes.Query<STypeUtils.DocDataFromOptions<F, _C, L>, F>
 
 const CollectionGroupQuery = <S extends SRoot>(schemaOptions: S) =>
   ((
@@ -175,7 +175,7 @@ type TypeDocumentFn<S extends SRoot> = <
 >(
   collectionPath: CP,
   docRef: DR,
-) => FTypes.DocumentRef<STypeUtils.SchemaUWithLocAndMeta<F, _C, L>, F>
+) => FTypes.DocumentRef<STypeUtils.DocDataFromOptions<F, _C, L>, F>
 
 const TypeDocument = <S extends SRoot>(schemaOptions: S) =>
   ((collectionPath: string, docRef: FTypes.DocumentRef<any>) => {
@@ -194,7 +194,7 @@ type GetParentDocumentFn<S extends SRoot> = <
   _C = GetDeep<S, L>
 >(
   collectionRef: CR,
-) => FTypes.DocumentRef<STypeUtils.SchemaUWithLocAndMeta<F, _C, L>, F>
+) => FTypes.DocumentRef<STypeUtils.DocDataFromOptions<F, _C, L>, F>
 
 const GetParentDocument = <S extends SRoot>(schemaOptions: S) =>
   ((collectionRef: FTypes.CollectionRef<any>) => {

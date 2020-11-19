@@ -36,8 +36,8 @@ export const FirestoreTriggerRegisterer = <S extends STypes.RootOptions.All>(
     DP extends string,
     L extends string[] = ParseDocumentPath<DP>,
     _C = GetDeep<S, L>,
-    T = STypes.HasLoc<L> & STypeUtils.GetT<_C>,
-    U = STypeUtils.SchemaUWithLocAndMeta<_admin.Firestore, _C, L>
+    T = STypeUtils.FTDocDataFromOptions<_admin.Firestore, _C, L>,
+    U = STypeUtils.DocDataFromOptions<_admin.Firestore, _C, L>
   >(options: {
     builder: _ff.FunctionBuilder
     path: DP
@@ -48,8 +48,8 @@ export const FirestoreTriggerRegisterer = <S extends STypes.RootOptions.All>(
     DP extends string,
     L extends string[] = ParseDocumentPath<DP>,
     _C = GetDeep<S, L>,
-    T = STypes.HasLoc<L> & STypeUtils.GetT<_C>,
-    U = STypeUtils.SchemaUWithLocAndMeta<_admin.Firestore, _C, L>
+    T = STypeUtils.FTDocDataFromOptions<_admin.Firestore, _C, L>,
+    U = STypeUtils.DocDataFromOptions<_admin.Firestore, _C, L>
   >(options: {
     builder: _ff.FunctionBuilder
     path: DP
@@ -60,8 +60,8 @@ export const FirestoreTriggerRegisterer = <S extends STypes.RootOptions.All>(
     DP extends string,
     L extends string[] = ParseDocumentPath<DP>,
     _C = GetDeep<S, L>,
-    T = STypes.HasLoc<L> & STypeUtils.GetT<_C>,
-    U = STypeUtils.SchemaUWithLocAndMeta<_admin.Firestore, _C, L>
+    T = STypeUtils.FTDocDataFromOptions<_admin.Firestore, _C, L>,
+    U = STypeUtils.DocDataFromOptions<_admin.Firestore, _C, L>
   >(options: {
     builder: _ff.FunctionBuilder
     path: DP

@@ -157,7 +157,7 @@ export const firestoreTrigger = {
     builder,
     path: 'versions/v1/users/{uid}/posts/{postId}',
     handler: async (decodedData, snap, context) => {
-      expectType<IPostWithL>(decodedData)
+      expectType<IPostA | IPostB>(decodedData)
       expectType<_admin.QueryDocumentSnapshot<IPostWithL>>(snap)
 
       // @ts-expect-error IUser
