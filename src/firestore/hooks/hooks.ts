@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useCollection, useDocument } from 'react-firebase-hooks/firestore'
 import { fweb } from '../../types/_firestore'
 import { useRefChangeLimitExceeded } from './utils'
@@ -66,3 +66,34 @@ export const useTypedQuery = <T>(
     error,
   }
 }
+
+export const useQuerySnapData = <T, U = T>(
+  querySnap: fweb.QuerySnapshot<T> | undefined,
+  transformer?: (data: T, snap: fweb.QueryDocumentSnapshot<T>) => U,
+): U[] | undefined =>
+  useMemo(
+    () =>
+      querySnap?.docs.map((snap) => {
+        const data = snap.data({ serverTimestamps: 'estimate' })
+        return transformer?.(data, snap) ?? ((data as unknown) as U)
+      }),
+    [querySnap], // eslint-disable-line
+  )
+
+export const useDocumentSnapData = <T, U = T>(
+  snap: fweb.DocumentSnapshot<T> | undefined,
+  transformer?: (data: T, snap: fweb.DocumentSnapshot<T>) => U,
+): U | undefined =>
+  useMemo(
+    () => {
+      if (!snap) {
+        return undefined
+      }
+      const data = snap.data({ serverTimestamps: 'estimate' })
+      if (!data) {
+        return undefined
+      }
+      return transformer?.(data, snap) ?? ((data as unknown) as U)
+    },
+    [snap], // eslint-disable-line
+  )
