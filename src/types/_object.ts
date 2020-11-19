@@ -4,7 +4,7 @@ type Cons<H, T> = T extends readonly any[]
     : never
   : never
 
-type Prev = [
+export type Prev = [
   never,
   0,
   1,

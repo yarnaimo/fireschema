@@ -1,5 +1,5 @@
 import { expectType } from 'tsd'
-import { getDeep, getDeepByKey } from '../../utils/_object'
+import { getDeepByKey } from '../../utils/_object'
 
 const obj = {
   a: {
@@ -16,20 +16,20 @@ const obj = {
   },
 }
 
-test('getDeep', () => {
-  const expected = {
-    b: { key: 'value' },
-  }
+// test('getDeep', () => {
+//   const expected = {
+//     b: { key: 'value' },
+//   }
 
-  type Expected = {
-    b: { key: string }
-  }
+//   type Expected = {
+//     b: { key: string }
+//   }
 
-  const result = getDeep(obj, ['d', 'b', 'c'])
+//   const result = getDeep(obj, ['d', 'b', 'c'])
 
-  expectType<Expected>(result)
-  expect(result).toEqual(expected)
-})
+//   expectType<Expected>(result)
+//   expect(result).toEqual(expected)
+// })
 
 test('getDeepByKey', () => {
   const expected = [

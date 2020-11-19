@@ -80,7 +80,11 @@ export declare namespace FTypes {
     fweb.QueryDocumentSnapshot<T>,
     fadmin.QueryDocumentSnapshot<T>
   >
-  export type SnapshotOptions = fweb.SnapshotOptions
+  export type SnapshotOptions<F extends FirestoreApp = FirestoreApp> = Env<
+    F,
+    fweb.SnapshotOptions,
+    undefined
+  >
 
   export type Transaction<F extends FirestoreApp> = Env<
     F,

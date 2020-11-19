@@ -45,13 +45,13 @@ export const firestoreSchema = createFirestoreSchema({
   [$functions]: {
     // /admins/<uid> が存在するかどうか
     ['isAdmin()']: `
-            return exists(/databases/$(database)/documents/admins/$(request.auth.uid));
-        `,
+      return exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    `,
 
     // アクセスしようとするユーザーの uid が {uid} と一致するかどうか
     ['matchesUser(uid)']: `
-            return request.auth.uid == uid;
-        `,
+      return request.auth.uid == uid;
+    `,
   },
 
   [$collectionGroups]: {
@@ -83,7 +83,7 @@ export const firestoreSchema = createFirestoreSchema({
       [$adapter]: PostAdapter,
       [$allow]: {
         read: true,
-        write: $or(['matchesUser(uid)']),
+        write: 'matchesUser(uid)',
       },
     },
   },

@@ -1,24 +1,20 @@
 import type { Attributes, PubSub } from '@google-cloud/pubsub'
-import { FunTypes } from '..'
-import { GetDeep, Loc } from '../../types/_object'
+import { $input, FunTypes } from '..'
+import { ExtractTopicNames, GetTopicMeta } from '../_types'
 
-export const initTopicClient = <S extends FunTypes.SchemaOptions>(
+export const TopicClient = <M extends FunTypes.FunctionsModule>(
   pubSubClient: PubSub,
-  schemaOptions: S,
 ) => {
   const publish = async <
-    L extends Loc<S['topic']>,
-    _C = GetDeep<S['topic'], L>,
-    C extends FunTypes.EnsureIO<_C> = FunTypes.EnsureIO<_C>
+    TN extends ExtractTopicNames<M['topic']>,
+    C extends GetTopicMeta<M['topic'], TN> = GetTopicMeta<M['topic'], TN>
   >(
-    loc: L,
-    data: FunTypes.InputType<C>,
+    topicName: TN,
+    data: C[typeof $input],
     attributes?: Attributes,
   ) => {
-    const name = loc.join('-')
-
     const messageId = await pubSubClient
-      .topic(name)
+      .topic(topicName)
       .publishJSON(data as object, attributes)
 
     return messageId

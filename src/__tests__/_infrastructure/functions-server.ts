@@ -1,14 +1,27 @@
+import { firestore } from 'firebase-admin'
 import * as functions from 'firebase-functions'
+import { Change } from 'firebase-functions'
 import { expectType } from 'tsd'
-import { initFunctionRegisterer, initFunctions, messages } from '../..'
-import { FunTypes } from '../../functions'
+import { $jsonSchema, FunctionRegisterer, FunTypes, messages } from '../..'
 import { Type } from '../../lib/type'
-import { IUser } from '../_fixtures/firestore-schema'
-import { functionsSchema } from '../_fixtures/functions-schema'
+import { fadmin } from '../../types/_firestore'
+import {
+  firestoreSchema,
+  IPostA,
+  IPostB,
+  IUser,
+  IUserJson,
+  IUserLocal,
+} from '../_fixtures/firestore-schema'
 import { region } from './_config'
 
 const timezone = 'Asia/Tokyo'
-const $register = initFunctionRegisterer(functions, functionsSchema, timezone)
+const $register = FunctionRegisterer(
+  firestoreSchema,
+  firestore,
+  functions,
+  timezone,
+)
 
 const builder = functions.region(region)
 
@@ -29,12 +42,19 @@ const wrap = async <T, U>(
   }
 }
 
-const createUserHandler: FunTypes.Callable.Handler<typeof functionsSchema.callable.createUser> = async (
-  data,
-  context,
-) => {
+const createUserSchema = [
+  $jsonSchema<IUserJson>(),
+  $jsonSchema<{ result: number }>(),
+] as const
+const createUserHandler: FunTypes.Callable.Handler<
+  IUserJson,
+  { result: number }
+> = async (data, context) => {
   return wrap(data, context, async () => {
-    expectType<Type.Merge<IUser, { timestamp: string }>>(data)
+    expectType<IUserJson>(data)
+
+    // @ts-expect-error timestamp
+    expectType<Type.Merge<IUserJson, { timestamp: number }>>(data)
 
     if (data.age < 0) {
       throw new functions.https.HttpsError('out-of-range', 'out of range')
@@ -45,21 +65,56 @@ const createUserHandler: FunTypes.Callable.Handler<typeof functionsSchema.callab
   })
 }
 
-const callable = {
-  createUser: $register.callable(['createUser'], {
+const toUpperCaseSchema = [
+  $jsonSchema<{ text: string }>(),
+  $jsonSchema<{ result: string }>(),
+] as const
+const toUpperCaseHandler: FunTypes.Callable.Handler<
+  { text: string },
+  { result: string }
+> = async (data, context) => {
+  return wrap(data, context, async () => {
+    expectType<{ text: string }>(data)
+    return { result: data.text.toUpperCase() }
+  })
+}
+
+export const callable = {
+  createUser: $register.callable({
+    schema: createUserSchema,
     builder,
     handler: createUserHandler,
   }),
+
+  nested: {
+    toUpperCase: $register.callable({
+      schema: toUpperCaseSchema,
+      builder,
+      handler: toUpperCaseHandler,
+    }),
+  },
 }
 
-const _errorExpected = $register.callable(['createUser'], {
-  builder,
-  // @ts-expect-error: result
-  handler: async (data, context) => ({ result: null }),
+!(() => {
+  $register.callable({
+    schema: createUserSchema,
+    builder,
+    handler: async (data, context) =>
+      // @ts-expect-error: result type
+      ({ result: null }),
+  })
+
+  $register.callable({
+    schema: toUpperCaseSchema,
+    builder,
+    handler: async (data, context) =>
+      // @ts-expect-error: result type
+      ({ result: null }),
+  })
 })
 
-const http = {
-  getKeys: $register.http(['getKeys'], {
+export const http = {
+  getKeys: $register.http({
     builder,
     handler: (req, resp) => {
       if (req.method !== 'POST') {
@@ -71,8 +126,9 @@ const http = {
   }),
 }
 
-const topic = {
-  publishMessage: $register.topic(['publishMessage'], {
+export const topic = {
+  publishMessage: $register.topic('publish_message', {
+    schema: $jsonSchema<{ text: string }>(),
     builder,
     handler: async (data) => {
       expectType<{ text: string }>(data)
@@ -81,8 +137,8 @@ const topic = {
   }),
 }
 
-const schedule = {
-  cron: $register.schedule(['cron'], {
+export const schedule = {
+  cron: $register.schedule({
     builder,
     schedule: '0 0 * * *',
     handler: async (context) => {
@@ -91,4 +147,70 @@ const schedule = {
   }),
 }
 
-export = initFunctions(functionsSchema, { callable, http, topic, schedule })
+export const firestoreTrigger = {
+  onPostCreate: $register.firestoreTrigger.onCreate({
+    builder,
+    path: 'versions/v1/users/{uid}/posts/{postId}',
+    handler: async (decodedData, snap, context) => {
+      expectType<IPostA | IPostB>(decodedData)
+      expectType<fadmin.QueryDocumentSnapshot<IPostA | IPostB>>(snap)
+
+      // @ts-expect-error IUser
+      expectType<IUser>(decodedData)
+
+      return { decodedData, snap } as any
+    },
+  }),
+
+  onUserCreate: $register.firestoreTrigger.onCreate({
+    builder,
+    path: 'versions/v1/users/{uid}',
+    handler: async (decodedData, snap, context) => {
+      expectType<IUserLocal>(decodedData)
+      expectType<fadmin.QueryDocumentSnapshot<IUser>>(snap)
+
+      // @ts-expect-error IPostA
+      expectType<IPostA>(decodedData)
+
+      return { decodedData, snap } as any
+    },
+  }),
+
+  onUserDelete: $register.firestoreTrigger.onDelete({
+    builder,
+    path: 'versions/v1/users/{uid}',
+    handler: async (decodedData, snap, context) => {
+      expectType<IUserLocal>(decodedData)
+      expectType<fadmin.QueryDocumentSnapshot<IUser>>(snap)
+
+      return { decodedData, snap } as any
+    },
+  }),
+
+  onUserUpdate: $register.firestoreTrigger.onUpdate({
+    builder,
+    path: 'versions/v1/users/{uid}',
+    handler: async (decodedData, snap, context) => {
+      expectType<Change<IUserLocal>>(decodedData)
+      expectType<Change<fadmin.QueryDocumentSnapshot<IUser>>>(snap)
+
+      return { decodedData, snap } as any
+    },
+  }),
+
+  onUserWrite: $register.firestoreTrigger.onWrite({
+    builder,
+    path: 'versions/v1/users/{uid}',
+    handler: async (decodedData, snap, context) => {
+      expectType<Change<IUserLocal | undefined>>(decodedData)
+      expectType<Change<fadmin.DocumentSnapshot<IUser>>>(snap)
+
+      // @ts-expect-error undefined
+      expectType<Change<IUserLocal>>(decodedData)
+      // @ts-expect-error QueryDocumentSnapshot
+      expectType<Change<fadmin.QueryDocumentSnapshot<IUser>>>(snap)
+
+      return { decodedData, snap } as any
+    },
+  }),
+}

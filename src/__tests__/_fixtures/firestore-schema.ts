@@ -39,14 +39,14 @@ export type IPostB = {
 const VersionSchema = $documentSchema<IVersion>()
 const VersionAdapter = $collectionAdapter<IVersion>()({})
 
+export const decodeUser = (data: IUser) => ({
+  ...data,
+  timestamp: dayjs(data.timestamp.toDate()),
+})
+
 export const UserSchema = $documentSchema<IUser, IUserLocal>({
-  decoder: (snap: FTypes.QueryDocumentSnap<IUser>): IUserLocal => {
-    const data = snap.data()
-    return {
-      ...data,
-      timestamp: dayjs(data.timestamp.toDate()),
-    }
-  },
+  decoder: (snap: FTypes.QueryDocumentSnap<IUser>, options): IUserLocal =>
+    decodeUser(snap.data(options)),
 })
 const UserAdapter = $collectionAdapter<IUserLocal>()({
   selectors: (q) => ({

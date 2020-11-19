@@ -2,10 +2,10 @@ import { P } from 'lifts'
 import { Type, TypeNode } from 'ts-morph'
 import ts, { factory as f } from 'typescript'
 import { R } from '../lib/fp'
-import { $ } from '../runtypes'
+import { $_ } from '../runtypes'
 
 const create$ = (
-  type: keyof typeof $,
+  type: keyof typeof $_,
   argumentsArray: ts.Expression[] | null,
 ) => {
   const propertyAccessNode = f.createPropertyAccessExpression(

@@ -1,7 +1,12 @@
-import { assertFails, assertSucceeds } from '@firebase/testing'
+import { assertFails, assertSucceeds, firestore } from '@firebase/testing'
 import { isDayjs } from 'dayjs'
 import { expectType } from 'tsd'
-import { STypes } from '../..'
+import {
+  createFirestoreRefAdapter,
+  createFirestoreWriteAdapter,
+  FirestoreRefAdapter,
+  STypes,
+} from '../..'
 import { fadmin, fweb } from '../../types/_firestore'
 import { userData } from '../_fixtures/data'
 import {
@@ -11,12 +16,50 @@ import {
   IUser,
   IUserLocal,
 } from '../_fixtures/firestore-schema'
-import { collections } from '../_infrastructure/firestore'
-import { $web, $webUnauthed } from '../_infrastructure/firestore-controller'
+import { authedApp } from '../_infrastructure/_app'
 import { expectEqualRef } from '../_utils/firestore'
 
-const r = collections($web)
-const ur = collections($webUnauthed)
+export const $: FirestoreRefAdapter<typeof firestoreSchema> = createFirestoreRefAdapter(
+  firestoreSchema,
+)
+
+const _collections = (app: fweb.Firestore) => {
+  const versions = $.collection(app, 'versions')
+  const v1 = versions.doc('v1')
+
+  const users = $.collection(v1, 'users')
+  const teenUsers = $.collectionQuery(v1, 'users', (q) => q.teen())
+  const user = users.doc('user')
+
+  const posts = $.collection(user, 'posts')
+  const post = posts.doc('post')
+
+  const usersGroup = $.collectionGroup(app, 'versions/v1/users')
+  const teenUsersGroup = $.collectionGroupQuery(app, 'versions/v1/users', (q) =>
+    q.teen(),
+  )
+
+  return {
+    versions,
+    v1,
+    users,
+    user,
+    teenUsers,
+    posts,
+    post,
+    usersGroup,
+    teenUsersGroup,
+  }
+}
+
+const app = authedApp('user').firestore()
+const appUnauthed = authedApp('unauthed').firestore()
+
+const $web = createFirestoreWriteAdapter(firestore, app)
+const $webUnauthed = createFirestoreWriteAdapter(firestore, appUnauthed)
+
+const r = _collections(app)
+const ur = _collections(appUnauthed)
 
 type UserU = IUserLocal &
   STypes.DocumentMeta<fadmin.Firestore> &
@@ -32,46 +75,53 @@ describe('types', () => {
   test('UAt', () => {
     expectType<typeof r.user>(
       {} as fweb.DocumentReference<
-        STypes.UAt<
-          fweb.Firestore,
-          typeof firestoreSchema,
-          ['versions', 'users']
-        >
+        STypes.UAt<typeof firestoreSchema, fweb.Firestore, 'versions/v1/users'>
       >,
     )
     expectType<
       fweb.DocumentReference<
-        STypes.UAt<
-          fweb.Firestore,
-          typeof firestoreSchema,
-          ['versions', 'users']
-        >
+        STypes.UAt<typeof firestoreSchema, fweb.Firestore, 'versions/v1/users'>
       >
     >(r.user)
 
     expectType<typeof r.post>(
       {} as fweb.DocumentReference<
         STypes.UAt<
-          fweb.Firestore,
           typeof firestoreSchema,
-          ['versions', 'users', 'posts']
+          fweb.Firestore,
+          'versions/v1/users/{uid}/posts'
         >
       >,
     )
   })
 })
 
-describe('refs', () => {
+describe('refs equality', () => {
   test('collection', () => {
-    expect(r.users.ref.path).toBe('versions/v1/users')
-    expect(r.user.path).toBe('versions/v1/users/user')
+    expectEqualRef(r.users, app.collection('versions/v1/users'), false)
+    expectEqualRef(r.user, app.doc('versions/v1/users/user'), false)
+
+    expectEqualRef(r.users, $.collection(r.v1, 'users'))
+    expectEqualRef(r.user, $.collection(r.v1, 'users').doc('user'))
   })
 
-  test('documentByPath', () => {
+  test('query', () => {
+    expectEqualRef(
+      r.users.where('age', '>=', 10).where('age', '<', 20),
+      r.teenUsers,
+    )
+
+    expectEqualRef(
+      r.usersGroup.where('age', '>=', 10).where('age', '<', 20),
+      r.teenUsersGroup,
+    )
+  })
+
+  test('typeDocument', () => {
     const path = 'versions/v1/users/user/posts/post'
-    const actualPostRef = $web.documentByPath(
-      ['versions', 'users', 'posts'],
-      path,
+    const actualPostRef = $.typeDocument(
+      'versions/v1/users/{uid}/posts',
+      app.doc(path),
     )
 
     expectType<firebase.firestore.DocumentReference<PostU>>(actualPostRef)
@@ -87,27 +137,18 @@ describe('refs', () => {
     expectEqualRef(actualPostRef, r.post)
   })
 
-  test('query', () => {
-    expectEqualRef(
-      r.users.ref.where('age', '>=', 10).where('age', '<', 20),
-      r.users.select.teen(),
-    )
-
-    expectEqualRef(
-      r.usersGroup.query.where('age', '>=', 10).where('age', '<', 20),
-      r.usersGroup.select.teen(),
-    )
-  })
-
-  test('parentOfCollection', () => {
-    const user = $web.parentOfCollection(r.posts.ref)
+  test('getParentDocument', () => {
+    const user = $.getParentDocument(r.posts)
 
     expectType<firebase.firestore.DocumentReference<UserU>>(user)
     expect(user.path).toBe(r.user.path)
+
+    // @ts-expect-error post
+    expectType<firebase.firestore.DocumentReference<PostU>>(user)
   })
 })
 
-const usersRaw = $web.app.collection('versions').doc('v1').collection('users')
+const usersRaw = app.collection('versions').doc('v1').collection('users')
 
 describe('read', () => {
   beforeEach(async () => {
@@ -127,7 +168,7 @@ describe('read', () => {
   })
 
   test('get collectionGroup', async () => {
-    const snap = await r.usersGroup.select.teen().get()
+    const snap = await r.teenUsersGroup.get()
 
     expect(snap.docs).toHaveLength(1)
     const data = snap.docs[0].data()
@@ -149,9 +190,9 @@ describe('write', () => {
       const snapRaw = await usersRaw.doc('user').get()
       expect(snapRaw.data()).toMatchObject({
         ...userData,
-        _createdAt: expect.any($web.Timestamp),
-        _updatedAt: expect.any($web.Timestamp),
-        timestamp: expect.any($web.Timestamp),
+        _createdAt: expect.any(firestore.Timestamp),
+        _updatedAt: expect.any(firestore.Timestamp),
+        timestamp: expect.any(firestore.Timestamp),
       })
     })
 
@@ -189,9 +230,9 @@ describe('write', () => {
       const snapRaw = await usersRaw.doc('user').get()
       expect(snapRaw.data()).toMatchObject({
         ...userData,
-        _createdAt: expect.any($web.Timestamp),
-        _updatedAt: expect.any($web.Timestamp),
-        timestamp: expect.any($web.Timestamp),
+        _createdAt: expect.any(firestore.Timestamp),
+        _updatedAt: expect.any(firestore.Timestamp),
+        timestamp: expect.any(firestore.Timestamp),
       })
     })
   })
@@ -215,7 +256,7 @@ describe('write', () => {
       test('normal', async () => {
         await $web[op](r.user, {
           name: 'umi-kousaka',
-          tags: $web.FieldValue.arrayUnion({ id: 2, name: 'tag2' }),
+          tags: firestore.FieldValue.arrayUnion({ id: 2, name: 'tag2' }),
         })
 
         const snapRaw = await usersRaw.doc('user').get()
@@ -223,8 +264,8 @@ describe('write', () => {
           ...userData,
           name: 'umi-kousaka',
           tags: [...userData.tags, { id: 2, name: 'tag2' }],
-          _updatedAt: expect.any($web.Timestamp),
-          timestamp: expect.any($web.Timestamp),
+          _updatedAt: expect.any(firestore.Timestamp),
+          timestamp: expect.any(firestore.Timestamp),
         })
       })
 
@@ -241,8 +282,8 @@ describe('write', () => {
         expect(snapRaw.data()).toMatchObject({
           ...userData,
           age: userData.age + 1,
-          _updatedAt: expect.any($web.Timestamp),
-          timestamp: expect.any($web.Timestamp),
+          _updatedAt: expect.any(firestore.Timestamp),
+          timestamp: expect.any(firestore.Timestamp),
         })
       })
     })

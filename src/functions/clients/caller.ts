@@ -1,28 +1,30 @@
 import { IResult, Result } from 'lifts'
-import { GetDeep, Loc } from '../../types/_object'
+import { GetDeep } from '../../types/_object'
+import { $input, $output } from '../constants'
 import { FunTypes } from '../FunTypes'
+import { ExtractFunctionPaths, ParseFunctionPath } from '../_types'
 
-export const initCaller = <S extends FunTypes.SchemaOptions>(
+export const Caller = <M extends FunTypes.FunctionsModule>(
   functionsApp: firebase.functions.Functions,
-  schemaOptions: S,
 ) => {
   const call = async <
-    L extends Loc<S['callable']>,
-    _C = GetDeep<S['callable'], L>,
-    C extends FunTypes.EnsureIO<_C> = FunTypes.EnsureIO<_C>
+    FP extends ExtractFunctionPaths<M['callable']>,
+    L extends string[] = ParseFunctionPath<FP>,
+    _C = GetDeep<M['callable'], L>,
+    C extends FunTypes.Callable.EnsureMeta<_C> = FunTypes.Callable.EnsureMeta<
+      _C
+    >
   >(
-    loc: L,
-    data: FunTypes.InputType<C>,
+    functionPath: FP,
+    data: C[typeof $input],
     options?: firebase.functions.HttpsCallableOptions,
-  ): Promise<
-    IResult<FunTypes.OutputType<C>, firebase.functions.HttpsError>
-  > => {
-    const name = ['callable', ...loc].join('-')
+  ): Promise<IResult<C[typeof $output], firebase.functions.HttpsError>> => {
+    const name = ['callable', functionPath].join('-')
     const callable = functionsApp.httpsCallable(name, options)
 
     try {
       const result = await callable(data)
-      return Result.ok(result.data as FunTypes.OutputType<C>)
+      return Result.ok(result.data as C[typeof $output])
     } catch (error) {
       return Result.err(error as firebase.functions.HttpsError)
     }

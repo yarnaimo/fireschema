@@ -1,26 +1,13 @@
 import { FTypes } from '../../types/FTypes'
 import { STypes } from '../STypes'
 
-// export const adapter = <T, S = unknown>({
-//   selectors,
-// }: {
-//   selectors: (query: FireTypes.Query<T>) => S
-// }) => {}
-
-// type Selectors<T, S> = (ref: FireTypes.Query<T>) => S
-
 export const $collectionAdapter = <T>() => {
   return <SL = {}>({
     selectors = () => ({} as SL),
   }: {
     selectors?: (q: FTypes.Query<T>) => SL
-  }) => {
-    const adapter = <F extends FTypes.FirestoreApp>(
-      q: FTypes.Query<T, F>,
-    ): STypes.Adapted<T, null, SL, F> => ({
-      select: selectors(q) as STypes.Selectors<T, null, SL, F>,
-    })
-
-    return adapter as STypes.Adapter<T, unknown, null, SL, FTypes.FirestoreApp>
-  }
+  }): STypes.CollectionAdapter<T, SL> => ({
+    selectors,
+    __SL__: {} as SL,
+  })
 }
