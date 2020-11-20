@@ -5,7 +5,7 @@ import {
   FirestoreRefAdapter,
   FirestoreWriteAdapter,
 } from '..'
-import { firestoreSchema } from './schema-example'
+import { firestoreSchema } from './1-1-schema'
 
 /**
  * コントローラの初期化
@@ -13,7 +13,7 @@ import { firestoreSchema } from './schema-example'
 const app: firebase.app.App = initializeApp({
   // ...
 })
-const firestoreApp = app.firestore()
+export const firestoreApp = app.firestore()
 
 export const $: FirestoreRefAdapter<typeof firestoreSchema> = createFirestoreRefAdapter(
   firestoreSchema,
@@ -65,10 +65,10 @@ techPostsGroup.get() // Promise<QuerySnapshot<PostA | PostB>>
  * ドキュメントの作成・更新
  */
 $web.create(user, {
-  name: 'umi',
-  displayName: null,
-  age: 16,
-  timestamp: firestore.FieldValue.serverTimestamp(),
+  name: 'test',
+  displayName: 'Test',
+  age: 20,
+  timestamp: $web.FieldValue.serverTimestamp(),
   options: { a: true },
 })
 $web.setMerge(user, {

@@ -1,3 +1,4 @@
+import { Merge } from 'type-fest'
 import {
   $adapter,
   $allow,
@@ -13,14 +14,24 @@ import {
 } from '..'
 
 // user
-type User = {
+export type User = {
   name: string
   displayName: string | null
   age: number
   timestamp: FTypes.Timestamp
   options: { a: boolean }
 }
-const UserSchema = $documentSchema<User>()
+export type UserDecoded = Merge<User, { timestamp: Date }>
+
+const UserSchema = $documentSchema<User, UserDecoded>({
+  decoder: (snap, options) => {
+    const data = snap.data(options)
+    return {
+      ...data,
+      timestamp: data.timestamp.toDate(),
+    }
+  },
+})
 const UserAdapter = $collectionAdapter<User>()({})
 
 // post
