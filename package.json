@@ -12,7 +12,7 @@
     "build:esm": "ttsc -P tsconfig.esm.json",
     "debug": "node --inspect -r ts-node/register",
     "dev": "yarn ts-node src/index.ts",
-    "docs": "md-magic && sed -i -e \"s/ from '..'/ from 'fireschema'/g\" README.md",
+    "docs": "md-magic && sed -i -e \"s/ from '../ from 'fireschema/g\" README.md",
     "emulators:exec": "firebase emulators:exec --only firestore,functions,pubsub",
     "fireschema:rules": "./dist/bin/cli.js src/example/schema-example.ts",
     "lint": "eslint --ignore-path .gitignore '**/*.{js,jsx,ts,tsx}'",
