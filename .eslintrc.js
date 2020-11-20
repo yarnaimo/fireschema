@@ -10,7 +10,7 @@ const config = {
     'no-restricted-imports': [
       'error',
       {
-        paths: ['remeda', '@sindresorhus/is', 'type-fest', 'firebase'],
+        paths: ['remeda', '@sindresorhus/is', 'firebase'],
         patterns: ['**/__mocks__/**'],
       },
     ],
