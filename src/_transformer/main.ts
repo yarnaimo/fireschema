@@ -1,5 +1,5 @@
 import { dirname, relative, resolve } from 'path'
-import { createWrappedNode, Node } from 'ts-morph'
+import { CallExpression, createWrappedNode, Node } from 'ts-morph'
 import ts, { factory } from 'typescript'
 import { transformDocumentSchemaNode } from './document-schema'
 import { transformJsonSchemaNode } from './json-schema'
@@ -91,7 +91,9 @@ function visitNode(node: ts.Node, program: ts.Program): ts.Node | undefined {
     return node
   }
 
-  const wrappedExpression = createWrappedNode(expression.node, { typeChecker })
+  const wrappedExpression = createWrappedNode(expression.node, {
+    typeChecker,
+  }) as CallExpression
   const [typeArgument] = wrappedExpression.getTypeArguments()
   if (!typeArgument) {
     throw new Error('type argument not specified')
