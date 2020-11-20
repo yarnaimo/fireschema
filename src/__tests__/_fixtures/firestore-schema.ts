@@ -11,8 +11,8 @@ import {
   $schema,
   createFirestoreSchema,
 } from '../..'
+import { FTypes } from '../../core/types'
 import { Type } from '../../lib/type'
-import { FTypes } from '../../types'
 
 export type IVersion = {}
 

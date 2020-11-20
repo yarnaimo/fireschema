@@ -5,7 +5,7 @@ import {
   loadFirestoreRules,
 } from '@firebase/testing'
 import { MapAsync } from 'lifts'
-import { renderSchema } from '../../firestore/_renderers/root'
+import { renderSchema } from '../../core/firestore/_renderer/root'
 import { firestoreSchema } from '../_fixtures/firestore-schema'
 import { projectId } from './_config'
 

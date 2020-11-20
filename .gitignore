@@ -27,6 +27,7 @@ Thumbs.db
 config
 coverage
 dist/**/*
+esm/**/*
 node_modules
 public
 sw.*

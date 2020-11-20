@@ -25,8 +25,8 @@ const main = () => {
   const schemaModule = require(schemaPath) // eslint-disable-line
 
   const rendererPath = isInsideNodeModules
-    ? '../../dist/firestore/_renderers/root'
-    : '../../src/firestore/_renderers/root'
+    ? '../../dist/core/firestore/_renderer/root'
+    : '../../src/core/firestore/_renderer/root'
   const rendererModule = require(rendererPath) // eslint-disable-line
 
   const rendered = rendererModule.renderSchema(schemaModule.firestoreSchema)

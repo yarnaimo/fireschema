@@ -1,5 +1,2 @@
-export * from './firestore'
-export * from './functions'
+export * from './core'
 export * from './runtypes'
-export * from './types'
-export * from './utils'

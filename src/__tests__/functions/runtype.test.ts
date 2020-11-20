@@ -1,4 +1,4 @@
-import { $jsonSchema } from '../../functions/factories'
+import { $jsonSchema } from '../../core'
 import { Type } from '../../lib/type'
 import { $_ } from '../../runtypes'
 import { userDataJson } from '../_fixtures/data'
