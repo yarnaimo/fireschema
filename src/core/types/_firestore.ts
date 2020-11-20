@@ -1,4 +1,3 @@
-
 // type PathChars =
 //   | 'A'
 //   | 'B'
@@ -85,19 +84,21 @@
 //   | `{${C[typeof $docLabel]}}`
 //   | string
 
-export type ParseCollectionPath<P extends string> =
-  P extends `${infer C}/${infer DT}`
-    ? DT extends `${infer D}/${infer T}`
-      ? [C, ...ParseCollectionPath<T>]
-      : never
-    : [P]
-
-export type ParseDocumentPath<P extends string> =
-  P extends `${infer C}/${infer DT}`
-    ? DT extends `${infer D}/${infer T}`
-      ? [C, ...ParseDocumentPath<T>]
-      : [C]
+export type ParseCollectionPath<
+  P extends string
+> = P extends `${infer C}/${infer DT}`
+  ? DT extends `${infer D}/${infer T}`
+    ? [C, ...ParseCollectionPath<T>]
     : never
+  : [P]
+
+export type ParseDocumentPath<
+  P extends string
+> = P extends `${infer C}/${infer DT}`
+  ? DT extends `${infer D}/${infer T}`
+    ? [C, ...ParseDocumentPath<T>]
+    : [C]
+  : never
 
 // export type SPath<
 //   C extends STypes.RootOptions.All | STypes.CollectionOptions.All,

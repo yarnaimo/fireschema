@@ -58,7 +58,7 @@
     "got": "^11.6.2",
     "jest": "^26.4.2",
     "markdown-magic": "^1.0.0",
-    "prettier": "^2.1.1",
+    "prettier": "^2.2.0",
     "react": "^16.13.1",
     "react-test-renderer": "^16.13.1",
     "sort-package-json": "^1.44.0",
