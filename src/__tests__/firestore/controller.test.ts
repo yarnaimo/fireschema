@@ -1,4 +1,8 @@
-import { assertFails, assertSucceeds, firestore } from '@firebase/testing'
+import {
+  assertFails,
+  assertSucceeds,
+  firestore,
+} from '@firebase/rules-unit-testing'
 import { isDayjs } from 'dayjs'
 import { expectType } from 'tsd'
 import {
@@ -19,9 +23,9 @@ import {
 import { authedApp } from '../_infrastructure/_app'
 import { expectEqualRef } from '../_utils/firestore'
 
-export const $: FirestoreRefAdapter<typeof firestoreSchema> = createFirestoreRefAdapter(
-  firestoreSchema,
-)
+export const $: FirestoreRefAdapter<
+  typeof firestoreSchema
+> = createFirestoreRefAdapter(firestoreSchema)
 
 const _collections = (app: _web.Firestore) => {
   const versions = $.collection(app, 'versions')
@@ -124,10 +128,10 @@ describe('refs equality', () => {
       app.doc(path),
     )
 
-    expectType<firebase.firestore.DocumentReference<PostU>>(actualPostRef)
+    expectType<_web.DocumentReference<PostU>>(actualPostRef)
 
     expectType<
-      firebase.firestore.DocumentReference<
+      _web.DocumentReference<
         IUser & { __loc__: ['versions', 'users', 'posts'] }
       >
       // @ts-expect-error: doc data
@@ -140,11 +144,11 @@ describe('refs equality', () => {
   test('getParentDocument', () => {
     const user = $.getParentDocument(r.posts)
 
-    expectType<firebase.firestore.DocumentReference<UserU>>(user)
+    expectType<_web.DocumentReference<UserU>>(user)
     expect(user.path).toBe(r.user.path)
 
     // @ts-expect-error post
-    expectType<firebase.firestore.DocumentReference<PostU>>(user)
+    expectType<_web.DocumentReference<PostU>>(user)
   })
 })
 

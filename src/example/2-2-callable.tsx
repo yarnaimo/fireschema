@@ -1,10 +1,10 @@
-import { initializeApp } from 'firebase/app'
+import firebase from 'firebase/app'
 import React from 'react'
 import { Caller } from '..'
 
 type FunctionsModule = typeof import('./2-1-registerer')
 
-const app: firebase.app.App = initializeApp({
+const app: firebase.app.App = firebase.initializeApp({
   // ...
 })
 const functionsApp = app.functions('asia-northeast1')

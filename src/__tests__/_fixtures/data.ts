@@ -1,4 +1,4 @@
-import { firestore } from '@firebase/testing'
+import { firestore } from '@firebase/rules-unit-testing'
 import dayjs from 'dayjs'
 import { FTypes } from '../../core/types'
 import { Type } from '../../lib/type'

@@ -1,5 +1,5 @@
 import { _admin } from '../../../lib/firestore-types'
-import { _ff } from '../../../lib/functions-types'
+import { _fadmin } from '../../../lib/functions-types'
 import { $schema } from '../../constants'
 import { FunTypes, STypes, STypeUtils } from '../../types'
 import { ParseDocumentPath } from '../../types/_firestore'
@@ -39,10 +39,10 @@ export const FirestoreTriggerRegisterer = <S extends STypes.RootOptions.All>(
     T = STypeUtils.FTDocDataFromOptions<_admin.Firestore, _C, L>,
     U = STypeUtils.DocDataFromOptions<_admin.Firestore, _C, L>
   >(options: {
-    builder: _ff.FunctionBuilder
+    builder: _fadmin.FunctionBuilder
     path: DP
     handler: FunTypes.FirestoreTrigger.OnCreateOrDeleteHandler<T, U>
-  }) => _ff.CloudFunction<_admin.QueryDocumentSnapshot>
+  }) => _fadmin.CloudFunction<_admin.QueryDocumentSnapshot>
 
   type OnUpdate = <
     DP extends string,
@@ -51,10 +51,10 @@ export const FirestoreTriggerRegisterer = <S extends STypes.RootOptions.All>(
     T = STypeUtils.FTDocDataFromOptions<_admin.Firestore, _C, L>,
     U = STypeUtils.DocDataFromOptions<_admin.Firestore, _C, L>
   >(options: {
-    builder: _ff.FunctionBuilder
+    builder: _fadmin.FunctionBuilder
     path: DP
     handler: FunTypes.FirestoreTrigger.OnUpdateHandler<T, U>
-  }) => _ff.CloudFunction<_ff.Change<_admin.QueryDocumentSnapshot>>
+  }) => _fadmin.CloudFunction<_fadmin.Change<_admin.QueryDocumentSnapshot>>
 
   type OnWrite = <
     DP extends string,
@@ -63,10 +63,10 @@ export const FirestoreTriggerRegisterer = <S extends STypes.RootOptions.All>(
     T = STypeUtils.FTDocDataFromOptions<_admin.Firestore, _C, L>,
     U = STypeUtils.DocDataFromOptions<_admin.Firestore, _C, L>
   >(options: {
-    builder: _ff.FunctionBuilder
+    builder: _fadmin.FunctionBuilder
     path: DP
     handler: FunTypes.FirestoreTrigger.OnWriteHandler<T, U>
-  }) => _ff.CloudFunction<_ff.Change<_admin.DocumentSnapshot>>
+  }) => _fadmin.CloudFunction<_fadmin.Change<_admin.DocumentSnapshot>>
 
   const onCreate: OnCreateOrDelete = ({ builder, path, handler }) => {
     const decode = buildDecoder(path)

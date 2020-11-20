@@ -1,5 +1,5 @@
 import { _admin } from '../../../lib/firestore-types'
-import { _ff } from '../../../lib/functions-types'
+import { _fadmin } from '../../../lib/functions-types'
 import { Type } from '../../../lib/type'
 import { messages } from '../../constants'
 import { FunTypes, STypes } from '../../types'
@@ -19,7 +19,7 @@ export const FunctionRegisterer = <S extends STypes.RootOptions.All>(
     handler,
   }: {
     schema: FunTypes.SchemaTuple<I, O>
-    builder: _ff.FunctionBuilder
+    builder: _fadmin.FunctionBuilder
     handler: FunTypes.Callable.Handler<I, O>
   }) => {
     assertJsonSchema(inputRuntype)
@@ -27,7 +27,7 @@ export const FunctionRegisterer = <S extends STypes.RootOptions.All>(
 
     const wrapped = async (
       data: unknown,
-      context: _ff.https.CallableContext,
+      context: _fadmin.https.CallableContext,
     ) => {
       const validated = inputRuntype.validate(data)
 
@@ -51,7 +51,7 @@ export const FunctionRegisterer = <S extends STypes.RootOptions.All>(
     builder,
     handler,
   }: {
-    builder: _ff.FunctionBuilder
+    builder: _fadmin.FunctionBuilder
     handler: FunTypes.Http.Handler
   }) => {
     return builder.https.onRequest(handler)
@@ -65,13 +65,13 @@ export const FunctionRegisterer = <S extends STypes.RootOptions.All>(
       handler,
     }: {
       schema: FunTypes.JsonSchema<I>
-      builder: _ff.FunctionBuilder
+      builder: _fadmin.FunctionBuilder
       handler: FunTypes.Topic.Handler<I>
     },
   ) => {
     const wrapped = async (
-      message: _ff.pubsub.Message,
-      context: _ff.EventContext,
+      message: _fadmin.pubsub.Message,
+      context: _fadmin.EventContext,
     ) => {
       const input = message.json as I
       await handler(input, message, context)
@@ -88,10 +88,10 @@ export const FunctionRegisterer = <S extends STypes.RootOptions.All>(
     handler,
     retryConfig = {},
   }: {
-    builder: _ff.FunctionBuilder
+    builder: _fadmin.FunctionBuilder
     schedule: string
     handler: FunTypes.Schedule.Handler
-    retryConfig?: _ff.ScheduleRetryConfig
+    retryConfig?: _fadmin.ScheduleRetryConfig
   }) => {
     return builder.pubsub
       .schedule(schedule)

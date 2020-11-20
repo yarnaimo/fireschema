@@ -1,4 +1,4 @@
-import firebase, { firestore, initializeApp } from 'firebase/app' // または firebase-admin
+import firebase from 'firebase/app' // または firebase-admin
 import {
   createFirestoreRefAdapter,
   createFirestoreWriteAdapter,
@@ -10,16 +10,16 @@ import { firestoreSchema } from './1-1-schema'
 /**
  * コントローラの初期化
  */
-const app: firebase.app.App = initializeApp({
+const app: firebase.app.App = firebase.initializeApp({
   // ...
 })
 export const firestoreApp = app.firestore()
 
-export const $: FirestoreRefAdapter<typeof firestoreSchema> = createFirestoreRefAdapter(
-  firestoreSchema,
-)
+export const $: FirestoreRefAdapter<
+  typeof firestoreSchema
+> = createFirestoreRefAdapter(firestoreSchema)
 export const $web: FirestoreWriteAdapter<firebase.firestore.Firestore> = createFirestoreWriteAdapter(
-  firestore,
+  firebase.firestore,
   firestoreApp,
 )
 

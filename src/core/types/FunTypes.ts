@@ -1,6 +1,6 @@
 import type express from 'express'
 import { _admin } from '../../lib/firestore-types'
-import { _ff } from '../../lib/functions-types'
+import { _fadmin } from '../../lib/functions-types'
 import { $_ } from '../../runtypes'
 import { $input, $output, $topicName } from '../constants'
 
@@ -16,7 +16,10 @@ export declare namespace FunTypes {
   export type JsonSchema<T> = $_.Runtype<unknown> & { __T__: T }
 
   export type NestedFunctions = {
-    [K in string]: _ff.CloudFunction<any> | _ff.HttpsFunction | NestedFunctions
+    [K in string]:
+      | _fadmin.CloudFunction<any>
+      | _fadmin.HttpsFunction
+      | NestedFunctions
   }
 
   export type FunctionsModule = {
@@ -38,13 +41,13 @@ export declare namespace FunTypes {
 
     export type Handler<I, O> = (
       inputData: I,
-      context: _ff.https.CallableContext,
+      context: _fadmin.https.CallableContext,
     ) => Promise<O>
   }
 
   export namespace Http {
     export type Handler = (
-      req: _ff.https.Request,
+      req: _fadmin.https.Request,
       resp: express.Response,
     ) => void | Promise<void>
   }
@@ -55,36 +58,36 @@ export declare namespace FunTypes {
 
     export type Handler<I> = (
       inputData: I,
-      message: _ff.pubsub.Message,
-      context: _ff.EventContext,
+      message: _fadmin.pubsub.Message,
+      context: _fadmin.EventContext,
     ) => Promise<void>
   }
 
   export namespace Schedule {
-    export type Handler = (context: _ff.EventContext) => Promise<void>
+    export type Handler = (context: _fadmin.EventContext) => Promise<void>
   }
 
   export namespace FirestoreTrigger {
     export type NestedOptions = {
-      [K in string]: _ff.CloudFunction<any> | NestedOptions
+      [K in string]: _fadmin.CloudFunction<any> | NestedOptions
     }
 
     export type OnCreateOrDeleteHandler<T, U> = (
       decodedData: U,
       snap: _admin.QueryDocumentSnapshot<T>,
-      context: _ff.EventContext,
+      context: _fadmin.EventContext,
     ) => Promise<void>
 
     export type OnUpdateHandler<T, U> = (
-      decodedData: _ff.Change<U>,
-      snap: _ff.Change<_admin.QueryDocumentSnapshot<T>>,
-      context: _ff.EventContext,
+      decodedData: _fadmin.Change<U>,
+      snap: _fadmin.Change<_admin.QueryDocumentSnapshot<T>>,
+      context: _fadmin.EventContext,
     ) => Promise<void>
 
     export type OnWriteHandler<T, U> = (
-      decodedData: _ff.Change<U | undefined>,
-      snap: _ff.Change<_admin.DocumentSnapshot<T>>,
-      context: _ff.EventContext,
+      decodedData: _fadmin.Change<U | undefined>,
+      snap: _fadmin.Change<_admin.DocumentSnapshot<T>>,
+      context: _fadmin.EventContext,
     ) => Promise<void>
   }
 }

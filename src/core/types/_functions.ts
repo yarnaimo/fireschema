@@ -1,4 +1,4 @@
-import { _ff } from '../../lib/functions-types'
+import { _fadmin } from '../../lib/functions-types'
 import { $topicName } from '../constants'
 import { FunTypes } from '../types'
 import { Prev } from './_object'
@@ -13,7 +13,7 @@ export type ExtractFunctionPaths<
 > = [D] extends [never]
   ? never
   : {
-      [K in keyof S & string]: S[K] extends _ff.CloudFunction<any>
+      [K in keyof S & string]: S[K] extends _fadmin.CloudFunction<any>
         ? K
         : S[K] extends FunTypes.NestedFunctions
         ? `${K}-${ExtractFunctionPaths<S[K], Prev[D]>}`

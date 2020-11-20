@@ -3,7 +3,8 @@ import {
   clearFirestoreData,
   initializeTestApp,
   loadFirestoreRules,
-} from '@firebase/testing'
+} from '@firebase/rules-unit-testing'
+import type firebase from 'firebase/app'
 import { MapAsync } from 'lifts'
 import { renderSchema } from '../../core/firestore/_renderer/root'
 import { firestoreSchema } from '../_fixtures/firestore-schema'
