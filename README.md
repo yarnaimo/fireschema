@@ -99,7 +99,7 @@ Fireschema が依存する一部のパッケージは **TypeScript 3.9** に依�
 <!-- The below code snippet is automatically added from ./src/example/1-1-schema.ts -->
 
 ```ts
-import { Merge } from 'fireschemape-fest'
+import { Merge } from 'type-fest'
 import {
   $adapter,
   $allow,
@@ -284,14 +284,14 @@ Fireschema の Firestore コントローラは `RefAdapter` と `WriteAdapter` �
 <!-- The below code snippet is automatically added from ./src/example/1-3-adapter.ts -->
 
 ```ts
-import firebase, { firestore, initializeApp } from 'fireschemarebase/app' // または firebase-admin
+import firebase, { firestore, initializeApp } from 'firebase/app' // または firebase-admin
 import {
   createFirestoreRefAdapter,
   createFirestoreWriteAdapter,
   FirestoreRefAdapter,
   FirestoreWriteAdapter,
 } from 'fireschema'
-import { firestoreSchema } from 'fireschema1-1-schema'
+import { firestoreSchema } from './1-1-schema'
 
 /**
  * コントローラの初期化
@@ -351,9 +351,9 @@ techPostsGroup.get() // Promise<QuerySnapshot<PostA | PostB>>
  * ドキュメントの作成・更新
  */
 $web.create(user, {
-  name: 'umi',
-  displayName: null,
-  age: 16,
+  name: 'test',
+  displayName: 'Test',
+  age: 20,
   timestamp: $web.FieldValue.serverTimestamp(),
   options: { a: true },
 })
@@ -384,14 +384,14 @@ $web.runTransaction(async (tc) => {
 <!-- The below code snippet is automatically added from ./src/example/1-4-hooks.tsx -->
 
 ```tsx
-import React from 'fireschemaact'
+import React from 'react'
 import {
   useDocumentSnapData,
   useQuerySnapData,
   useTypedDocument,
   useTypedQuery,
 } from 'fireschema/hooks'
-import { $, firestoreApp } from 'fireschema1-3-adapter'
+import { $, firestoreApp } from './1-3-adapter'
 
 /**
  * コレクション/クエリをリアルタイムで表示
@@ -438,11 +438,11 @@ Fireschema の Cloud Functions 型付け機能を利用するには、まず `Fu
 <!-- The below code snippet is automatically added from ./src/example/2-1-registerer.ts -->
 
 ```ts
-import { firestore } from 'fireschemarebase-admin'
-import * as functions from 'fireschemarebase-functions'
-import { Merge } from 'fireschemape-fest'
+import { firestore } from 'firebase-admin'
+import * as functions from 'firebase-functions'
+import { Merge } from 'type-fest'
 import { $jsonSchema, FunctionRegisterer } from 'fireschema'
-import { firestoreSchema, User } from 'fireschema1-1-schema'
+import { firestoreSchema, User } from './1-1-schema'
 
 /**
  * Registererを初期化
@@ -528,8 +528,8 @@ callble function の client 作成時に functions の index モジュールの�
 <!-- The below code snippet is automatically added from ./src/example/2-2-callable.tsx -->
 
 ```tsx
-import { initializeApp } from 'fireschemarebase/app'
-import React from 'fireschemaact'
+import { initializeApp } from 'firebase/app'
+import React from 'react'
 import { Caller } from 'fireschema'
 
 type FunctionsModule = typeof import('./2-1-registerer')
@@ -547,8 +547,8 @@ const Component = () => {
       name: 'test',
       displayName: 'Test',
       age: 20,
-      options: { a: true },
       timestamp: new Date().toISOString(),
+      options: { a: true },
     })
 
     if (!result.isOk) {
