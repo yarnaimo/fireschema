@@ -25,3 +25,22 @@ export const createConverter = (decoder: STypes.Decoder<any, any>) => ({
   fromFirestore: decoder,
   toFirestore: (data: any) => data,
 })
+
+export const lastUpdatedByTrigger = (
+  before: STypes.DocumentMeta,
+  after: STypes.DocumentMeta,
+) => {
+  if (!after._lastUpdateByTrigger) {
+    return false
+  }
+  if (!before._lastUpdateByTrigger) {
+    return true
+  }
+  if (
+    before._lastUpdateByTrigger.toMillis() <
+    after._lastUpdateByTrigger.toMillis()
+  ) {
+    return true
+  }
+  return false
+}

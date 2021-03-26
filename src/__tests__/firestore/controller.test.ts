@@ -10,6 +10,7 @@ import {
   createFirestoreWriteAdapter,
   FirestoreRefAdapter,
   STypes,
+  _lastUpdateByTrigger,
 } from '../../core'
 import { _admin, _web } from '../../lib/firestore-types'
 import { userData } from '../_fixtures/data'
@@ -186,6 +187,21 @@ describe('read', () => {
   })
 })
 
+const mockOtherEventTriggerEnv = () => {
+  Object.assign(process.env, {
+    FUNCTION_NAME: 'testFunction1',
+    FUNCTION_TRIGGER_TYPE: 'OTHER_EVENT_TRIGGER',
+  })
+  return {
+    reset: () => {
+      Object.assign(process.env, {
+        FUNCTION_NAME: undefined,
+        FUNCTION_TRIGGER_TYPE: undefined,
+      })
+    },
+  }
+}
+
 describe('write', () => {
   describe('create', () => {
     test('normal', async () => {
@@ -198,6 +214,18 @@ describe('write', () => {
         _updatedAt: expect.any(firestore.Timestamp),
         timestamp: expect.any(firestore.Timestamp),
       })
+      expect(snapRaw.data()![_lastUpdateByTrigger]).toBeUndefined()
+    })
+
+    test('normal (other event trigger)', async () => {
+      const mock = mockOtherEventTriggerEnv()
+      await $web.create(r.user, userData)
+
+      const snapRaw = await usersRaw.doc('user').get()
+      expect(snapRaw.data()![_lastUpdateByTrigger]).toBeInstanceOf(
+        firestore.Timestamp,
+      )
+      mock.reset()
     })
 
     test('normal (empty array)', async () => {
@@ -271,6 +299,21 @@ describe('write', () => {
           _updatedAt: expect.any(firestore.Timestamp),
           timestamp: expect.any(firestore.Timestamp),
         })
+        expect(snapRaw.data()![_lastUpdateByTrigger]).toBeUndefined()
+      })
+
+      test('normal (other event trigger)', async () => {
+        const mock = mockOtherEventTriggerEnv()
+        await $web[op](r.user, {
+          name: 'umi-kousaka',
+          tags: firestore.FieldValue.arrayUnion({ id: 2, name: 'tag2' }),
+        })
+
+        const snapRaw = await usersRaw.doc('user').get()
+        expect(snapRaw.data()![_lastUpdateByTrigger]).toBeInstanceOf(
+          firestore.Timestamp,
+        )
+        mock.reset()
       })
 
       test('transaction', async () => {

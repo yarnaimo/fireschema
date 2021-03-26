@@ -1,3 +1,4 @@
+import { logger } from 'firebase-functions'
 import { _admin } from '../../../lib/firestore-types'
 import { _fadmin } from '../../../lib/functions-types'
 import { $schema } from '../../constants'
@@ -7,6 +8,7 @@ import { GetDeep } from '../../types/_object'
 import {
   firestorePathToLoc,
   getCollectionOptions,
+  lastUpdatedByTrigger,
 } from '../../utils/_firestore'
 
 export const FirestoreTriggerRegisterer = <S extends STypes.RootOptions.All>(
@@ -94,6 +96,12 @@ export const FirestoreTriggerRegisterer = <S extends STypes.RootOptions.All>(
         decode(change.before),
         decode(change.after),
       )
+      if (lastUpdatedByTrigger(change.before.data(), change.after.data())) {
+        logger.error(
+          'Stopped the function execution because onUpdate infinite loop detected.',
+        )
+        return
+      }
       return handler(decodedData, change as any, context)
     })
   }

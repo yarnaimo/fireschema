@@ -75,9 +75,12 @@ export declare namespace STypeUtils {
     ? []
     : GetDocT<P>['__loc__']
 
-  export type GetSL<_C> = EnsureOptions<
+  export type GetSL<
     _C
-  >[typeof $adapter] extends STypes.CollectionAdapter<any, any>
+  > = EnsureOptions<_C>[typeof $adapter] extends STypes.CollectionAdapter<
+    any,
+    any
+  >
     ? EnsureOptions<_C>[typeof $adapter]['__SL__']
     : {}
 
@@ -203,8 +206,9 @@ export declare namespace STypes {
   export type DocumentMeta<
     F extends FTypes.FirestoreApp = FTypes.FirestoreApp
   > = {
-    _createdAt: FTypes.Timestamp<F>
-    _updatedAt: FTypes.Timestamp<F>
+    _createdAt?: FTypes.Timestamp<F>
+    _updatedAt?: FTypes.Timestamp<F>
+    _lastUpdateByTrigger?: FTypes.Timestamp<F>
   }
 
   type WithoutLoc<T> = T extends HasLoc<any> ? Type.Except<T, '__loc__'> : T

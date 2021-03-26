@@ -1,6 +1,7 @@
 import { _admin, _web } from '../../../lib/firestore-types'
-import { _createdAt, _updatedAt } from '../../constants'
+import { _createdAt, _lastUpdateByTrigger, _updatedAt } from '../../constants'
 import { FTypes, STypes } from '../../types'
+import { isOtherEventTrigger } from '../../utils/_functions'
 
 type UnknownT = STypes.HasT<unknown>
 
@@ -14,19 +15,36 @@ type ToUpdate<U extends UnknownT, F extends FTypes.FirestoreApp> = Partial<
 >
 
 const WithMeta = (FieldValue: FTypes.FieldValueClass) => {
+  const composeTriggerTimestamp = () =>
+    isOtherEventTrigger()
+      ? { [_lastUpdateByTrigger]: FieldValue.serverTimestamp() }
+      : {}
+
   return {
-    toCreate: <U extends STypes.HasT<unknown>>(data: {}) =>
-      (({
-        ...data,
+    toCreate: <U extends STypes.HasT<unknown>>(data: {}) => {
+      const timestamps = {
         [_createdAt]: FieldValue.serverTimestamp(),
         [_updatedAt]: FieldValue.serverTimestamp(),
-      } as any) as U['__T__']),
-
-    toUpdate: <U extends STypes.HasT<unknown>>(data: {}) =>
-      (({
+      }
+      const triggerTimestamps = composeTriggerTimestamp()
+      return ({
         ...data,
+        ...timestamps,
+        ...triggerTimestamps,
+      } as unknown) as U['__T__']
+    },
+
+    toUpdate: <U extends STypes.HasT<unknown>>(data: {}) => {
+      const timestamps = {
         [_updatedAt]: FieldValue.serverTimestamp(),
-      } as any) as U['__T__']),
+      }
+      const triggerTimestamps = composeTriggerTimestamp()
+      return ({
+        ...data,
+        ...timestamps,
+        ...triggerTimestamps,
+      } as unknown) as U['__T__']
+    },
   }
 }
 
