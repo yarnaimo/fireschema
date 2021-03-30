@@ -2,9 +2,11 @@
   "extends": "@sindresorhus/tsconfig",
   "compilerOptions": {
     "target": "es2018",
+    "module": "CommonJS",
     "esModuleInterop": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
+    "noUncheckedIndexedAccess": false,
     "outDir": "dist",
     "lib": ["dom", "dom.iterable", "es2019"],
     "baseUrl": ".",

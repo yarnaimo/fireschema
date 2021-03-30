@@ -44,6 +44,8 @@ export declare namespace STypeUtils {
     unknown,
   ]
     ? U
+    : T extends any[]
+    ? T
     : never
 
   export type Parent<F extends FTypes.FirestoreApp = FTypes.FirestoreApp> =

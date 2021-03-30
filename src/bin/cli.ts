@@ -5,7 +5,7 @@ import { relative, resolve } from 'path'
 import { register } from 'ts-node'
 
 register({
-  project: process.env.TS_NODE_PROJECT,
+  project: process.env['TS_NODE_PROJECT'],
   compiler: 'ttypescript',
 })
 

@@ -17,11 +17,8 @@ const UserJsonRuntype = $_.Record({
   age: $_.Number,
   tags: $_.Array($_.Record({ id: $_.Number, name: $_.String })),
   options: $_.Record({ a: $_.Boolean, b: $_.String }),
-}).And(
-  $_.Record({
-    timestamp: $_.String,
-  }),
-)
+  timestamp: $_.String,
+})
 
 const PostRuntype = $_.Record({
   type: $_.Literal('a'),
