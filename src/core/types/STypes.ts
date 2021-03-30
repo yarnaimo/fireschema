@@ -75,9 +75,12 @@ export declare namespace STypeUtils {
     ? []
     : GetDocT<P>['__loc__']
 
-  export type GetSL<_C> = EnsureOptions<
+  export type GetSL<
     _C
-  >[typeof $adapter] extends STypes.CollectionAdapter<any, any>
+  > = EnsureOptions<_C>[typeof $adapter] extends STypes.CollectionAdapter<
+    any,
+    any
+  >
     ? EnsureOptions<_C>[typeof $adapter]['__SL__']
     : {}
 
