@@ -103,7 +103,11 @@ export declare namespace STypes {
     U,
     L extends string[],
     T
-  > = STypes.DocumentMeta<F> & U & STypes.HasLoc<L> & STypes.HasT<T>
+  > = STypes.DocumentMeta<F> &
+    U &
+    STypes.HasLoc<L> &
+    STypes.HasT<T> &
+    STypes.HasId
 
   export type ConditionExp = string | boolean
 
@@ -188,6 +192,9 @@ export declare namespace STypes {
   }
   export type HasT<T> = {
     __T__: T
+  }
+  export type HasId = {
+    id: string
   }
 
   export type UAt<

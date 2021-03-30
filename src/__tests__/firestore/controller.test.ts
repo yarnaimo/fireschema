@@ -11,8 +11,8 @@ import {
   FirestoreRefAdapter,
   STypes,
 } from '../../core'
-import { _admin, _web } from '../../lib/firestore-types'
-import { userData } from '../_fixtures/data'
+import { _web } from '../../lib/firestore-types'
+import { postAData, userData } from '../_fixtures/data'
 import {
   firestoreSchema,
   IPostA,
@@ -66,14 +66,16 @@ const r = _collections(app)
 const ur = _collections(appUnauthed)
 
 type UserU = IUserLocal &
-  STypes.DocumentMeta<_admin.Firestore> &
+  STypes.DocumentMeta<_web.Firestore> &
   STypes.HasLoc<['versions', 'users']> &
-  STypes.HasT<IUser>
+  STypes.HasT<IUser> &
+  STypes.HasId
 
 type PostU = (IPostA | IPostB) &
-  STypes.DocumentMeta<_admin.Firestore> &
+  STypes.DocumentMeta<_web.Firestore> &
   STypes.HasLoc<['versions', 'users', 'posts']> &
-  STypes.HasT<IPostA | IPostB>
+  STypes.HasT<IPostA | IPostB> &
+  STypes.HasId
 
 describe('types', () => {
   test('UAt', () => {
@@ -138,7 +140,6 @@ describe('refs equality', () => {
     >(actualPostRef)
 
     expect(actualPostRef.path).toBe(path)
-    expectEqualRef(actualPostRef, r.post)
   })
 
   test('getParentDocument', () => {
@@ -157,9 +158,15 @@ const usersRaw = app.collection('versions').doc('v1').collection('users')
 describe('read', () => {
   beforeEach(async () => {
     await usersRaw.doc('user').set(userData as any)
+
+    await usersRaw
+      .doc('user')
+      .collection('posts')
+      .doc('post')
+      .set(postAData as any)
   })
 
-  test('get', async () => {
+  test('get - user', async () => {
     const snap = await r.user.get()
     const data = snap.data()! // eslint-disable-line @typescript-eslint/no-non-null-assertion
 
@@ -167,11 +174,23 @@ describe('read', () => {
     expect(data).toMatchObject({
       ...userData,
       timestamp: expect.anything(),
+      id: snap.id,
     })
     expect(isDayjs(data.timestamp)).toBeTruthy()
   })
 
-  test('get collectionGroup', async () => {
+  test('get - post', async () => {
+    const snap = await r.post.get()
+    const data = snap.data()! // eslint-disable-line @typescript-eslint/no-non-null-assertion
+
+    expectType<PostU>(data)
+    expect(data).toMatchObject({
+      ...postAData,
+      id: snap.id,
+    })
+  })
+
+  test('get collectionGroup - user', async () => {
     const snap = await r.teenUsersGroup.get()
 
     expect(snap.docs).toHaveLength(1)
@@ -181,8 +200,22 @@ describe('read', () => {
     expect(data).toMatchObject({
       ...userData,
       timestamp: expect.anything(),
+      id: snap.docs[0].id,
     })
     expect(isDayjs(data.timestamp)).toBeTruthy()
+  })
+
+  test('get collection - post', async () => {
+    const snap = await r.posts.get()
+
+    expect(snap.docs).toHaveLength(1)
+    const data = snap.docs[0].data()
+
+    expectType<PostU>(data)
+    expect(data).toMatchObject({
+      ...postAData,
+      id: snap.docs[0].id,
+    })
   })
 })
 

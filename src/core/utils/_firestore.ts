@@ -1,4 +1,4 @@
-import { STypes, STypeUtils } from '../types'
+import { FTypes, STypes, STypeUtils } from '../types'
 import { getDeep } from './_object'
 
 export const firestorePathToLoc = (path: string) =>
@@ -21,7 +21,16 @@ export const childLoc = (parent: STypeUtils.Parent, collectionName: string) => [
   collectionName,
 ]
 
-export const createConverter = (decoder: STypes.Decoder<any, any>) => ({
-  fromFirestore: decoder,
+export const createConverter = (
+  decoder: STypes.Decoder<any, any> | undefined,
+) => ({
+  fromFirestore: (snap: FTypes.QueryDocumentSnap<any>, options: any) => {
+    const decodedData = decoder ? decoder(snap, options) : snap.data(options)
+
+    return {
+      ...decodedData,
+      id: snap.id,
+    }
+  },
   toFirestore: (data: any) => data,
 })

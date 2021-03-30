@@ -42,6 +42,7 @@ const VersionAdapter = $collectionAdapter<IVersion>()({})
 export const decodeUser = (data: IUser) => ({
   ...data,
   timestamp: dayjs(data.timestamp.toDate()),
+  id: undefined, // decode -> id追加 の順に行われるのを確認する用
 })
 
 export const UserSchema = $documentSchema<IUser, IUserLocal>({

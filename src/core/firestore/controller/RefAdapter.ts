@@ -36,9 +36,9 @@ const decoded = (
     return cachedQuery
   }
 
-  const convertedQuery = decoder
-    ? (rawQuery.withConverter as any)(createConverter(decoder))
-    : rawQuery
+  const convertedQuery = (rawQuery.withConverter as any)(
+    createConverter(decoder),
+  )
 
   addQueryCache(collectionName, rawQuery, convertedQuery)
 
