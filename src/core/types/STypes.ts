@@ -134,19 +134,19 @@ export declare namespace STypes {
     snapshot: FTypes.QueryDocumentSnap<T>,
   ) => U
 
-  export type CollectionSchema<T, U = T, SL = {}> = {
+  export type CollectionSchema<T, U, HasDecoder extends boolean, SL = {}> = {
     __T__: T
     __U__: U
     __SL__: SL
     schema: string
-    decoder: Decoder<T, U> | undefined
+    decoder: HasDecoder extends true ? Decoder<T, U> : undefined
     selectors: (q: FTypes.Query<U>) => SL
   }
 
   export namespace CollectionOptions {
     export type Meta = {
       [$docLabel]: string
-      [$schema]: CollectionSchema<any>
+      [$schema]: CollectionSchema<any, any, any>
       // [$collectionGroup]?: boolean
       [$allow]: AllowOptions
     }

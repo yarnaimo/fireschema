@@ -9,6 +9,7 @@ import {
   createFirestoreRefAdapter,
   createFirestoreWriteAdapter,
   FirestoreRefAdapter,
+  FTypes,
   STypes,
 } from '../../core'
 import { _web } from '../../lib/firestore-types'
@@ -19,6 +20,8 @@ import {
   IPostB,
   IUser,
   IUserLocal,
+  PostSchema,
+  UserSchema,
 } from '../_fixtures/firestore-schema'
 import { authedApp } from '../_infrastructure/_app'
 import { expectEqualRef } from '../_utils/firestore'
@@ -78,6 +81,14 @@ type PostU = (IPostA | IPostB) &
   STypes.HasId
 
 describe('types', () => {
+  test('decoder', () => {
+    expectType<
+      (data: IUser, snap: FTypes.QueryDocumentSnap<IUser>) => IUserLocal
+    >(UserSchema.decoder)
+
+    expectType<undefined>(PostSchema.decoder)
+  })
+
   test('UAt', () => {
     expectType<typeof r.user>(
       {} as _web.DocumentReference<

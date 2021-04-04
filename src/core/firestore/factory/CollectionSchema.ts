@@ -1,20 +1,26 @@
 import { FTypes, STypes } from '../../types'
 
-export function $collectionSchema<T, U = T>() {
+export function $collectionSchema<T, _U = undefined>() {
   // eslint-disable-next-line prefer-rest-params
   const rawFirstArgument = arguments[0] ?? {}
+
+  type HasDecoder = _U extends undefined ? false : true
+  type U = _U extends undefined ? T : _U
+
+  type DecoderOptions = HasDecoder extends true
+    ? { decoder: STypes.Decoder<T, U> }
+    : { decoder?: undefined }
 
   return <SL = {}>({
     decoder,
     selectors = () => ({} as SL),
-  }: {
-    decoder?: STypes.Decoder<T, U>
+  }: DecoderOptions & {
     selectors?: (q: FTypes.Query<U>) => SL
-  } = {}): STypes.CollectionSchema<T, U, SL> => {
+  }): STypes.CollectionSchema<T, U, HasDecoder, SL> => {
     return {
       ...rawFirstArgument,
       decoder,
       selectors,
-    } as STypes.CollectionSchema<T, U, SL>
+    } as STypes.CollectionSchema<T, U, HasDecoder, SL>
   }
 }

@@ -10,7 +10,7 @@ let index = 0
 
 export const renderRules = (
   $allow: STypes.AllowOptions,
-  schema: STypes.CollectionSchema<any> | null,
+  schema: STypes.CollectionSchema<any, any, any> | null,
   pIndent: number,
 ) => {
   if (!schema || !is.string(schema.schema)) {

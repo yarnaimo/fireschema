@@ -15,7 +15,7 @@ import { addQueryCache, findCachedQuery } from './_query-cache'
 type SRoot = STypes.RootOptions.All
 
 const selected = (
-  schema: STypes.CollectionSchema<any, any>,
+  schema: STypes.CollectionSchema<any, any, any>,
   selector: STypes.Select<any, any, any>,
 ) => (query: FTypes.Query<unknown>) => {
   const selectorsObject = schema.selectors(query)
@@ -24,7 +24,7 @@ const selected = (
 }
 
 const decoded = (
-  schema: STypes.CollectionSchema<any>,
+  schema: STypes.CollectionSchema<any, any, any>,
   collectionName: string,
 ) => (rawQuery: FTypes.Query<any>) => {
   const { decoder } = schema

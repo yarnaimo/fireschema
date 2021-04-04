@@ -35,7 +35,13 @@ export type IPostB = {
   texts: string[]
 }
 
-const VersionSchema = $collectionSchema<IVersion>()()
+const VersionSchema = $collectionSchema<IVersion>()({})
+void (() => {
+  const VersionSchemaError = $collectionSchema<IVersion>()({
+    // @ts-expect-error decoder without U type
+    decoder: (data) => data,
+  })
+})
 
 export const decodeUser = (data: IUser) => ({
   ...data,
@@ -50,9 +56,15 @@ export const UserSchema = $collectionSchema<IUser, IUserLocal>()({
     teen: () => q.where('age', '>=', 10).where('age', '<', 20),
   }),
 })
+void (() => {
+  const UserSchemaError = $collectionSchema<IUser, IUserLocal>()({
+    // @ts-expect-error decoder not specified
+    decoder: undefined,
+  })
+})
 
-export const PostSchema = $collectionSchema<IPostA | IPostB>()()
-export const PostASchema = $collectionSchema<IPostA>()()
+export const PostSchema = $collectionSchema<IPostA | IPostB>()({})
+export const PostASchema = $collectionSchema<IPostA>()({})
 
 const getCurrentAuthUser = () => `getCurrentAuthUser()`
 const isAdmin = () => `isAdmin()`
