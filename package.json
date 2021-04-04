@@ -14,7 +14,7 @@
     "dev": "yarn ts-node src/index.ts",
     "docs": "md-magic && sed -i -e \"s/ from '\\.\\./ from 'fireschema/g\" README.md",
     "emulators:exec": "firebase emulators:exec --only firestore,functions,pubsub",
-    "fireschema:rules": "./dist/bin/cli.js src/example/schema-example.ts",
+    "firestore:rules": "./dist/bin/cli.js src/example/1-1-schema.ts",
     "lint": "eslint --ignore-path .gitignore '**/*.{js,jsx,ts,tsx}'",
     "prepare": "./append-emulator-proxyer.sh",
     "serve": "yarn build && firebase emulators:start --only firestore,functions,pubsub",
