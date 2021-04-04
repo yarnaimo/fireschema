@@ -1,7 +1,6 @@
 import { _admin, _web } from '../../lib/firestore-types'
 import { Type } from '../../lib/type'
 import {
-  $adapter,
   $allow,
   $collectionGroups,
   $docLabel,
@@ -79,11 +78,12 @@ export declare namespace STypeUtils {
 
   export type GetSL<
     _C
-  > = EnsureOptions<_C>[typeof $adapter] extends STypes.CollectionAdapter<
+  > = EnsureOptions<_C>[typeof $schema] extends STypes.CollectionSchema<
+    any,
     any,
     any
   >
-    ? EnsureOptions<_C>[typeof $adapter]['__SL__']
+    ? EnsureOptions<_C>[typeof $schema]['__SL__']
     : {}
 
   export type DocDataFromOptions<
@@ -134,18 +134,19 @@ export declare namespace STypes {
     options: FTypes.SnapshotOptions,
   ) => U
 
-  export type DocumentSchema<T, U = T> = {
+  export type CollectionSchema<T, U = T, SL = {}> = {
     __T__: T
     __U__: U
+    __SL__: SL
     schema: string
     decoder: Decoder<T, U> | undefined
+    selectors: (q: FTypes.Query<U>) => SL
   }
 
   export namespace CollectionOptions {
     export type Meta = {
       [$docLabel]: string
-      [$schema]: DocumentSchema<any>
-      [$adapter]: STypes.CollectionAdapter<any, any> | null
+      [$schema]: CollectionSchema<any>
       // [$collectionGroup]?: boolean
       [$allow]: AllowOptions
     }
@@ -181,12 +182,6 @@ export declare namespace STypes {
     [K in keyof SL]: SL[K] extends (...args: infer A) => FTypes.Query<infer U>
       ? (...args: A) => FTypes.Query<DocData<F, U, NonNullable<L>, T>, F>
       : SL[K]
-  }
-
-  export type CollectionAdapter<T, SL extends Selectors<any, any, any, any>> = {
-    selectors: (q: FTypes.Query<T>) => SL
-  } & {
-    __SL__: SL
   }
 
   export type HasLoc<L extends string[]> = {

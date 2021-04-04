@@ -1,11 +1,9 @@
 import { Merge } from 'type-fest'
 import {
-  $adapter,
   $allow,
-  $collectionAdapter,
   $collectionGroups,
+  $collectionSchema,
   $docLabel,
-  $documentSchema,
   $functions,
   $or,
   $schema,
@@ -23,7 +21,7 @@ export type User = {
 }
 export type UserDecoded = Merge<User, { timestamp: Date }>
 
-const UserSchema = $documentSchema<User, UserDecoded>({
+const UserSchema = $collectionSchema<User, UserDecoded>()({
   decoder: (snap, options) => {
     const data = snap.data(options)
     return {
@@ -32,7 +30,6 @@ const UserSchema = $documentSchema<User, UserDecoded>({
     }
   },
 })
-const UserAdapter = $collectionAdapter<User>()({})
 
 // post
 type PostA = {
@@ -45,8 +42,7 @@ type PostB = {
   tags: { id: number; name: string }[]
   texts: string[]
 }
-const PostSchema = $documentSchema<PostA | PostB>()
-const PostAdapter = $collectionAdapter<PostA | PostB>()({
+const PostSchema = $collectionSchema<PostA | PostB>()({
   selectors: (q) => ({
     byTag: (tag: string) => q.where('tags', 'array-contains', tag),
   }),
@@ -69,7 +65,6 @@ export const firestoreSchema = createFirestoreSchema({
     users: {
       [$docLabel]: 'uid',
       [$schema]: UserSchema,
-      [$adapter]: UserAdapter,
       [$allow]: {
         read: true,
       },
@@ -79,8 +74,7 @@ export const firestoreSchema = createFirestoreSchema({
   // /users/{uid}
   users: {
     [$docLabel]: 'uid', // {uid} の部分
-    [$schema]: UserSchema, // documentSchema
-    [$adapter]: UserAdapter, // collectionAdapter
+    [$schema]: UserSchema, // collectionSchema
     [$allow]: {
       // アクセス制御
       read: true, // 誰でも可
@@ -91,7 +85,6 @@ export const firestoreSchema = createFirestoreSchema({
     posts: {
       [$docLabel]: 'postId',
       [$schema]: PostSchema,
-      [$adapter]: PostAdapter,
       [$allow]: {
         read: true,
         write: 'matchesUser(uid)',

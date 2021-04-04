@@ -1,10 +1,10 @@
 import { dirname, relative, resolve } from 'path'
-import { CallExpression, createWrappedNode, Node } from 'ts-morph'
+import { CallExpression, createWrappedNode } from 'ts-morph'
 import ts, { factory } from 'typescript'
-import { transformDocumentSchemaNode } from './document-schema'
+import { createCollectionSchemaOptionsNode } from './collection-schema'
 import { transformJsonSchemaNode } from './json-schema'
 
-const documentSchema = '$documentSchema'
+const collectionSchema = '$collectionSchema'
 const jsonSchema = '$jsonSchema'
 
 const relativePath = relative(process.cwd(), __dirname)
@@ -86,35 +86,32 @@ function visitNode(node: ts.Node, program: ts.Program): ts.Node | undefined {
   //   if (isKeysImportExpression(node)) {
   //     return
   //   }
-  const expression = ensureSchemaCallExpression(node, typeChecker)
-  if (!expression) {
+  const exp = ensureSchemaCallExpression(node, typeChecker)
+  if (!exp) {
     return node
   }
 
-  const wrappedExpression = createWrappedNode(expression.node, {
+  const wrappedExp = createWrappedNode(exp.node, {
     typeChecker,
   }) as CallExpression
-  const [typeArgument] = wrappedExpression.getTypeArguments()
-  if (!typeArgument) {
+  const [TType] = wrappedExp.getTypeArguments()
+  if (!TType) {
     throw new Error('type argument not specified')
   }
 
-  if (expression.type === documentSchema) {
-    const firstArgument = wrappedExpression.getArguments()[0] as
-      | Node<ts.Node>
-      | undefined
-    const visitedNode =
-      firstArgument && visitNode(firstArgument.compilerNode, program)
+  if (exp.type === collectionSchema) {
+    const optionsNode = createCollectionSchemaOptionsNode(TType)
 
-    return transformDocumentSchemaNode(
-      typeArgument,
-      visitedNode && createWrappedNode(visitedNode),
+    return factory.createCallExpression(
+      exp.node.expression,
+      exp.node.typeArguments,
+      [optionsNode],
     )
   } else {
     const file = node.getSourceFile()
     runtypesImportFlags.set(file.fileName, true)
 
-    return transformJsonSchemaNode(typeArgument)
+    return transformJsonSchemaNode(TType)
   }
 }
 
@@ -137,8 +134,8 @@ function ensureSchemaCallExpression(
     !ts.isJSDocSignature(declaration) &&
     declaration.name?.getText()
 
-  return name === documentSchema
-    ? ({ node, type: documentSchema } as const)
+  return name === collectionSchema
+    ? ({ node, type: collectionSchema } as const)
     : name === jsonSchema
     ? ({ node, type: jsonSchema } as const)
     : null

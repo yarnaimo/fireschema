@@ -1,6 +1,6 @@
 import { P } from 'lifts'
 import { R } from '../../../lib/fp'
-import { $adapter, $schema } from '../../constants'
+import { $schema } from '../../constants'
 import { FTypes, STypes, STypeUtils } from '../../types'
 import { ParseCollectionPath } from '../../types/_firestore'
 import { GetDeep } from '../../types/_object'
@@ -10,23 +10,21 @@ import {
   firestorePathToLoc,
   getCollectionOptions,
 } from '../../utils/_firestore'
-import { $collectionAdapter } from '../factory'
 import { addQueryCache, findCachedQuery } from './_query-cache'
 
 type SRoot = STypes.RootOptions.All
 
 const selected = (
-  adapter: STypes.CollectionAdapter<any, any> | null,
+  schema: STypes.CollectionSchema<any, any>,
   selector: STypes.Select<any, any, any>,
 ) => (query: FTypes.Query<unknown>) => {
-  const selectorsObject =
-    adapter?.selectors(query) ?? $collectionAdapter()({}).selectors(query)
+  const selectorsObject = schema.selectors(query)
 
   return selector(selectorsObject)
 }
 
 const decoded = (
-  schema: STypes.DocumentSchema<any>,
+  schema: STypes.CollectionSchema<any>,
   collectionName: string,
 ) => (rawQuery: FTypes.Query<any>) => {
   const { decoder } = schema
@@ -103,7 +101,7 @@ const CollectionQuery = <S extends SRoot>(schemaOptions: S) =>
     return P(
       parent.collection(collectionName),
       decoded(collectionOptions[$schema], collectionName),
-      selected(collectionOptions[$adapter], selector),
+      selected(collectionOptions[$schema], selector),
     )
   }) as CollectionQueryFn<S>
 
@@ -159,7 +157,7 @@ const CollectionGroupQuery = <S extends SRoot>(schemaOptions: S) =>
     return P(
       app.collectionGroup(collectionName),
       decoded(collectionOptions[$schema], collectionName),
-      selected(collectionOptions[$adapter], selector),
+      selected(collectionOptions[$schema], selector),
     )
   }) as CollectionGroupFn<S>
 

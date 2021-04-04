@@ -2,10 +2,9 @@ import dayjs, { Dayjs } from 'dayjs'
 import {
   $adapter,
   $allow,
-  $collectionAdapter,
   $collectionGroups,
+  $collectionSchema,
   $docLabel,
-  $documentSchema,
   $functions,
   $or,
   $schema,
@@ -36,8 +35,7 @@ export type IPostB = {
   texts: string[]
 }
 
-const VersionSchema = $documentSchema<IVersion>()
-const VersionAdapter = $collectionAdapter<IVersion>()({})
+const VersionSchema = $collectionSchema<IVersion>()()
 
 export const decodeUser = (data: IUser) => ({
   ...data,
@@ -45,19 +43,16 @@ export const decodeUser = (data: IUser) => ({
   id: undefined, // decode -> id追加 の順に行われるのを確認する用
 })
 
-export const UserSchema = $documentSchema<IUser, IUserLocal>({
+export const UserSchema = $collectionSchema<IUser, IUserLocal>()({
   decoder: (snap: FTypes.QueryDocumentSnap<IUser>, options): IUserLocal =>
     decodeUser(snap.data(options)),
-})
-const UserAdapter = $collectionAdapter<IUserLocal>()({
   selectors: (q) => ({
     teen: () => q.where('age', '>=', 10).where('age', '<', 20),
   }),
 })
 
-export const PostSchema = $documentSchema<IPostA | IPostB>()
-export const PostASchema = $documentSchema<IPostA>()
-const PostAdapter = $collectionAdapter<IPostA | IPostB>()({})
+export const PostSchema = $collectionSchema<IPostA | IPostB>()()
+export const PostASchema = $collectionSchema<IPostA>()()
 
 const getCurrentAuthUser = () => `getCurrentAuthUser()`
 const isAdmin = () => `isAdmin()`
@@ -80,7 +75,6 @@ export const firestoreSchema = createFirestoreSchema({
     users: {
       [$docLabel]: 'uid',
       [$schema]: UserSchema,
-      [$adapter]: UserAdapter,
       [$allow]: {
         read: true,
       },
@@ -96,7 +90,6 @@ export const firestoreSchema = createFirestoreSchema({
     users: {
       [$docLabel]: 'uid',
       [$schema]: UserSchema,
-      [$adapter]: UserAdapter,
       [$allow]: {
         read: true,
         write: $or([isUserScope('uid')]),
@@ -105,7 +98,6 @@ export const firestoreSchema = createFirestoreSchema({
       posts: {
         [$docLabel]: 'postId',
         [$schema]: PostSchema,
-        [$adapter]: PostAdapter,
         [$allow]: {
           read: true,
           write: $or([isUserScope('uid')]),
@@ -116,7 +108,6 @@ export const firestoreSchema = createFirestoreSchema({
       privatePosts: {
         [$docLabel]: 'postId',
         [$schema]: PostASchema,
-        [$adapter]: PostAdapter,
         [$allow]: {
           read: $or(['isAdmin()', 'isUserScope(uid)']),
           write: $or(['isUserScope(uid)']),

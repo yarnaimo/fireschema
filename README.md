@@ -80,8 +80,7 @@ Fireschema が依存する一部のパッケージは **TypeScript 3.9** に依�
 
 > 以下の変数名は特殊な意味を持つため、fireschema からのインポート以外で使用しないでください。
 >
-> - `$documentSchema`
-> - `$collectionAdapter`
+> - `$collectionSchema`
 > - `__$__`
 
 **Example**
@@ -101,12 +100,10 @@ Fireschema が依存する一部のパッケージは **TypeScript 3.9** に依�
 ```ts
 import { Merge } from 'type-fest'
 import {
-  $adapter,
   $allow,
-  $collectionAdapter,
   $collectionGroups,
+  $collectionSchema,
   $docLabel,
-  $documentSchema,
   $functions,
   $or,
   $schema,
@@ -124,7 +121,7 @@ export type User = {
 }
 export type UserDecoded = Merge<User, { timestamp: Date }>
 
-const UserSchema = $documentSchema<User, UserDecoded>({
+const UserSchema = $collectionSchema<User, UserDecoded>()({
   decoder: (snap, options) => {
     const data = snap.data(options)
     return {
@@ -133,7 +130,6 @@ const UserSchema = $documentSchema<User, UserDecoded>({
     }
   },
 })
-const UserAdapter = $collectionAdapter<User>()({})
 
 // post
 type PostA = {
@@ -146,8 +142,7 @@ type PostB = {
   tags: { id: number; name: string }[]
   texts: string[]
 }
-const PostSchema = $documentSchema<PostA | PostB>()
-const PostAdapter = $collectionAdapter<PostA | PostB>()({
+const PostSchema = $collectionSchema<PostA | PostB>()({
   selectors: (q) => ({
     byTag: (tag: string) => q.where('tags', 'array-contains', tag),
   }),
@@ -170,7 +165,6 @@ export const firestoreSchema = createFirestoreSchema({
     users: {
       [$docLabel]: 'uid',
       [$schema]: UserSchema,
-      [$adapter]: UserAdapter,
       [$allow]: {
         read: true,
       },
@@ -180,8 +174,7 @@ export const firestoreSchema = createFirestoreSchema({
   // /users/{uid}
   users: {
     [$docLabel]: 'uid', // {uid} の部分
-    [$schema]: UserSchema, // documentSchema
-    [$adapter]: UserAdapter, // collectionAdapter
+    [$schema]: UserSchema, // collectionSchema
     [$allow]: {
       // アクセス制御
       read: true, // 誰でも可
@@ -192,7 +185,6 @@ export const firestoreSchema = createFirestoreSchema({
     posts: {
       [$docLabel]: 'postId',
       [$schema]: PostSchema,
-      [$adapter]: PostAdapter,
       [$allow]: {
         read: true,
         write: 'matchesUser(uid)',
@@ -284,7 +276,7 @@ Fireschema の Firestore コントローラは `RefAdapter` と `WriteAdapter` �
 <!-- The below code snippet is automatically added from ./src/example/1-3-adapter.ts -->
 
 ```ts
-import firebase, { firestore, initializeApp } from 'firebase/app' // または firebase-admin
+import firebase from 'firebase/app' // または firebase-admin
 import {
   createFirestoreRefAdapter,
   createFirestoreWriteAdapter,
@@ -296,16 +288,16 @@ import { firestoreSchema } from './1-1-schema'
 /**
  * コントローラの初期化
  */
-const app: firebase.app.App = initializeApp({
+const app: firebase.app.App = firebase.initializeApp({
   // ...
 })
 export const firestoreApp = app.firestore()
 
-export const $: FirestoreRefAdapter<typeof firestoreSchema> = createFirestoreRefAdapter(
-  firestoreSchema,
-)
+export const $: FirestoreRefAdapter<
+  typeof firestoreSchema
+> = createFirestoreRefAdapter(firestoreSchema)
 export const $web: FirestoreWriteAdapter<firebase.firestore.Firestore> = createFirestoreWriteAdapter(
-  firestore,
+  firebase.firestore,
   firestoreApp,
 )
 
@@ -528,13 +520,13 @@ callble function の client 作成時に functions の index モジュールの�
 <!-- The below code snippet is automatically added from ./src/example/2-2-callable.tsx -->
 
 ```tsx
-import { initializeApp } from 'firebase/app'
+import firebase from 'firebase/app'
 import React from 'react'
 import { Caller } from 'fireschema'
 
 type FunctionsModule = typeof import('./2-1-registerer')
 
-const app: firebase.app.App = initializeApp({
+const app: firebase.app.App = firebase.initializeApp({
   // ...
 })
 const functionsApp = app.functions('asia-northeast1')

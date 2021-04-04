@@ -1,5 +1,5 @@
 import { P } from 'lifts'
-import { Node, Type, TypeNode } from 'ts-morph'
+import { Type, TypeNode } from 'ts-morph'
 import ts, { factory as f } from 'typescript'
 import { $$and, $and, $or } from '../core/utils'
 import { R } from '../lib/fp'
@@ -66,30 +66,14 @@ const transformNode = (
   throw new Error(`invalid type: ${type.getText()}`)
 }
 
-export const transformDocumentSchemaNode = (
+export const createCollectionSchemaOptionsNode = (
   typeArgument: TypeNode<ts.TypeNode>,
-  firstArgument: Node<ts.Node> | undefined,
 ) => {
   const transformed = transformNode()(typeArgument.getType())
 
-  if (firstArgument && !Node.isExpression(firstArgument)) {
-    throw new Error('first argument must be a expression')
-  }
-
-  const targetObject =
-    firstArgument?.compilerNode ?? f.createObjectLiteralExpression([])
-  const sourceObject = f.createObjectLiteralExpression([
+  const schemaOptionsObject = f.createObjectLiteralExpression([
     f.createPropertyAssignment('schema', f.createStringLiteral(transformed)),
   ])
 
-  const objectAssign = f.createPropertyAccessExpression(
-    f.createIdentifier('Object'),
-    'assign',
-  )
-  const objectAssignCall = f.createCallExpression(objectAssign, undefined, [
-    targetObject,
-    sourceObject,
-  ])
-
-  return objectAssignCall
+  return schemaOptionsObject
 }
