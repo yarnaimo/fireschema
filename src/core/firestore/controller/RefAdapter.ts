@@ -181,9 +181,9 @@ const TypeDocument = <S extends SRoot>(schemaOptions: S) =>
   }) as TypeDocumentFn<S>
 
 /**
- * GetParentDocument
+ * GetParentDocumentRef
  */
-type GetParentDocumentFn<S extends SRoot> = <
+type GetParentDocumentRefFn<S extends SRoot> = <
   CR extends FTypes.CollectionRef<STypes.HasLoc<string[]>>,
   F extends FTypes.FirestoreApp = STypeUtils.GetFFromCollectionRef<CR>,
   L extends string[] = STypeUtils.OmitLast<
@@ -194,10 +194,10 @@ type GetParentDocumentFn<S extends SRoot> = <
   collectionRef: CR,
 ) => FTypes.DocumentRef<STypeUtils.DocDataFromOptions<F, _C, L>, F>
 
-const GetParentDocument = <S extends SRoot>(schemaOptions: S) =>
+const GetParentDocumentRef = <S extends SRoot>(schemaOptions: S) =>
   ((collectionRef: FTypes.CollectionRef<any>) => {
     return collectionRef.parent
-  }) as GetParentDocumentFn<S>
+  }) as GetParentDocumentRefFn<S>
 
 /**
  * all
@@ -209,7 +209,7 @@ export type FirestoreRefAdapter<S extends SRoot> = {
   collectionGroupQuery: CollectionGroupQueryFn<S>
 
   typeDocument: TypeDocumentFn<S>
-  getParentDocument: GetParentDocumentFn<S>
+  getParentDocumentRef: GetParentDocumentRefFn<S>
 }
 
 export const createFirestoreRefAdapter = <S extends SRoot>(
@@ -222,6 +222,6 @@ export const createFirestoreRefAdapter = <S extends SRoot>(
     collectionGroupQuery: CollectionGroupQuery(schemaOptions),
 
     typeDocument: TypeDocument(schemaOptions),
-    getParentDocument: GetParentDocument(schemaOptions),
+    getParentDocumentRef: GetParentDocumentRef(schemaOptions),
   }
 }

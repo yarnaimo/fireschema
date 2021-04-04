@@ -315,7 +315,7 @@ techPosts.get() // Promise<QuerySnapshot<PostA | PostB>>
 /**
  * コレクションの親ドキュメントを参照
  */
-const _user = $.getParentDocument(posts) // DocumentReference<User>
+const _user = $.getParentDocumentRef(posts) // DocumentReference<User>
 
 /**
  * DocumentReference に型をつける

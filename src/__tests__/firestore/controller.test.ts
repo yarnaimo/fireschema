@@ -153,8 +153,8 @@ describe('refs equality', () => {
     expect(actualPostRef.path).toBe(path)
   })
 
-  test('getParentDocument', () => {
-    const user = $.getParentDocument(r.posts)
+  test('getParentDocumentRef', () => {
+    const user = $.getParentDocumentRef(r.posts)
 
     expectType<_web.DocumentReference<UserU>>(user)
     expect(user.path).toBe(r.user.path)
