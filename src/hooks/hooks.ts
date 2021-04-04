@@ -3,21 +3,23 @@ import { useCollection, useDocument } from 'react-firebase-hooks/firestore'
 import { _web } from '../lib/firestore-types'
 import { useRefChangeLimitExceeded } from './utils'
 
-export type UseTypedDocument<T> = {
-  snap: _web.DocumentSnapshot<T> | undefined
+export type UseTypedDocument<U, V = U> = {
+  data: V | undefined
+  snap: _web.DocumentSnapshot<U> | undefined
   loading: boolean
   error: Error | undefined
 }
 
-export const useTypedDocument = <T>(
-  docRef: _web.DocumentReference<T> | null | undefined,
+export const useTypedDocument = <U, V = U>(
+  docRef: _web.DocumentReference<U> | null | undefined,
+  transformer?: (data: U, snap: _web.DocumentSnapshot<U>) => V,
   options?: {
     snapshotListenOptions?: _web.SnapshotListenOptions
   },
-): UseTypedDocument<T> => {
+): UseTypedDocument<U, V> => {
   const { exceeded } = useRefChangeLimitExceeded(docRef)
 
-  const [snap, loading, error] = useDocument(
+  const [snap, loading, error] = useDocument<U>(
     exceeded() ? undefined : docRef,
     options,
   )
@@ -28,28 +30,28 @@ export const useTypedDocument = <T>(
     }
   }, [error])
 
-  return {
-    snap: snap as _web.DocumentSnapshot<T> | undefined,
-    loading,
-    error,
-  }
+  const data = useDocumentSnapData(snap, transformer)
+
+  return { data, snap, loading, error }
 }
 
-export type UseTypedQuery<T> = {
-  snap: _web.QuerySnapshot<T> | undefined
+export type UseTypedQuery<U, V = U> = {
+  data: V[] | undefined
+  snap: _web.QuerySnapshot<U> | undefined
   loading: boolean
   error: Error | undefined
 }
 
-export const useTypedQuery = <T>(
-  query: _web.Query<T> | null | undefined,
+export const useTypedQuery = <U, V = U>(
+  query: _web.Query<U> | null | undefined,
+  transformer?: (data: U, snap: _web.DocumentSnapshot<U>) => V,
   options?: {
     snapshotListenOptions?: _web.SnapshotListenOptions
   },
-): UseTypedQuery<T> => {
+): UseTypedQuery<U, V> => {
   const { exceeded } = useRefChangeLimitExceeded(query)
 
-  const [snap, loading, error] = useCollection(
+  const [snap, loading, error] = useCollection<U>(
     exceeded() ? undefined : query,
     options,
   )
@@ -60,30 +62,28 @@ export const useTypedQuery = <T>(
     }
   }, [error])
 
-  return {
-    snap: snap as _web.QuerySnapshot<T> | undefined,
-    loading,
-    error,
-  }
+  const data = useQuerySnapData(snap, transformer)
+
+  return { data, snap, loading, error }
 }
 
-export const useQuerySnapData = <T, U = T>(
-  querySnap: _web.QuerySnapshot<T> | undefined,
-  transformer?: (data: T, snap: _web.QueryDocumentSnapshot<T>) => U,
-): U[] | undefined =>
+export const useQuerySnapData = <U, V = U>(
+  querySnap: _web.QuerySnapshot<U> | undefined,
+  transformer?: (data: U, snap: _web.QueryDocumentSnapshot<U>) => V,
+): V[] | undefined =>
   useMemo(
     () =>
       querySnap?.docs.map((snap) => {
         const data = snap.data({ serverTimestamps: 'estimate' })
-        return transformer?.(data, snap) ?? ((data as unknown) as U)
+        return transformer?.(data, snap) ?? ((data as unknown) as V)
       }),
     [querySnap], // eslint-disable-line
   )
 
-export const useDocumentSnapData = <T, U = T>(
-  snap: _web.DocumentSnapshot<T> | undefined,
-  transformer?: (data: T, snap: _web.DocumentSnapshot<T>) => U,
-): U | undefined =>
+export const useDocumentSnapData = <U, V = U>(
+  snap: _web.DocumentSnapshot<U> | undefined,
+  transformer?: (data: U, snap: _web.DocumentSnapshot<U>) => V,
+): V | undefined =>
   useMemo(
     () => {
       if (!snap) {
@@ -93,7 +93,7 @@ export const useDocumentSnapData = <T, U = T>(
       if (!data) {
         return undefined
       }
-      return transformer?.(data, snap) ?? ((data as unknown) as U)
+      return transformer?.(data, snap) ?? ((data as unknown) as V)
     },
     [snap], // eslint-disable-line
   )

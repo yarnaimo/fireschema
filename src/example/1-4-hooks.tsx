@@ -1,10 +1,5 @@
 import React from 'react'
-import {
-  useDocumentSnapData,
-  useQuerySnapData,
-  useTypedDocument,
-  useTypedQuery,
-} from '../hooks'
+import { useTypedDocument, useTypedQuery } from '../hooks'
 import { $, firestoreApp } from './1-3-adapter'
 
 /**
@@ -12,14 +7,13 @@ import { $, firestoreApp } from './1-3-adapter'
  */
 export const UsersComponent = () => {
   const users = useTypedQuery($.collection(firestoreApp, 'users'))
-  const usersData = useQuerySnapData(users.snap)
-  if (!usersData) {
+  if (!users.data) {
     return <span>{'Loading...'}</span>
   }
 
   return (
     <ul>
-      {usersData.map((user, i) => (
+      {users.data.map((user, i) => (
         <li key={i}>{user.displayName}</li>
       ))}
     </ul>
@@ -31,10 +25,9 @@ export const UsersComponent = () => {
  */
 export const UserComponent = ({ id }: { id: string }) => {
   const user = useTypedDocument($.collection(firestoreApp, 'users').doc(id))
-  const userData = useDocumentSnapData(user.snap)
-  if (!userData) {
+  if (!user.data) {
     return <span>{'Loading...'}</span>
   }
 
-  return <span>{userData.displayName}</span>
+  return <span>{user.data.displayName}</span>
 }
