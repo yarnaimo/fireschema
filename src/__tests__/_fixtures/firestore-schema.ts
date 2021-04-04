@@ -44,8 +44,8 @@ export const decodeUser = (data: IUser) => ({
 })
 
 export const UserSchema = $collectionSchema<IUser, IUserLocal>()({
-  decoder: (snap: FTypes.QueryDocumentSnap<IUser>, options): IUserLocal =>
-    decodeUser(snap.data(options)),
+  decoder: (data: IUser, snap: FTypes.QueryDocumentSnap<IUser>): IUserLocal =>
+    decodeUser(data),
   selectors: (q) => ({
     teen: () => q.where('age', '>=', 10).where('age', '<', 20),
   }),

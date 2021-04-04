@@ -130,8 +130,8 @@ export declare namespace STypes {
   }
 
   export type Decoder<T, U> = (
+    data: T,
     snapshot: FTypes.QueryDocumentSnap<T>,
-    options: FTypes.SnapshotOptions,
   ) => U
 
   export type CollectionSchema<T, U = T, SL = {}> = {

@@ -22,13 +22,10 @@ export type User = {
 export type UserDecoded = Merge<User, { timestamp: Date }>
 
 const UserSchema = $collectionSchema<User, UserDecoded>()({
-  decoder: (snap, options) => {
-    const data = snap.data(options)
-    return {
-      ...data,
-      timestamp: data.timestamp.toDate(),
-    }
-  },
+  decoder: (data) => ({
+    ...data,
+    timestamp: data.timestamp.toDate(),
+  }),
 })
 
 // post

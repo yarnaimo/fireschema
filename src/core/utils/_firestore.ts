@@ -24,8 +24,12 @@ export const childLoc = (parent: STypeUtils.Parent, collectionName: string) => [
 export const createConverter = (
   decoder: STypes.Decoder<any, any> | undefined,
 ) => ({
-  fromFirestore: (snap: FTypes.QueryDocumentSnap<any>, options: any) => {
-    const decodedData = decoder ? decoder(snap, options) : snap.data(options)
+  fromFirestore: (
+    snap: FTypes.QueryDocumentSnap<any>,
+    options: FTypes.SnapshotOptions,
+  ) => {
+    const data = snap.data(options)
+    const decodedData = decoder ? decoder(data, snap) : data
 
     return {
       ...decodedData,

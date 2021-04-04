@@ -19,8 +19,10 @@ export const FirestoreTriggerRegisterer = <S extends STypes.RootOptions.All>(
     const collectionOptions = getCollectionOptions(firestoreSchema, loc)
     const { decoder } = collectionOptions[$schema]
 
-    return (snap: _admin.QueryDocumentSnapshot<any>) =>
-      decoder ? decoder(snap, undefined) : snap.data()
+    return (snap: _admin.QueryDocumentSnapshot<any>) => {
+      const data = snap.data()
+      return decoder ? decoder(data, snap) : data
+    }
   }
 
   const buildSnapDecoder = (path: string) => {
