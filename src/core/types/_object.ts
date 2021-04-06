@@ -4,7 +4,7 @@ type Cons<H, T> = T extends readonly any[]
     : never
   : never
 
-export type Prev = [
+export type Subtract = [
   never,
   0,
   1,
@@ -30,25 +30,42 @@ export type Prev = [
   ...0[]
 ]
 
-export type Loc<T, D extends number = 10> = [D] extends [never]
+export type Loc<T, Depth extends number = 5> = [Depth] extends [never]
   ? never
   : T extends object
   ? {
       [K in keyof T & string]-?:
-        | [K]
-        | (Loc<T[K], Prev[D]> extends infer P
-            ? P extends []
-              ? never
-              : Cons<K, P>
+        | K
+        | (Loc<T[K], Subtract[Depth]> extends infer P
+            ? P extends string
+              ? JoinLoc<K, P>
+              : never
             : never)
     }[keyof T & string]
-  : []
+  : never
 
-export type Leaves<T, D extends number = 10> = [D] extends [never]
+export type JoinLoc<T extends string, U extends string> = T extends ''
+  ? U
+  : `${T}.${U}`
+
+export type OmitLastSegment<
+  L extends string
+> = L extends `${infer T}.${infer U}`
+  ? U extends `${string}.${string}`
+    ? `${T}.${OmitLastSegment<U>}`
+    : T
+  : L
+
+type ParseLocString<L extends string> = L extends `${infer T}.${infer U}`
+  ? [T, ...ParseLocString<U>]
+  : [L]
+
+export type Leaves<T, Depth extends number = 5> = [Depth] extends [never]
   ? never
   : T extends object
-  ? { [K in keyof T & string]-?: Cons<K, Leaves<T[K], Prev[D]>> }[keyof T &
-      string]
+  ? {
+      [K in keyof T & string]-?: Cons<K, Leaves<T[K], Subtract[Depth]>>
+    }[keyof T & string]
   : []
 
 type Next<U> = U extends readonly [string, ...string[]]
@@ -57,14 +74,24 @@ type Next<U> = U extends readonly [string, ...string[]]
     : never
   : never
 
-export type GetDeep<T, L extends readonly string[]> = L[0] extends keyof T
+export type GetDeep<T, LA extends readonly string[], D extends number = 5> = [
+  D,
+] extends [never]
+  ? never
+  : LA[0] extends keyof T
   ? {
-      0: T[L[0]]
-      1: GetDeep<T[L[0]], Next<L>>
-    }[L[1] extends undefined ? 0 : 1]
-  : L extends []
+      0: T[LA[0]]
+      1: GetDeep<T[LA[0]], Next<LA>, Subtract[D]>
+    }[LA[1] extends undefined ? 0 : 1]
+  : LA extends []
   ? T
   : never
+
+export type GetByLoc<T, L extends string, D extends number = 5> = GetDeep<
+  T,
+  ParseLocString<L>,
+  D
+>
 
 export type GetDeepByKey<T, Key> = {
   [K in keyof T]: T[K] extends object

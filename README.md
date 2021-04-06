@@ -159,9 +159,9 @@ export const firestoreSchema = createFirestoreSchema({
   },
 
   [$collectionGroups]: {
-    users: {
-      [$docLabel]: 'uid',
-      [$schema]: UserSchema,
+    posts: {
+      [$docLabel]: 'postId',
+      [$schema]: PostSchema,
       [$allow]: {
         read: true,
       },
@@ -274,12 +274,7 @@ Fireschema の Firestore コントローラは `RefAdapter` と `WriteAdapter` �
 
 ```ts
 import firebase from 'firebase/app' // または firebase-admin
-import {
-  createFirestoreRefAdapter,
-  createFirestoreWriteAdapter,
-  FirestoreRefAdapter,
-  FirestoreWriteAdapter,
-} from 'fireschema'
+import { TypedFirestore } from 'fireschema/core'
 import { firestoreSchema } from './1-1-schema'
 
 /**
@@ -290,77 +285,84 @@ const app: firebase.app.App = firebase.initializeApp({
 })
 export const firestoreApp = app.firestore()
 
-export const $: FirestoreRefAdapter<
-  typeof firestoreSchema
-> = createFirestoreRefAdapter(firestoreSchema)
-export const $web: FirestoreWriteAdapter<firebase.firestore.Firestore> = createFirestoreWriteAdapter(
-  firebase.firestore,
-  firestoreApp,
-)
+export const typedFirestore: TypedFirestore<
+  typeof firestoreSchema,
+  firebase.firestore.Firestore
+> = new TypedFirestore(firestoreSchema, firebase.firestore, firestoreApp)
 
 /**
  * コレクションの参照・データ取得
  */
-const users = $.collection(firestoreApp, 'users') // /users
-const user = users.doc('userId') // /users/userId
+const users = typedFirestore.collection('users')
+const user = users.doc('userId')
 
-const posts = $.collection(user, 'posts') // /users/userId/posts
-const post = posts.doc('123') // /users/userId/posts/123
-const techPosts = $.collectionQuery(user, 'posts', (q) => q.byTag('tech'))
+const posts = user.collection('posts')
+const post = posts.doc('123')
+const techPosts = user.collectionQuery('posts', (q) => q.byTag('tech'))
 
-post.get() // Promise<DocumentSnapshot<PostA | PostB>>
-posts.get() // Promise<QuerySnapshot<PostA | PostB>>
-techPosts.get() // Promise<QuerySnapshot<PostA | PostB>>
+!(async () => {
+  await post.get() // DocumentSnapshot<PostA | PostB>
+  await posts.get() // QuerySnapshot<PostA | PostB>
+  await techPosts.get() // QuerySnapshot<PostA | PostB>
+})
 
-/**
- * コレクションの親ドキュメントを参照
- */
-const _user = $.getParentDocumentRef(posts) // DocumentReference<User>
+!(async () => {
+  const snap = await users.get()
+  const firstUserRef = snap.docs[0]!.ref
 
-/**
- * DocumentReference に型をつける
- */
-const untypedPostRef = firestoreApp.doc('users/{uid}/posts/post')
-const _post = $.typeDocument('users/{uid}/posts', untypedPostRef) // DocumentReference<PostA | PostB>
+  const postsOfFirstUser = typedFirestore
+    .wrapDocument(firstUserRef)
+    .collection('posts')
+  await postsOfFirstUser.get()
+})
+
+const _posts = post.parentCollection()
+const _user = posts.parentDocument()
 
 /**
  * コレクショングループの参照・データ取得
  */
-const postsGroup = $.collectionGroup(firestoreApp, 'users/{uid}/posts')
-const techPostsGroup = $.collectionGroupQuery(
-  firestoreApp,
-  'users/{uid}/posts',
+const postsGroup = typedFirestore.collectionGroup('posts', 'users.posts')
+const techPostsGroup = typedFirestore.collectionGroupQuery(
+  'posts',
+  'users.posts',
   (q) => q.byTag('tech'),
 )
 
-postsGroup.get() // Promise<QuerySnapshot<PostA | PostB>>
-techPostsGroup.get() // Promise<QuerySnapshot<PostA | PostB>>
+!(async () => {
+  await postsGroup.get() // QuerySnapshot<PostA | PostB>
+  await techPostsGroup.get() // QuerySnapshot<PostA | PostB>
+})
 
 /**
  * ドキュメントの作成・更新
  */
-$web.create(user, {
-  name: 'test',
-  displayName: 'Test',
-  age: 20,
-  timestamp: $web.FieldValue.serverTimestamp(),
-  options: { a: true },
+!(async () => {
+  await user.create({
+    name: 'test',
+    displayName: 'Test',
+    age: 20,
+    timestamp: typedFirestore.firestoreStatic.FieldValue.serverTimestamp(),
+    options: { a: true },
+  })
+  await user.setMerge({
+    age: 21,
+  })
+  await user.update({
+    age: 21,
+  })
+  await user.delete()
 })
-$web.setMerge(user, {
-  age: 17,
-})
-$web.update(user, {
-  age: 17,
-})
-$web.delete(user)
 
 /**
  * トランザクション
  */
-$web.runTransaction(async (tc) => {
-  const snap = await tc.get(user)
-  tc.setMerge(user, {
-    age: snap.data()!.age + 1,
+!(async () => {
+  await typedFirestore.runTransaction(async (tt) => {
+    const snap = await tt.get(user)
+    tt.update(user, {
+      age: snap.data()!.age + 1,
+    })
   })
 })
 ```
@@ -375,13 +377,13 @@ $web.runTransaction(async (tc) => {
 ```tsx
 import React from 'react'
 import { useTypedDocument, useTypedQuery } from 'fireschema/hooks'
-import { $, firestoreApp } from './1-3-adapter'
+import { typedFirestore } from './1-3-adapter'
 
 /**
  * コレクション/クエリをリアルタイムで表示
  */
 export const UsersComponent = () => {
-  const users = useTypedQuery($.collection(firestoreApp, 'users'))
+  const users = useTypedQuery(typedFirestore.collection('users'))
   if (!users.data) {
     return <span>{'Loading...'}</span>
   }
@@ -399,7 +401,7 @@ export const UsersComponent = () => {
  * ドキュメントをリアルタイムで表示
  */
 export const UserComponent = ({ id }: { id: string }) => {
-  const user = useTypedDocument($.collection(firestoreApp, 'users').doc(id))
+  const user = useTypedDocument(typedFirestore.collection('users').doc(id))
   if (!user.data) {
     return <span>{'Loading...'}</span>
   }

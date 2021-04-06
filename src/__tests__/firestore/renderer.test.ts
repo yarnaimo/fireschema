@@ -1,5 +1,5 @@
-import { firestoreSchema } from '../../../__tests__/_fixtures/firestore-schema'
-import { renderSchema } from './root'
+import { renderSchema } from '../../core/firestore/_renderer/root'
+import { firestoreSchema } from '../_fixtures/firestore-schema'
 
 const expected = `
 rules_version = '2';
@@ -33,6 +33,7 @@ service cloud.firestore {
 
         allow read: if true;
         allow write: if (isUserScope(uid) && __validator_0__(request.resource.data));
+        allow delete: if isUserScope(uid);
 
         match /posts/{postId} {
           function __validator_1__(data) {

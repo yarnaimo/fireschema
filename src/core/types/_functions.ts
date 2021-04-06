@@ -1,7 +1,7 @@
 import { _fadmin } from '../../lib/functions-types'
 import { $topicName } from '../constants'
 import { FunTypes } from '../types'
-import { Prev } from './_object'
+import { Subtract } from './_object'
 
 export type ParseFunctionPath<
   P extends string
@@ -16,7 +16,7 @@ export type ExtractFunctionPaths<
       [K in keyof S & string]: S[K] extends _fadmin.CloudFunction<any>
         ? K
         : S[K] extends FunTypes.NestedFunctions
-        ? `${K}-${ExtractFunctionPaths<S[K], Prev[D]>}`
+        ? `${K}-${ExtractFunctionPaths<S[K], Subtract[D]>}`
         : never
     }[keyof S & string]
 

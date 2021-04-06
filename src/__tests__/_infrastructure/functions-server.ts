@@ -148,9 +148,8 @@ export const schedule = {
   }),
 }
 
-type IUserWithL = IUser & STypes.HasLoc<['versions', 'users']>
-type IPostWithL = (IPostA | IPostB) &
-  STypes.HasLoc<['versions', 'users', 'posts']>
+type IUserWithL = IUser & STypes.HasLoc<'versions.users'>
+type IPostWithL = (IPostA | IPostB) & STypes.HasLoc<'versions.users.posts'>
 
 export const firestoreTrigger = {
   onPostCreate: $register.firestoreTrigger.onCreate({

@@ -1,12 +1,12 @@
 import React from 'react'
 import { useTypedDocument, useTypedQuery } from '../hooks'
-import { $, firestoreApp } from './1-3-adapter'
+import { typedFirestore } from './1-3-adapter'
 
 /**
  * コレクション/クエリをリアルタイムで表示
  */
 export const UsersComponent = () => {
-  const users = useTypedQuery($.collection(firestoreApp, 'users'))
+  const users = useTypedQuery(typedFirestore.collection('users'))
   if (!users.data) {
     return <span>{'Loading...'}</span>
   }
@@ -24,7 +24,7 @@ export const UsersComponent = () => {
  * ドキュメントをリアルタイムで表示
  */
 export const UserComponent = ({ id }: { id: string }) => {
-  const user = useTypedDocument($.collection(firestoreApp, 'users').doc(id))
+  const user = useTypedDocument(typedFirestore.collection('users').doc(id))
   if (!user.data) {
     return <span>{'Loading...'}</span>
   }

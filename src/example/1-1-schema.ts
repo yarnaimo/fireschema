@@ -59,9 +59,9 @@ export const firestoreSchema = createFirestoreSchema({
   },
 
   [$collectionGroups]: {
-    users: {
-      [$docLabel]: 'uid',
-      [$schema]: UserSchema,
+    posts: {
+      [$docLabel]: 'postId',
+      [$schema]: PostSchema,
       [$allow]: {
         read: true,
       },

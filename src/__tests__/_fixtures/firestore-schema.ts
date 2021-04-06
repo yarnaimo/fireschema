@@ -1,4 +1,3 @@
-import dayjs, { Dayjs } from 'dayjs'
 import {
   $adapter,
   $allow,
@@ -23,7 +22,7 @@ export type IUser = {
   timestamp: FTypes.Timestamp
   options: { a: boolean; b: string }
 }
-export type IUserLocal = Type.Merge<IUser, { timestamp: Dayjs }>
+export type IUserLocal = Type.Merge<IUser, { timestamp: string }>
 export type IUserJson = Type.Merge<IUser, { timestamp: string }>
 
 export type IPostA = {
@@ -45,7 +44,7 @@ void (() => {
 
 export const decodeUser = (data: IUser) => ({
   ...data,
-  timestamp: dayjs(data.timestamp.toDate()),
+  timestamp: data.timestamp.toDate().toISOString(),
   id: undefined, // decode -> id追加 の順に行われるのを確認する用
 })
 
@@ -105,6 +104,7 @@ export const firestoreSchema = createFirestoreSchema({
       [$allow]: {
         read: true,
         write: $or([isUserScope('uid')]),
+        delete: isUserScope('uid'),
       },
 
       posts: {

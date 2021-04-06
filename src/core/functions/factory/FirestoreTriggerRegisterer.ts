@@ -3,11 +3,12 @@ import { _fadmin } from '../../../lib/functions-types'
 import { $schema } from '../../constants'
 import { FunTypes, STypes, STypeUtils } from '../../types'
 import { ParseDocumentPath } from '../../types/_firestore'
-import { GetDeep } from '../../types/_object'
 import {
   firestorePathToLoc,
   getCollectionOptions,
 } from '../../utils/_firestore'
+
+type F = _admin.Firestore
 
 export const FirestoreTriggerRegisterer = <S extends STypes.RootOptions.All>(
   firestoreSchema: S,
@@ -36,38 +37,38 @@ export const FirestoreTriggerRegisterer = <S extends STypes.RootOptions.All>(
 
   type OnCreateOrDelete = <
     DP extends string,
-    L extends string[] = ParseDocumentPath<DP>,
-    _C = GetDeep<S, L>,
-    T = STypeUtils.FTDocDataFromOptions<_admin.Firestore, _C, L>,
-    U = STypeUtils.DocDataFromOptions<_admin.Firestore, _C, L>
+    L extends string = ParseDocumentPath<DP>
   >(options: {
     builder: _fadmin.FunctionBuilder
     path: DP
-    handler: FunTypes.FirestoreTrigger.OnCreateOrDeleteHandler<T, U>
+    handler: FunTypes.FirestoreTrigger.OnCreateOrDeleteHandler<
+      STypeUtils.FTDocDataAt<S, F, L>,
+      STypeUtils.DocDataAt<S, F, L>
+    >
   }) => _fadmin.CloudFunction<_admin.QueryDocumentSnapshot>
 
   type OnUpdate = <
     DP extends string,
-    L extends string[] = ParseDocumentPath<DP>,
-    _C = GetDeep<S, L>,
-    T = STypeUtils.FTDocDataFromOptions<_admin.Firestore, _C, L>,
-    U = STypeUtils.DocDataFromOptions<_admin.Firestore, _C, L>
+    L extends string = ParseDocumentPath<DP>
   >(options: {
     builder: _fadmin.FunctionBuilder
     path: DP
-    handler: FunTypes.FirestoreTrigger.OnUpdateHandler<T, U>
+    handler: FunTypes.FirestoreTrigger.OnUpdateHandler<
+      STypeUtils.FTDocDataAt<S, F, L>,
+      STypeUtils.DocDataAt<S, F, L>
+    >
   }) => _fadmin.CloudFunction<_fadmin.Change<_admin.QueryDocumentSnapshot>>
 
   type OnWrite = <
     DP extends string,
-    L extends string[] = ParseDocumentPath<DP>,
-    _C = GetDeep<S, L>,
-    T = STypeUtils.FTDocDataFromOptions<_admin.Firestore, _C, L>,
-    U = STypeUtils.DocDataFromOptions<_admin.Firestore, _C, L>
+    L extends string = ParseDocumentPath<DP>
   >(options: {
     builder: _fadmin.FunctionBuilder
     path: DP
-    handler: FunTypes.FirestoreTrigger.OnWriteHandler<T, U>
+    handler: FunTypes.FirestoreTrigger.OnWriteHandler<
+      STypeUtils.FTDocDataAt<S, F, L>,
+      STypeUtils.DocDataAt<S, F, L>
+    >
   }) => _fadmin.CloudFunction<_fadmin.Change<_admin.DocumentSnapshot>>
 
   const onCreate: OnCreateOrDelete = ({ builder, path, handler }) => {
