@@ -113,8 +113,8 @@ describe('types', () => {
   })
 })
 
-describe('refs idempotency', () => {
-  test('collection', () => {
+describe('refs', () => {
+  test('ref equality', () => {
     expectEqualRef(r.users.raw, app.collection('versions/v1/users'), false)
     expectEqualRef(r.user.raw, app.doc('versions/v1/users/user'), false)
 
@@ -122,7 +122,7 @@ describe('refs idempotency', () => {
     expectEqualRef(r.user.raw, r.v1.collection('users').doc('user').raw)
   })
 
-  test('query', () => {
+  test('query equality', () => {
     expectEqualRef(
       r.users.raw.where('age', '>=', 10).where('age', '<', 20),
       r.teenUsers.raw,
@@ -132,6 +132,13 @@ describe('refs idempotency', () => {
       r.usersGroup.raw.where('age', '>=', 10).where('age', '<', 20),
       r.teenUsersGroup.raw,
     )
+  })
+
+  test('doc() argument', () => {
+    const a = r.users.doc()
+    const b = r.users.doc(undefined)
+    expect(a.id).toHaveLength(20)
+    expect(b.id).toHaveLength(20)
   })
 })
 
