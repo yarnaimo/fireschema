@@ -56,7 +56,9 @@ export type OmitLastSegment<
     : T
   : L
 
-type ParseLocString<L extends string> = L extends `${infer T}.${infer U}`
+export type ParseLocString<L extends string> = L extends ''
+  ? []
+  : L extends `${infer T}.${infer U}`
   ? [T, ...ParseLocString<U>]
   : [L]
 

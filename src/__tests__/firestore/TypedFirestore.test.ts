@@ -24,9 +24,21 @@ import { expectAnyTimestamp, expectEqualRef } from '../_utils/firestore'
 const _tcollections = (app: _web.Firestore) => {
   const typedFirestore = new TypedFirestore(firestoreSchema, firestore, app)
 
+  void (() => {
+    typedFirestore.collection(
+      // @ts-expect-error: wrong collection name
+      'users',
+    )
+  })
   const versions = typedFirestore.collection('versions')
   const v1 = versions.doc('v1')
 
+  void (() => {
+    v1.collection(
+      // @ts-expect-error: wrong collection name
+      'posts',
+    )
+  })
   const users = v1.collection('users')
   const teenUsers = v1.collectionQuery('users', (q) => q.teen())
   const user = users.doc('user')

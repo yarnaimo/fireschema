@@ -1,7 +1,12 @@
 import { EntriesStrict, P } from 'lifts'
 import { R } from '../../lib/fp'
 import { is } from '../../lib/type'
-import { GetDeepByKey, JoinLoc, OmitLastSegment } from '../types/_object'
+import {
+  GetDeepByKey,
+  JoinLoc,
+  OmitLastSegment,
+  ParseLocString,
+} from '../types/_object'
 
 export const getDeep = (object: object, paths: string[]) => {
   return paths.reduce(
@@ -9,9 +14,6 @@ export const getDeep = (object: object, paths: string[]) => {
     object as { [key: string]: unknown },
   ) as unknown
 }
-
-export const getByLoc = (object: object, loc: string) =>
-  getDeep(object, loc.split('.'))
 
 export const getDeepByKey = <T extends object, Key extends string>(
   obj: T,
@@ -33,6 +35,12 @@ export const getDeepByKey = <T extends object, Key extends string>(
     }),
   ) as any
 }
+
+export const parseLocString = <L extends string>(loc: L) =>
+  (loc === '' ? [] : loc.split('.')) as ParseLocString<L>
+
+export const getByLoc = (object: object, loc: string) =>
+  getDeep(object, parseLocString(loc))
 
 export const joinLoc = <T extends string, U extends string>(
   t: T,
