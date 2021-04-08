@@ -1,2 +1,2 @@
-export * from './Caller'
-export * from './Topic'
+export * from './TypedCaller'
+export * from './TypedTopic'

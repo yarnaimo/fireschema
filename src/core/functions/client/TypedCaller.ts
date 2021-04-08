@@ -5,10 +5,10 @@ import { FunTypes } from '../../types'
 import { ExtractFunctionPaths, ParseFunctionPath } from '../../types/_functions'
 import { GetDeep } from '../../types/_object'
 
-export const Caller = <M extends FunTypes.FunctionsModule>(
-  functionsApp: _fweb.Functions,
-) => {
-  const call = async <
+export class TypedCaller<M extends FunTypes.FunctionsModule> {
+  constructor(readonly functionsApp: _fweb.Functions) {}
+
+  async call<
     FP extends ExtractFunctionPaths<M['callable']>,
     L extends string[] = ParseFunctionPath<FP>,
     _C = GetDeep<M['callable'], L>,
@@ -17,9 +17,9 @@ export const Caller = <M extends FunTypes.FunctionsModule>(
     functionPath: FP,
     data: C[typeof $input],
     options?: _fweb.HttpsCallableOptions,
-  ): Promise<IResult<C[typeof $output], _fweb.HttpsError>> => {
+  ): Promise<IResult<C[typeof $output], _fweb.HttpsError>> {
     const name = ['callable', functionPath].join('-')
-    const callable = functionsApp.httpsCallable(name, options)
+    const callable = this.functionsApp.httpsCallable(name, options)
 
     try {
       const result = await callable(data)
@@ -28,6 +28,4 @@ export const Caller = <M extends FunTypes.FunctionsModule>(
       return Result.err(error as _fweb.HttpsError)
     }
   }
-
-  return call
 }
