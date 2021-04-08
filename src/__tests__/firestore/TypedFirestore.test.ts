@@ -96,7 +96,7 @@ describe('types', () => {
 
   test('UAt', () => {
     expectType<UserU>(
-      {} as STypes.UAt<
+      {} as STypes.DocDataAt<
         typeof firestoreSchema,
         _web.Firestore,
         'versions.users'
@@ -104,7 +104,7 @@ describe('types', () => {
     )
     expectType<PostU>(
       // @ts-expect-error: wrong U type
-      {} as STypes.UAt<
+      {} as STypes.DocDataAt<
         typeof firestoreSchema,
         _web.Firestore,
         'versions.users'

@@ -2,7 +2,7 @@ import { P } from 'lifts'
 import { _web } from '../../../../lib/firestore-types'
 import { R } from '../../../../lib/fp'
 import { $schema } from '../../../constants'
-import { FTypes, STypes, STypeUtils } from '../../../types'
+import { FTypes, STypes } from '../../../types'
 import { JoinLoc, OmitLastSegment } from '../../../types/_object'
 import { getCollectionOptions } from '../../../utils/_firestore'
 import { getLastSegment, omitLastSegment } from '../../../utils/_object'
@@ -13,7 +13,7 @@ export class TypedQueryRef<
   S extends STypes.RootOptions.All,
   F extends FTypes.FirestoreApp,
   L extends string,
-  U = STypeUtils.DocDataAt<S, F, L>
+  U = STypes.DocDataAt<S, F, L>
 > {
   readonly raw: FTypes.Query<U, F>
 
@@ -47,7 +47,7 @@ export class TypedCollectionRef<
   S extends STypes.RootOptions.All,
   F extends FTypes.FirestoreApp,
   L extends string,
-  U = STypeUtils.DocDataAt<S, F, L>
+  U = STypes.DocDataAt<S, F, L>
 > extends TypedQueryRef<S, F, L, U> {
   readonly id: string
   readonly path: string

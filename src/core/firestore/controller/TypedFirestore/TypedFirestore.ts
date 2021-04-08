@@ -1,5 +1,5 @@
 import { $collectionGroups } from '../../../constants'
-import { FTypes, STypes, STypeUtils } from '../../../types'
+import { FTypes, STypes } from '../../../types'
 import { Loc } from '../../../types/_object'
 import { firestorePathToLoc } from '../../../utils/_firestore'
 import { TypedQueryRef } from './TypedCollectionRef'
@@ -53,7 +53,7 @@ export class TypedFirestore<
   // docref に L がある場合
   wrapDocument<
     D extends FTypes.DocumentRef<any, F>,
-    L extends string = STypeUtils.InferDocT<D>['__loc__']
+    L extends string = STypes.InferDocT<D>['__loc__']
   >(raw: D): TypedDocumentRef<S, F, L>
 
   // TODO: docref に L がない場合

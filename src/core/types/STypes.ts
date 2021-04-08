@@ -7,7 +7,7 @@ import {
   $schema,
 } from '../constants'
 import { FTypes } from './FTypes'
-import { GetByLoc, Loc } from './_object'
+import { GetByLoc } from './_object'
 
 export const allowOptions = {
   read: {
@@ -23,7 +23,7 @@ export const allowOptions = {
   },
 }
 
-export declare namespace STypeUtils {
+export declare namespace STypes {
   export type InferDocT<
     D extends FTypes.FirestoreApp | FTypes.DocumentRef<unknown>
   > = D extends FTypes.DocumentRef<infer T> ? T : never
@@ -36,54 +36,32 @@ export declare namespace STypeUtils {
 
   export type GetSchemaT<_C> = EnsureOptions<_C>[typeof $schema]['__T__']
 
-  export type EnsureOptions<_C> = _C extends STypes.CollectionOptions.Meta
-    ? _C
-    : never
+  export type EnsureOptions<_C> = _C extends CollectionOptions.Meta ? _C : never
 
   export type GetSL<
     _C
-  > = EnsureOptions<_C>[typeof $schema] extends STypes.CollectionSchema<
-    any,
-    any,
-    any
-  >
+  > = EnsureOptions<_C>[typeof $schema] extends CollectionSchema<any, any, any>
     ? EnsureOptions<_C>[typeof $schema]['__SL__']
     : {}
 
   export type DocDataAt<
-    S extends STypes.RootOptions.All,
+    S extends RootOptions.All,
     F extends FTypes.FirestoreApp,
     L extends string
-  > = STypes.DocData<
-    F,
-    GetSchemaU<GetByLoc<S, L>>,
-    L,
-    GetSchemaT<GetByLoc<S, L>>
-  >
+  > = DocData<F, GetSchemaU<GetByLoc<S, L>>, L, GetSchemaT<GetByLoc<S, L>>>
 
   export type FTDocDataAt<
-    S extends STypes.RootOptions.All,
+    S extends RootOptions.All,
     F extends FTypes.FirestoreApp,
     L extends string
-  > = STypes.DocData<
-    F,
-    GetSchemaT<GetByLoc<S, L>>,
-    L,
-    GetSchemaT<GetByLoc<S, L>>
-  >
-}
+  > = DocData<F, GetSchemaT<GetByLoc<S, L>>, L, GetSchemaT<GetByLoc<S, L>>>
 
-export declare namespace STypes {
   export type DocData<
     F extends FTypes.FirestoreApp,
     U,
     L extends string,
     T
-  > = STypes.DocumentMeta<F> &
-    U &
-    STypes.HasLoc<L> &
-    STypes.HasT<T> &
-    STypes.HasId
+  > = DocumentMeta<F> & U & HasLoc<L> & HasT<T> & HasId
 
   export type ConditionExp = string | boolean
 
@@ -137,7 +115,7 @@ export declare namespace STypes {
   }
 
   export type Select<
-    S extends STypes.RootOptions.All,
+    S extends RootOptions.All,
     F extends FTypes.FirestoreApp,
     L extends string,
     // P extends Utils.Parent,
@@ -145,8 +123,8 @@ export declare namespace STypes {
     // PC,
     _C = GetByLoc<S, L>
   > = (
-    q: Selectors<STypeUtils.GetSchemaT<_C>, L, STypeUtils.GetSL<_C>, F>,
-  ) => FTypes.Query<STypeUtils.DocDataAt<S, F, L>, F>
+    q: Selectors<GetSchemaT<_C>, L, GetSL<_C>, F>,
+  ) => FTypes.Query<DocDataAt<S, F, L>, F>
 
   export type Selectors<
     T,
@@ -169,13 +147,6 @@ export declare namespace STypes {
     id: string
   }
 
-  export type UAt<
-    S extends STypes.RootOptions.All,
-    F extends FTypes.FirestoreApp,
-    L extends string = Loc<S>,
-    _C = GetByLoc<S, L>
-  > = DocData<F, STypeUtils.GetSchemaU<_C>, L, STypeUtils.GetSchemaT<_C>>
-
   export type DocumentMeta<
     F extends FTypes.FirestoreApp = FTypes.FirestoreApp
   > = {
@@ -194,10 +165,10 @@ export declare namespace STypes {
   > = T extends FTypes.Timestamp ? FTypes.Timestamp<F> : T
 
   export type WriteData<
-    S extends STypes.RootOptions.All,
+    S extends RootOptions.All,
     F extends FTypes.FirestoreApp,
     L extends string,
-    T = STypeUtils.DocDataAt<S, F, L>['__T__'],
+    T = DocDataAt<S, F, L>['__T__'],
     _T = WithoutMeta<WithoutLoc<T>>
   > = {
     [K in keyof _T]: WriteDataField<_T[K], F> | FTypes.FieldValue<F>

@@ -1,5 +1,5 @@
 import { _web } from '../../../../lib/firestore-types'
-import { FTypes, STypes, STypeUtils } from '../../../types'
+import { FTypes, STypes } from '../../../types'
 import { TypedCollectionRef } from './TypedCollectionRef'
 import { TypedFDBase } from './TypedFDBase'
 import { DocDataHelper } from './_utils'
@@ -8,7 +8,7 @@ export class TypedDocumentRef<
   S extends STypes.RootOptions.All,
   F extends FTypes.FirestoreApp,
   L extends string,
-  U = STypeUtils.DocDataAt<S, F, L>
+  U = STypes.DocDataAt<S, F, L>
 > extends TypedFDBase<S, F, L, false, U> {
   readonly id: string
   readonly path: string

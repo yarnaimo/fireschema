@@ -1,4 +1,4 @@
-import { FTypes, STypes, STypeUtils } from '../../../types'
+import { FTypes, STypes } from '../../../types'
 import { GetByLoc, JoinLoc } from '../../../types/_object'
 import { joinLoc } from '../../../utils/_object'
 import { TypedCollectionRef, TypedQueryRef } from './TypedCollectionRef'
@@ -8,7 +8,7 @@ export class TypedFDBase<
   F extends FTypes.FirestoreApp,
   L extends string,
   IsRoot extends boolean,
-  U = STypeUtils.DocDataAt<S, F, L>,
+  U = STypes.DocDataAt<S, F, L>,
   _C = GetByLoc<S, L>
 > {
   protected constructor(
