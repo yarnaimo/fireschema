@@ -5,7 +5,7 @@ import { $jsonSchema, TypedFunctions } from '..'
 import { firestoreSchema, User } from './1-1-schema'
 
 /**
- * Registererを初期化
+ * Initialize TypedFunctions
  */
 const timezone = 'Asia/Tokyo'
 const typedFunctions = new TypedFunctions(
@@ -17,13 +17,15 @@ const typedFunctions = new TypedFunctions(
 const builder = functions.region('asia-northeast1')
 
 /**
- * functionsのindexファイル (functions/index.tsなど)
- * (通常はfunctionごとにファイルを分割します)
+ * functions/index.ts file
  */
 export type UserJson = Merge<User, { timestamp: string }>
 export const callable = {
   createUser: typedFunctions.callable({
-    schema: [$jsonSchema<UserJson>(), $jsonSchema<{ result: boolean }>()],
+    schema: [
+      $jsonSchema<UserJson>(), // schema of request data (automatically validate on request)
+      $jsonSchema<{ result: boolean }>(), // schema of response data
+    ],
     builder,
     handler: async (data, context) => {
       console.log(data) // UserJson
@@ -38,7 +40,7 @@ export const firestoreTrigger = {
     builder,
     path: 'users/{uid}',
     handler: async (decodedData, snap, context) => {
-      console.log(decodedData) // UserDecoded (パス文字列から自動で型付け)
+      console.log(decodedData) // UserDecoded (provided based on path string)
       console.log(snap) // QueryDocumentSnapshot<User>
     },
   }),

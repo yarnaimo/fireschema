@@ -47,12 +47,12 @@ const PostSchema = $collectionSchema<PostA | PostB>()({
 
 export const firestoreSchema = createFirestoreSchema({
   [$functions]: {
-    // /admins/<uid> が存在するかどうか
+    // whether /admins/<uid> exists
     ['isAdmin()']: `
       return exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     `,
 
-    // アクセスしようとするユーザーの uid が {uid} と一致するかどうか
+    // whether uid matches
     ['matchesUser(uid)']: `
       return request.auth.uid == uid;
     `,
@@ -70,12 +70,12 @@ export const firestoreSchema = createFirestoreSchema({
 
   // /users/{uid}
   users: {
-    [$docLabel]: 'uid', // {uid} の部分
+    [$docLabel]: 'uid', // {uid}
     [$schema]: UserSchema, // collectionSchema
     [$allow]: {
-      // アクセス制御
-      read: true, // 誰でも可
-      write: $or(['matchesUser(uid)', 'isAdmin()']), // {uid} と一致するユーザー or 管理者のみ可
+      // access control
+      read: true, // all user
+      write: $or(['matchesUser(uid)', 'isAdmin()']), // only users matching {uid} or admins
     },
 
     // /users/{uid}/posts/{postId}

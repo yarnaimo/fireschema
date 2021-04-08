@@ -1,53 +1,64 @@
-import firebase from 'firebase/app' // または firebase-admin
+import firebase from 'firebase/app' // or firebase-admin
 import { TypedFirestore } from '../core'
 import { firestoreSchema } from './1-1-schema'
 
-/**
- * コントローラの初期化
- */
 const app: firebase.app.App = firebase.initializeApp({
   // ...
 })
-export const firestoreApp = app.firestore()
+const firestoreApp = app.firestore()
 
+/**
+ * Initialize TypedFirestore
+ */
 export const typedFirestore: TypedFirestore<
   typeof firestoreSchema,
   firebase.firestore.Firestore
 > = new TypedFirestore(firestoreSchema, firebase.firestore, firestoreApp)
 
 /**
- * コレクションの参照・データ取得
+ * Reference collections/documents and get snapshot
  */
-const users = typedFirestore.collection('users')
-const user = users.doc('userId')
+const users = typedFirestore.collection('users') // TypedCollectionRef instance
+const user = users.doc('userId') // TypedDocumentRef instance
 
 const posts = user.collection('posts')
 const post = posts.doc('123')
-const techPosts = user.collectionQuery('posts', (q) => q.byTag('tech'))
+const techPosts = user.collectionQuery(
+  'posts',
+  (q) => q.byTag('tech'), // selector defined in schema
+)
 
 !(async () => {
+  await user.get() // DocumentSnapshot<User>
+
   await post.get() // DocumentSnapshot<PostA | PostB>
   await posts.get() // QuerySnapshot<PostA | PostB>
   await techPosts.get() // QuerySnapshot<PostA | PostB>
 })
 
+/**
+ * Get child collection of retrived document snapshot
+ */
 !(async () => {
   const snap = await users.get()
   const firstUserRef = snap.docs[0]!.ref
 
-  const postsOfFirstUser = typedFirestore
-    .wrapDocument(firstUserRef)
-    .collection('posts')
-  await postsOfFirstUser.get()
+  await typedFirestore.wrapDocument(firstUserRef).collection('posts').get()
 })
 
+/**
+ * Reference parent collection/document
+ */
 const _posts = post.parentCollection()
 const _user = posts.parentDocument()
 
 /**
- * コレクショングループの参照・データ取得
+ * Reference collections groups and get snapshot
  */
-const postsGroup = typedFirestore.collectionGroup('posts', 'users.posts')
+const postsGroup = typedFirestore.collectionGroup(
+  'posts', // collection name: passed to original collectionGroup method
+  'users.posts', // to get schema options
+)
 const techPostsGroup = typedFirestore.collectionGroupQuery(
   'posts',
   'users.posts',
@@ -60,7 +71,7 @@ const techPostsGroup = typedFirestore.collectionGroupQuery(
 })
 
 /**
- * ドキュメントの作成・更新
+ * Write data
  */
 !(async () => {
   await user.create({
@@ -80,7 +91,7 @@ const techPostsGroup = typedFirestore.collectionGroupQuery(
 })
 
 /**
- * トランザクション
+ * Transaction
  */
 !(async () => {
   await typedFirestore.runTransaction(async (tt) => {

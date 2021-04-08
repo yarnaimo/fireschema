@@ -3,7 +3,7 @@ import { useTypedDocument, useTypedQuery } from '../hooks'
 import { typedFirestore } from './1-3-adapter'
 
 /**
- * コレクション/クエリをリアルタイムで表示
+ * Get realtime updates of collection/query
  */
 export const UsersComponent = () => {
   const users = useTypedQuery(typedFirestore.collection('users'))
@@ -21,7 +21,7 @@ export const UsersComponent = () => {
 }
 
 /**
- * ドキュメントをリアルタイムで表示
+ * Get realtime updates of document
  */
 export const UserComponent = ({ id }: { id: string }) => {
   const user = useTypedDocument(typedFirestore.collection('users').doc(id))
