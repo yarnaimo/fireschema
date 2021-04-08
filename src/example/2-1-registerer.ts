@@ -1,14 +1,14 @@
 import { firestore } from 'firebase-admin'
 import * as functions from 'firebase-functions'
 import { Merge } from 'type-fest'
-import { $jsonSchema, FunctionRegisterer } from '..'
+import { $jsonSchema, TypedFunctions } from '..'
 import { firestoreSchema, User } from './1-1-schema'
 
 /**
  * Registererを初期化
  */
 const timezone = 'Asia/Tokyo'
-const $register = FunctionRegisterer(
+const typedFunctions = new TypedFunctions(
   firestoreSchema,
   firestore,
   functions,
@@ -22,7 +22,7 @@ const builder = functions.region('asia-northeast1')
  */
 export type UserJson = Merge<User, { timestamp: string }>
 export const callable = {
-  createUser: $register.callable({
+  createUser: typedFunctions.callable({
     schema: [$jsonSchema<UserJson>(), $jsonSchema<{ result: boolean }>()],
     builder,
     handler: async (data, context) => {
@@ -34,7 +34,7 @@ export const callable = {
 }
 
 export const firestoreTrigger = {
-  onUserCreate: $register.firestoreTrigger.onCreate({
+  onUserCreate: typedFunctions.firestoreTrigger.onCreate({
     builder,
     path: 'users/{uid}',
     handler: async (decodedData, snap, context) => {
@@ -45,7 +45,7 @@ export const firestoreTrigger = {
 }
 
 export const http = {
-  getKeys: $register.http({
+  getKeys: typedFunctions.http({
     builder,
     handler: (req, resp) => {
       if (req.method !== 'POST') {
@@ -58,7 +58,7 @@ export const http = {
 }
 
 export const topic = {
-  publishMessage: $register.topic('publish_message', {
+  publishMessage: typedFunctions.topic('publish_message', {
     schema: $jsonSchema<{ text: string }>(),
     builder,
     handler: async (data) => {
@@ -68,7 +68,7 @@ export const topic = {
 }
 
 export const schedule = {
-  cron: $register.schedule({
+  cron: typedFunctions.schedule({
     builder,
     schedule: '0 0 * * *',
     handler: async (context) => {

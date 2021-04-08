@@ -1,7 +1,7 @@
 import { firestore } from 'firebase-admin'
 import * as functions from 'firebase-functions'
 import { expectType } from 'tsd'
-import { $jsonSchema, FunctionRegisterer, FunTypes, messages } from '../..'
+import { $jsonSchema, FunTypes, messages, TypedFunctions } from '../..'
 import { STypes } from '../../core'
 import { _admin } from '../../lib/firestore-types'
 import { _fadmin } from '../../lib/functions-types'
@@ -17,7 +17,7 @@ import {
 import { region } from './_config'
 
 const timezone = 'Asia/Tokyo'
-const $register = FunctionRegisterer(
+const typedFunctions = new TypedFunctions(
   firestoreSchema,
   firestore,
   functions,
@@ -81,14 +81,14 @@ const toUpperCaseHandler: FunTypes.Callable.Handler<
 }
 
 export const callable = {
-  createUser: $register.callable({
+  createUser: typedFunctions.callable({
     schema: createUserSchema,
     builder,
     handler: createUserHandler,
   }),
 
   nested: {
-    toUpperCase: $register.callable({
+    toUpperCase: typedFunctions.callable({
       schema: toUpperCaseSchema,
       builder,
       handler: toUpperCaseHandler,
@@ -97,7 +97,7 @@ export const callable = {
 }
 
 !(() => {
-  $register.callable({
+  typedFunctions.callable({
     schema: createUserSchema,
     builder,
     handler: async (data, context) =>
@@ -105,7 +105,7 @@ export const callable = {
       ({ result: null }),
   })
 
-  $register.callable({
+  typedFunctions.callable({
     schema: toUpperCaseSchema,
     builder,
     handler: async (data, context) =>
@@ -115,7 +115,7 @@ export const callable = {
 })
 
 export const http = {
-  getKeys: $register.http({
+  getKeys: typedFunctions.http({
     builder,
     handler: (req, resp) => {
       if (req.method !== 'POST') {
@@ -128,7 +128,7 @@ export const http = {
 }
 
 export const topic = {
-  publishMessage: $register.topic('publish_message', {
+  publishMessage: typedFunctions.topic('publish_message', {
     schema: $jsonSchema<{ text: string }>(),
     builder,
     handler: async (data) => {
@@ -139,7 +139,7 @@ export const topic = {
 }
 
 export const schedule = {
-  cron: $register.schedule({
+  cron: typedFunctions.schedule({
     builder,
     schedule: '0 0 * * *',
     handler: async (context) => {
@@ -152,7 +152,7 @@ type IUserWithL = IUser & STypes.HasLoc<'versions.users'>
 type IPostWithL = (IPostA | IPostB) & STypes.HasLoc<'versions.users.posts'>
 
 export const firestoreTrigger = {
-  onPostCreate: $register.firestoreTrigger.onCreate({
+  onPostCreate: typedFunctions.firestoreTrigger.onCreate({
     builder,
     path: 'versions/v1/users/{uid}/posts/{postId}',
     handler: async (decodedData, snap, context) => {
@@ -166,7 +166,7 @@ export const firestoreTrigger = {
     },
   }),
 
-  onUserCreate: $register.firestoreTrigger.onCreate({
+  onUserCreate: typedFunctions.firestoreTrigger.onCreate({
     builder,
     path: 'versions/v1/users/{uid}',
     handler: async (decodedData, snap, context) => {
@@ -180,7 +180,7 @@ export const firestoreTrigger = {
     },
   }),
 
-  onUserDelete: $register.firestoreTrigger.onDelete({
+  onUserDelete: typedFunctions.firestoreTrigger.onDelete({
     builder,
     path: 'versions/v1/users/{uid}',
     handler: async (decodedData, snap, context) => {
@@ -191,7 +191,7 @@ export const firestoreTrigger = {
     },
   }),
 
-  onUserUpdate: $register.firestoreTrigger.onUpdate({
+  onUserUpdate: typedFunctions.firestoreTrigger.onUpdate({
     builder,
     path: 'versions/v1/users/{uid}',
     handler: async (decodedData, snap, context) => {
@@ -202,7 +202,7 @@ export const firestoreTrigger = {
     },
   }),
 
-  onUserWrite: $register.firestoreTrigger.onWrite({
+  onUserWrite: typedFunctions.firestoreTrigger.onWrite({
     builder,
     path: 'versions/v1/users/{uid}',
     handler: async (decodedData, snap, context) => {

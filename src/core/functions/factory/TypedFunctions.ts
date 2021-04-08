@@ -4,16 +4,24 @@ import { Type } from '../../../lib/type'
 import { messages } from '../../constants'
 import { FunTypes, STypes } from '../../types'
 import { withType } from '../../utils/_type'
-import { FirestoreTriggerRegisterer } from './FirestoreTriggerRegisterer'
 import { assertJsonSchema } from './JsonSchema'
+import { TypedFirestoreTrigger } from './TypedFirestoreTrigger'
 
-export const FunctionRegisterer = <S extends STypes.RootOptions.All>(
-  firestoreSchema: S,
-  firestoreStatic: typeof _admin,
-  functions: typeof import('firebase-functions'),
-  timezone: string,
-) => {
-  const callable = <I extends Type.JsonObject, O extends Type.JsonObject>({
+export class TypedFunctions<S extends STypes.RootOptions.All> {
+  constructor(
+    readonly firestoreSchema: S,
+    readonly firestoreStatic: typeof _admin,
+    readonly functions: typeof import('firebase-functions'),
+    readonly timezone: string,
+  ) {}
+
+  firestoreTrigger = new TypedFirestoreTrigger(
+    this.firestoreSchema,
+    this.firestoreStatic,
+    this.functions,
+  )
+
+  callable<I extends Type.JsonObject, O extends Type.JsonObject>({
     schema: [inputRuntype, outputRuntype],
     builder,
     handler,
@@ -21,7 +29,7 @@ export const FunctionRegisterer = <S extends STypes.RootOptions.All>(
     schema: FunTypes.SchemaTuple<I, O>
     builder: _fadmin.FunctionBuilder
     handler: FunTypes.Callable.Handler<I, O>
-  }) => {
+  }) {
     assertJsonSchema(inputRuntype)
     assertJsonSchema(outputRuntype)
 
@@ -32,7 +40,7 @@ export const FunctionRegisterer = <S extends STypes.RootOptions.All>(
       const validated = inputRuntype.validate(data)
 
       if (!validated.success) {
-        throw new functions.https.HttpsError(
+        throw new this.functions.https.HttpsError(
           'invalid-argument',
           messages.invalidRequest,
         )
@@ -47,17 +55,17 @@ export const FunctionRegisterer = <S extends STypes.RootOptions.All>(
     )
   }
 
-  const http = ({
+  http({
     builder,
     handler,
   }: {
     builder: _fadmin.FunctionBuilder
     handler: FunTypes.Http.Handler
-  }) => {
+  }) {
     return builder.https.onRequest(handler)
   }
 
-  const topic = <N extends string, I extends Type.JsonObject>(
+  topic<N extends string, I extends Type.JsonObject>(
     topicName: N,
     {
       schema,
@@ -68,7 +76,7 @@ export const FunctionRegisterer = <S extends STypes.RootOptions.All>(
       builder: _fadmin.FunctionBuilder
       handler: FunTypes.Topic.Handler<I>
     },
-  ) => {
+  ) {
     const wrapped = async (
       message: _fadmin.pubsub.Message,
       context: _fadmin.EventContext,
@@ -82,7 +90,7 @@ export const FunctionRegisterer = <S extends STypes.RootOptions.All>(
     )
   }
 
-  const schedule = ({
+  schedule({
     builder,
     schedule,
     handler,
@@ -92,19 +100,11 @@ export const FunctionRegisterer = <S extends STypes.RootOptions.All>(
     schedule: string
     handler: FunTypes.Schedule.Handler
     retryConfig?: _fadmin.ScheduleRetryConfig
-  }) => {
+  }) {
     return builder.pubsub
       .schedule(schedule)
-      .timeZone(timezone)
+      .timeZone(this.timezone)
       .retryConfig(retryConfig)
       .onRun(handler)
   }
-
-  const firestoreTrigger = FirestoreTriggerRegisterer(
-    firestoreSchema,
-    firestoreStatic,
-    functions,
-  )
-
-  return { callable, http, topic, schedule, firestoreTrigger }
 }
