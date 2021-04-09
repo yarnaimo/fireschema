@@ -31,8 +31,10 @@ const transformNode = (
     )
   }
 
-  const primitiveRuleExpression = type.isNull()
-    ? $or([`${name} == null`, `!("${key}" in ${parent})`])
+  const primitiveRuleExpression = type.isUndefined()
+    ? `!("${key}" in ${parent})`
+    : type.isNull()
+    ? `${name} == null`
     : type.isLiteral()
     ? `${name} == ${type.getText()}`
     : type.isString()

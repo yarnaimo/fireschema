@@ -13,17 +13,26 @@ type IUserJson = Type.Merge<
 
 const UserJsonRuntype = $_.Record({
   name: $_.String,
-  displayName: $_.Null.Or($_.String),
+  displayName: $_.Union($_.Null, $_.String),
   age: $_.Number,
   tags: $_.Array($_.Record({ id: $_.Number, name: $_.String })),
-  options: $_.Record({ a: $_.Boolean, b: $_.String }),
+  options: $_.Optional(
+    $_.Union(
+      $_.Undefined,
+      $_.Record({
+        a: $_.Boolean,
+        b: $_.String,
+      }),
+    ),
+  ),
   timestamp: $_.String,
 })
 
-const PostRuntype = $_.Record({
-  type: $_.Literal('a'),
-  text: $_.String,
-}).Or(
+const PostRuntype = $_.Union(
+  $_.Record({
+    type: $_.Literal('a'),
+    text: $_.String,
+  }),
   $_.Record({
     type: $_.Literal('b'),
     texts: $_.Array($_.String),
@@ -52,10 +61,10 @@ test('normal', () => {
 test('union', () => {
   const result = $jsonSchema<IUserJson & ({ a: string } | { b: number })>()
 
-  const expectedA = UserJsonRuntype.And($_.Record({ a: $_.String }))
-  const expectedB = UserJsonRuntype.And($_.Record({ b: $_.Number }))
+  const expectedA = $_.Intersect(UserJsonRuntype, $_.Record({ a: $_.String }))
+  const expectedB = $_.Intersect(UserJsonRuntype, $_.Record({ b: $_.Number }))
 
-  expect(result.toString()).toBe(expectedA.Or(expectedB).toString())
+  expect(result.toString()).toBe($_.Union(expectedA, expectedB).toString())
   expect(result.guard({ ...userDataJson, a: 'value' })).toBeTruthy()
   expect(result.guard({ ...userDataJson, b: 0 })).toBeTruthy()
   expect(result.guard({ ...userDataJson, c: 'value' })).toBeFalsy()

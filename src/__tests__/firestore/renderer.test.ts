@@ -23,11 +23,11 @@ service cloud.firestore {
         function __validator_0__(data) {
           return (
             data.name is string
-              && ((data.displayName == null || !("displayName" in data)) || data.displayName is string)
+              && (data.displayName == null || data.displayName is string)
               && (data.age is int || data.age is float)
               && (data.tags.size() == 0 || ((data.tags[0].id is int || data.tags[0].id is float) && data.tags[0].name is string))
               && data.timestamp is timestamp
-              && (data.options.a is bool && data.options.b is string)
+              && (!("options" in data) || (data.options.a is bool && data.options.b is string))
           );
         }
 

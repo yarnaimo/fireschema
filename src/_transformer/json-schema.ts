@@ -42,22 +42,24 @@ const transformNode = (type: Type<ts.Type>): ts.Expression => {
   }
 
   if (type.isUnion()) {
-    return P(
-      type.getUnionTypes(),
-      R.map(transformNode),
-      reduceExpressions('Or'),
-    )
+    const types = type.getUnionTypes()
+    const hasUndefined = types.some((t) => t.isUndefined())
+
+    const unionExpression = create$('Union', P(types, R.map(transformNode)))
+
+    return hasUndefined
+      ? create$('Optional', [unionExpression])
+      : unionExpression
   }
 
   if (type.isIntersection()) {
-    return P(
-      type.getIntersectionTypes(),
-      R.map(transformNode),
-      reduceExpressions('And'),
-    )
+    const types = type.getIntersectionTypes()
+    return create$('Intersect', P(types, R.map(transformNode)))
   }
 
-  const primitiveRuntypeExpression = type.isNull()
+  const primitiveRuntypeExpression = type.isUndefined()
+    ? create$('Undefined', null)
+    : type.isNull()
     ? create$('Null', null)
     : type.isLiteral()
     ? create$('Literal', [f.createIdentifier(type.getText())])

@@ -20,7 +20,7 @@ export type IUser = {
   age: number
   tags: { id: number; name: string }[]
   timestamp: FTypes.Timestamp
-  options: { a: boolean; b: string }
+  options: { a: boolean; b: string } | undefined
 }
 export type IUserLocal = Type.Merge<IUser, { timestamp: string }>
 export type IUserJson = Type.Merge<IUser, { timestamp: string }>
