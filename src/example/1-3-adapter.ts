@@ -6,6 +6,7 @@ const app: firebase.app.App = firebase.initializeApp({
   // ...
 })
 const firestoreApp = app.firestore()
+firestoreApp.settings({ ignoreUndefinedProperties: true })
 
 /**
  * Initialize TypedFirestore
