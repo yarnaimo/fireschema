@@ -2,7 +2,7 @@ import firebase from 'firebase/app'
 import React from 'react'
 import { TypedCaller } from '..'
 
-type FunctionsModule = typeof import('./2-1-registerer')
+type FunctionsModule = typeof import('./2-1-typed-functions')
 
 const app: firebase.app.App = firebase.initializeApp({
   // ...

@@ -1,5 +1,5 @@
 import firebase from 'firebase/app' // or firebase-admin
-import { TypedFirestore } from '../core'
+import { TypedFirestore } from '..'
 import { firestoreSchema } from './1-1-schema'
 
 const app: firebase.app.App = firebase.initializeApp({

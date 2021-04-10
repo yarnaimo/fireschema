@@ -17,7 +17,7 @@ export type User = {
   displayName: string | null
   age: number
   timestamp: FTypes.Timestamp
-  options: { a: boolean }
+  options: { a: boolean } | undefined
 }
 export type UserDecoded = Merge<User, { timestamp: Date }>
 

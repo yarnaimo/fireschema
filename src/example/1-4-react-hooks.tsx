@@ -1,6 +1,6 @@
 import React from 'react'
 import { useTypedDocument, useTypedQuery } from '../hooks'
-import { typedFirestore } from './1-3-adapter'
+import { typedFirestore } from './1-3-typed-firestore'
 
 /**
  * Get realtime updates of collection/query

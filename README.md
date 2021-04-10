@@ -123,7 +123,7 @@ export type User = {
   displayName: string | null
   age: number
   timestamp: FTypes.Timestamp
-  options: { a: boolean }
+  options: { a: boolean } | undefined
 }
 export type UserDecoded = Merge<User, { timestamp: Date }>
 
@@ -228,7 +228,7 @@ service cloud.firestore {
       return request.auth.uid == uid;
     }
 
-    match /{path=**}/users/{uid} {
+    match /{path=**}/posts/{postId} {
       allow read: if true;
     }
 
@@ -236,10 +236,10 @@ service cloud.firestore {
       function __validator_0__(data) {
         return (
           data.name is string
-            && ((data.displayName == null || !("displayName" in data)) || data.displayName is string)
+            && (data.displayName == null || data.displayName is string)
             && (data.age is int || data.age is float)
             && data.timestamp is timestamp
-            && data.options.a is bool
+            && (!("options" in data) || data.options.a is bool)
         );
       }
 
@@ -277,12 +277,12 @@ service cloud.firestore {
 
 The Firestore interface of Fireschema supports both **Web SDK and Admin SDK**.
 
-<!-- AUTO-GENERATED-CONTENT:START (CODE:src=./src/example/1-3-adapter.ts) -->
-<!-- The below code snippet is automatically added from ./src/example/1-3-adapter.ts -->
+<!-- AUTO-GENERATED-CONTENT:START (CODE:src=./src/example/1-3-typed-firestore.ts) -->
+<!-- The below code snippet is automatically added from ./src/example/1-3-typed-firestore.ts -->
 
 ```ts
 import firebase from 'firebase/app' // or firebase-admin
-import { TypedFirestore } from 'fireschema/core'
+import { TypedFirestore } from 'fireschema'
 import { firestoreSchema } from './1-1-schema'
 
 const app: firebase.app.App = firebase.initializeApp({
@@ -391,15 +391,15 @@ const techPostsGroup = typedFirestore.collectionGroupQuery(
 
 <br>
 
-### 4. Hooks
+### 4. React Hooks
 
-<!-- AUTO-GENERATED-CONTENT:START (CODE:src=./src/example/1-4-hooks.tsx) -->
-<!-- The below code snippet is automatically added from ./src/example/1-4-hooks.tsx -->
+<!-- AUTO-GENERATED-CONTENT:START (CODE:src=./src/example/1-4-react-hooks.tsx) -->
+<!-- The below code snippet is automatically added from ./src/example/1-4-react-hooks.tsx -->
 
 ```tsx
 import React from 'react'
 import { useTypedDocument, useTypedQuery } from 'fireschema/hooks'
-import { typedFirestore } from './1-3-adapter'
+import { typedFirestore } from './1-3-typed-firestore'
 
 /**
  * Get realtime updates of collection/query
@@ -440,12 +440,12 @@ export const UserComponent = ({ id }: { id: string }) => {
 
 <br>
 
-## Example - Functions
+## Example - Cloud Functions
 
 ### 1. Create functions
 
-<!-- AUTO-GENERATED-CONTENT:START (CODE:src=./src/example/2-1-registerer.ts) -->
-<!-- The below code snippet is automatically added from ./src/example/2-1-registerer.ts -->
+<!-- AUTO-GENERATED-CONTENT:START (CODE:src=./src/example/2-1-typed-functions.ts) -->
+<!-- The below code snippet is automatically added from ./src/example/2-1-typed-functions.ts -->
 
 ```ts
 import { firestore } from 'firebase-admin'
@@ -538,15 +538,15 @@ export const schedule = {
 
 Automatically provide types to request/response data based on passed functions module type.
 
-<!-- AUTO-GENERATED-CONTENT:START (CODE:src=./src/example/2-2-callable.tsx) -->
-<!-- The below code snippet is automatically added from ./src/example/2-2-callable.tsx -->
+<!-- AUTO-GENERATED-CONTENT:START (CODE:src=./src/example/2-2-callable-function.tsx) -->
+<!-- The below code snippet is automatically added from ./src/example/2-2-callable-function.tsx -->
 
 ```tsx
 import firebase from 'firebase/app'
 import React from 'react'
 import { TypedCaller } from 'fireschema'
 
-type FunctionsModule = typeof import('./2-1-registerer')
+type FunctionsModule = typeof import('./2-1-typed-functions')
 
 const app: firebase.app.App = firebase.initializeApp({
   // ...
