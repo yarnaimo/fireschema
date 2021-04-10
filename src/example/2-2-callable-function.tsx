@@ -21,11 +21,11 @@ const Component = () => {
       options: { a: true },
     })
 
-    if (!result.isOk) {
+    if (result.error) {
       console.error(result.error)
       return
     }
-    console.log(result.value)
+    console.log(result.data)
   }
 
   return <button onClick={createUser}></button>

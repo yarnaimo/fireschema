@@ -43,6 +43,10 @@ export declare namespace FunTypes {
       inputData: I,
       context: _fadmin.https.CallableContext,
     ) => Promise<O>
+
+    export type CallResult<T, E = unknown> =
+      | { data: T; error?: never }
+      | { data?: never; error: E }
   }
 
   export namespace Http {

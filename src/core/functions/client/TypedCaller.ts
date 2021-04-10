@@ -1,4 +1,3 @@
-import { IResult, Result } from 'lifts'
 import { _fweb } from '../../../lib/functions-types'
 import { $input, $output } from '../../constants'
 import { FunTypes } from '../../types'
@@ -17,15 +16,17 @@ export class TypedCaller<M extends FunTypes.FunctionsModule> {
     functionPath: FP,
     data: C[typeof $input],
     options?: _fweb.HttpsCallableOptions,
-  ): Promise<IResult<C[typeof $output], _fweb.HttpsError>> {
+  ): Promise<
+    FunTypes.Callable.CallResult<C[typeof $output], _fweb.HttpsError>
+  > {
     const name = ['callable', functionPath].join('-')
     const callable = this.functionsApp.httpsCallable(name, options)
 
     try {
       const result = await callable(data)
-      return Result.ok(result.data as C[typeof $output])
+      return { data: result.data as C[typeof $output] }
     } catch (error) {
-      return Result.err(error as _fweb.HttpsError)
+      return { error: error as _fweb.HttpsError }
     }
   }
 }
