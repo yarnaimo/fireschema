@@ -1,8 +1,10 @@
 import type express from 'express'
 import { _admin } from '../../lib/firestore-types'
-import { _fadmin } from '../../lib/functions-types'
+import { _fadmin, _fweb } from '../../lib/functions-types'
 import { $_ } from '../../runtypes'
 import { $input, $output, $topicName } from '../constants'
+import { ExtractFP, ParseFP } from './_functions'
+import { GetDeep } from './_object'
 
 export declare namespace FunTypes {
   // export type Jsonfy<T> = {
@@ -44,7 +46,22 @@ export declare namespace FunTypes {
       context: _fadmin.https.CallableContext,
     ) => Promise<O>
 
-    export type CallResult<T, E = unknown> =
+    export type GetByFP<
+      MC extends NestedFunctions,
+      FP extends ExtractFP<MC>
+    > = EnsureMeta<GetDeep<MC, ParseFP<FP>>>
+
+    export type InputOf<
+      MC extends NestedFunctions,
+      FP extends ExtractFP<MC>
+    > = GetByFP<MC, FP>[typeof $input]
+
+    export type OutputOf<
+      MC extends NestedFunctions,
+      FP extends ExtractFP<MC>
+    > = GetByFP<MC, FP>[typeof $output]
+
+    export type CallResult<T, E = _fweb.HttpsError> =
       | { data: T; error?: never }
       | { data?: never; error: E }
   }

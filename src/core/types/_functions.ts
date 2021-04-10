@@ -3,11 +3,11 @@ import { $topicName } from '../constants'
 import { FunTypes } from '../types'
 import { Subtract } from './_object'
 
-export type ParseFunctionPath<
-  P extends string
-> = P extends `${infer P1}-${infer P2}` ? [P1, ...ParseFunctionPath<P2>] : [P]
+export type ParseFP<P extends string> = P extends `${infer P1}-${infer P2}`
+  ? [P1, ...ParseFP<P2>]
+  : [P]
 
-export type ExtractFunctionPaths<
+export type ExtractFP<
   S extends FunTypes.NestedFunctions,
   D extends number = 5
 > = [D] extends [never]
@@ -16,7 +16,7 @@ export type ExtractFunctionPaths<
       [K in keyof S & string]: S[K] extends _fadmin.CloudFunction<any>
         ? K
         : S[K] extends FunTypes.NestedFunctions
-        ? `${K}-${ExtractFunctionPaths<S[K], Subtract[D]>}`
+        ? `${K}-${ExtractFP<S[K], Subtract[D]>}`
         : never
     }[keyof S & string]
 
