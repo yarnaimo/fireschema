@@ -74,7 +74,9 @@ export class TypedCollectionRef<
   }
 
   doc(id?: string) {
-    const docRaw = this.raw.doc(id) as FTypes.DocumentRef<any, F>
+    const idArgs = id ? [id] : []
+    const docRaw = this.raw.doc(...idArgs) as FTypes.DocumentRef<any, F>
+
     return new TypedDocumentRef<S, F, L>(
       this.schemaOptions,
       this.firestoreStatic,
