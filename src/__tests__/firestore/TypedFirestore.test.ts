@@ -516,7 +516,7 @@ describe('hooks', () => {
   }
 
   test('useTypedDocument', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result, waitForNextUpdate, unmount } = renderHook(() =>
       useTypedDocument(r.user),
     )
     expect(result.current).toEqual(initialResult)
@@ -532,10 +532,11 @@ describe('hooks', () => {
     expectType<UserU>(result.current.data!)
     // @ts-expect-error: wrong data type
     expectType<PostU>(result.current.data!)
+    unmount()
   })
 
   test('useTypedDocument with transformer', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result, waitForNextUpdate, unmount } = renderHook(() =>
       useTypedDocument(r.user, (data) => data.name),
     )
     expect(result.current).toEqual(initialResult)
@@ -551,10 +552,11 @@ describe('hooks', () => {
     expectType<string>(result.current.data!)
     // @ts-expect-error: wrong data type
     expectType<number>(result.current.data!)
+    unmount()
   })
 
   test('useTypedQuery', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result, waitForNextUpdate, unmount } = renderHook(() =>
       useTypedQuery(r.users),
     )
     expect(result.current).toEqual(initialResult)
@@ -570,10 +572,11 @@ describe('hooks', () => {
     expectType<UserU>(result.current.data![0]!)
     // @ts-expect-error: wrong data type
     expectType<PostU>(result.current.data![0]!)
+    unmount()
   })
 
   test('useTypedQuery with transformer', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result, waitForNextUpdate, unmount } = renderHook(() =>
       useTypedQuery(r.users, (data) => data.name),
     )
     expect(result.current).toEqual(initialResult)
@@ -589,5 +592,6 @@ describe('hooks', () => {
     expectType<string>(result.current.data![0]!)
     // @ts-expect-error: wrong data type
     expectType<number>(result.current.data![0]!)
+    unmount()
   })
 })
