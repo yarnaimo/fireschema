@@ -10,12 +10,12 @@ let index = 0
 
 export const renderRules = (
   $allow: STypes.AllowOptions,
-  schema: STypes.DocumentSchema<any> | null,
+  schema: STypes.CollectionSchema<any, any, any> | null,
   pIndent: number,
 ) => {
   if (!schema || !is.string(schema.schema)) {
     throw new Error(
-      'documentSchema call expression not transformed and directly called',
+      'collectionSchema call expression not transformed and directly called',
     )
   }
 

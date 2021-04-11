@@ -1,5 +1,13 @@
 import { expectType } from 'tsd'
-import { getDeepByKey } from './_object'
+import {
+  getByLoc,
+  getDeep,
+  getDeepByKey,
+  getLastSegment,
+  joinLoc,
+  omitLastSegment,
+  parseLocString,
+} from './_object'
 
 const obj = {
   a: {
@@ -16,20 +24,10 @@ const obj = {
   },
 }
 
-// test('getDeep', () => {
-//   const expected = {
-//     b: { key: 'value' },
-//   }
-
-//   type Expected = {
-//     b: { key: string }
-//   }
-
-//   const result = getDeep(obj, ['d', 'b', 'c'])
-
-//   expectType<Expected>(result)
-//   expect(result).toEqual(expected)
-// })
+test('getDeep', () => {
+  const result = getDeep(obj, ['d', 'b', 'c'])
+  expect(result).toEqual(obj.d.b.c)
+})
 
 test('getDeepByKey', () => {
   const expected = [
@@ -63,5 +61,76 @@ test('getDeepByKey', () => {
   const result = getDeepByKey(obj, 'b')
 
   expectType<Expected>(result)
+  // @ts-expect-error: error
+  expectType<Expected[number]>(result)
+
   expect(result).toEqual(expected)
+})
+
+test('parseLocString', () => {
+  const result = parseLocString('a.b.c')
+
+  expectType<['a', 'b', 'c']>(result)
+  // @ts-expect-error: error
+  expectType<['a', 'b']>(result)
+  expect(result).toEqual(['a', 'b', 'c'])
+})
+
+test('parseLocString (1 segment)', () => {
+  const result = parseLocString('a')
+
+  expectType<['a']>(result)
+  // @ts-expect-error: error
+  expectType<['a', 'b']>(result)
+  expect(result).toEqual(['a'])
+})
+
+test('parseLocString (empty)', () => {
+  const result = parseLocString('')
+
+  expectType<[]>(result)
+  // @ts-expect-error: error
+  expectType<['']>(result)
+  expect(result).toEqual([])
+})
+
+test('getByLoc', () => {
+  const result = getByLoc(obj, 'd.b.c')
+  expect(result).toEqual(obj.d.b.c)
+})
+
+test('joinLoc', () => {
+  const result = joinLoc('a.b', 'c')
+
+  expectType<'a.b.c'>(result)
+  // @ts-expect-error: error
+  expectType<'a.b'>(result)
+
+  expect(result).toBe('a.b.c')
+})
+
+test('joinLoc (empty)', () => {
+  const result = joinLoc('', 'a.b')
+
+  expectType<'a.b'>(result)
+  // @ts-expect-error: error
+  expectType<'.a.b'>(result)
+
+  expect(result).toBe('a.b')
+})
+
+test('getLastSegment', () => {
+  const result = getLastSegment('a.b.c')
+
+  expect(result).toBe('c')
+})
+
+test('omitLastSegment', () => {
+  const result = omitLastSegment('a.b.c')
+
+  expectType<'a.b'>(result)
+  // @ts-expect-error: error
+  expectType<'a.b.c'>(result)
+
+  expect(result).toBe('a.b')
 })

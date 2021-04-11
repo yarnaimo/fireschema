@@ -1,13 +1,27 @@
-[English (Translated by DeepL)](README.en.md)
+<br />
 
-# Fireschema
+![Fireschema](./logo.png)
 
-- Firestore のコレクション構造・スキーマ・アクセス制御などをオブジェクトで定義して、rules の生成やドキュメントの型付けなどを自動で行う
-- Firestore Trigger のドキュメントや Callable Function の Request/Response の型付けを自動で行う
+<p align="center">Strongly typed Firestore framework for TypeScript</p>
 
-## Requirements
+<br />
 
-- **TypeScript** (>= 4.1)
+## Features
+
+- **Strong type safety for Firestore** - Automatically provide type information to _nested documents_ without unsafe type assertions, from the simple schema. Also support data decoding.
+- **Security rules generation** - Generate firestore.rules file including data type validation and access control from the schema.
+- **React Hooks** - Get realtime updates with React Hooks.
+- **Type safety for Cloud Functions**
+  - Automatically provide type information to snapshot data on Firestore Trigger Function based on the path string.
+  - Guard HTTPS callable function's request/response data type _both on compile time and runtime_.
+
+<br />
+
+## Requirement
+
+- **TypeScript** (>= 4.2)
+
+<br />
 
 ## Install
 
@@ -16,28 +30,17 @@ yarn add fireschema
 yarn add -D typescript ts-node
 ```
 
+<br />
+
 ## Setup
 
-### Custom Compiler / Transformer
+### Custom Transformer
 
-Fireschema では TypeScript の AST から型情報を取得する目的で **Custom Transformer** を使用するため、ビルド時は **ttypescript** という Custom Compiler を使う必要があります。
+To generate Firestore security rules or embedding type validation code into Callable Function, you need to compile codes via **Fireschema's custom transformer** that retrives type information from TypeScript AST.
 
-Custom Compiler / Transformer を使用するには、設定ファイルに以下の内容を追加してください。
+Currently official TypeScript package doesn't support custom transformers, and you need to use **[ttypescript](https://github.com/cevek/ttypescript)** that wraps TypeScript compiler.
 
-**package.json**
-
-`ttsc` / `ts-node` は環境変数 `TS_NODE_PROJECT` を使うと任意の `tsconfig.json` が指定できます。
-
-```json
-{
-  "scripts": {
-    "build": "ttsc", // <- tsc
-    "ts-node": "ts-node --compiler ttypescript" // <- ts-node
-  }
-}
-```
-
-**tsconfig.json**
+Add following options to your **`tsconfig.json`**,
 
 ```json
 {
@@ -51,49 +54,51 @@ Custom Compiler / Transformer を使用するには、設定ファイルに以�
 }
 ```
 
-**jest.config.js**
+and replace the commands.
+
+|            | before    | after                                  |
+| ---------- | --------- | -------------------------------------- |
+| typescript | `tsc`     | `ttsc` (ttypescript's compile command) |
+| ts-node    | `ts-node` | `ts-node --compiler ttypescript`       |
+
+> `ttsc` and `ts-node` supports specifying `tsconfig.json` by using environment variable `TS_NODE_PROJECT`.
+
+If you use ts-jest, add following options to jest config.
 
 ```js
 module.exports = {
   globals: {
     'ts-jest': {
-      tsConfig: 'tsconfig.json',
+      tsconfig: 'tsconfig.json',
       compiler: 'ttypescript',
     },
   },
 }
 ```
 
-### Override Dependencies
+<br>
 
-Fireschema が依存する一部のパッケージは **TypeScript 3.9** に依存しているため、Selective dependency resolutions で**依存関係を上書き**する必要があります。(yarn のみ対応)
+---
 
-```json
-{
-  "resolutions": {
-    "fireschema/**/typescript": "^4.1.2"
-  }
-}
-```
+<br>
 
-## Usage (Firestore)
+## Example - Firestore
 
-> 以下の変数名は特殊な意味を持つため、fireschema からのインポート以外で使用しないでください。
+> **Do not use following variable names except importing from fireschema**.
 >
-> - `$documentSchema`
-> - `$collectionAdapter`
+> - `$collectionSchema`
 > - `__$__`
 
-**Example**
+#### Data structure of examples
 
-- users/{uid}
-  - ユーザー (`User`)
-- users/{uid}/posts/{postId}
-  - ユーザーの投稿 (`PostA` または `PostB`)
+- `users/{uid}` - `User`
+- `users/{uid}/posts/{postId}` - `PostA | PostB`
 
-### 1. コレクション構造・スキーマ定義
+<br>
 
-スキーマ定義は **`firestoreSchema`** として named export してください。
+### 1. Define schema
+
+The schema definition must be named exported as **`firestoreSchema`**.
 
 <!-- AUTO-GENERATED-CONTENT:START (CODE:src=./src/example/1-1-schema.ts) -->
 <!-- The below code snippet is automatically added from ./src/example/1-1-schema.ts -->
@@ -101,12 +106,10 @@ Fireschema が依存する一部のパッケージは **TypeScript 3.9** に依�
 ```ts
 import { Merge } from 'type-fest'
 import {
-  $adapter,
   $allow,
-  $collectionAdapter,
   $collectionGroups,
+  $collectionSchema,
   $docLabel,
-  $documentSchema,
   $functions,
   $or,
   $schema,
@@ -120,20 +123,16 @@ export type User = {
   displayName: string | null
   age: number
   timestamp: FTypes.Timestamp
-  options: { a: boolean }
+  options: { a: boolean } | undefined
 }
 export type UserDecoded = Merge<User, { timestamp: Date }>
 
-const UserSchema = $documentSchema<User, UserDecoded>({
-  decoder: (snap, options) => {
-    const data = snap.data(options)
-    return {
-      ...data,
-      timestamp: data.timestamp.toDate(),
-    }
-  },
+const UserSchema = $collectionSchema<User, UserDecoded>()({
+  decoder: (data) => ({
+    ...data,
+    timestamp: data.timestamp.toDate(),
+  }),
 })
-const UserAdapter = $collectionAdapter<User>()({})
 
 // post
 type PostA = {
@@ -146,8 +145,7 @@ type PostB = {
   tags: { id: number; name: string }[]
   texts: string[]
 }
-const PostSchema = $documentSchema<PostA | PostB>()
-const PostAdapter = $collectionAdapter<PostA | PostB>()({
+const PostSchema = $collectionSchema<PostA | PostB>()({
   selectors: (q) => ({
     byTag: (tag: string) => q.where('tags', 'array-contains', tag),
   }),
@@ -155,22 +153,21 @@ const PostAdapter = $collectionAdapter<PostA | PostB>()({
 
 export const firestoreSchema = createFirestoreSchema({
   [$functions]: {
-    // /admins/<uid> が存在するかどうか
+    // whether /admins/<uid> exists
     ['isAdmin()']: `
       return exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     `,
 
-    // アクセスしようとするユーザーの uid が {uid} と一致するかどうか
+    // whether uid matches
     ['matchesUser(uid)']: `
       return request.auth.uid == uid;
     `,
   },
 
   [$collectionGroups]: {
-    users: {
-      [$docLabel]: 'uid',
-      [$schema]: UserSchema,
-      [$adapter]: UserAdapter,
+    posts: {
+      [$docLabel]: 'postId',
+      [$schema]: PostSchema,
       [$allow]: {
         read: true,
       },
@@ -179,20 +176,18 @@ export const firestoreSchema = createFirestoreSchema({
 
   // /users/{uid}
   users: {
-    [$docLabel]: 'uid', // {uid} の部分
-    [$schema]: UserSchema, // documentSchema
-    [$adapter]: UserAdapter, // collectionAdapter
+    [$docLabel]: 'uid', // {uid}
+    [$schema]: UserSchema, // collectionSchema
     [$allow]: {
-      // アクセス制御
-      read: true, // 誰でも可
-      write: $or(['matchesUser(uid)', 'isAdmin()']), // {uid} と一致するユーザー or 管理者のみ可
+      // access control
+      read: true, // all user
+      write: $or(['matchesUser(uid)', 'isAdmin()']), // only users matching {uid} or admins
     },
 
     // /users/{uid}/posts/{postId}
     posts: {
       [$docLabel]: 'postId',
       [$schema]: PostSchema,
-      [$adapter]: PostAdapter,
       [$allow]: {
         read: true,
         write: 'matchesUser(uid)',
@@ -204,16 +199,18 @@ export const firestoreSchema = createFirestoreSchema({
 
 <!-- AUTO-GENERATED-CONTENT:END -->
 
-### 2. firestore.rules 生成
+<br>
+
+### 2. Generate firestore.rules
 
 ```sh
-yarn fireschema <スキーマのパス>.ts
+yarn fireschema <path-to-schema>.ts
 ```
 
-`ttsc` / `ts-node` と同じく、環境変数 `TS_NODE_PROJECT` で任意の `tsconfig.json` が指定できます。
+> Environment variable `TS_NODE_PROJECT` is supported similarly to `ttsc` and `ts-node`.
 
 <details>
-  <summary>生成される firestore.rules の例</summary>
+  <summary>Example of generated firestore.rules</summary>
 
 <!-- AUTO-GENERATED-CONTENT:START (CODE:src=./firestore.rules) -->
 <!-- The below code snippet is automatically added from ./firestore.rules -->
@@ -231,7 +228,7 @@ service cloud.firestore {
       return request.auth.uid == uid;
     }
 
-    match /{path=**}/users/{uid} {
+    match /{path=**}/posts/{postId} {
       allow read: if true;
     }
 
@@ -239,10 +236,10 @@ service cloud.firestore {
       function __validator_0__(data) {
         return (
           data.name is string
-            && ((data.displayName == null || !("displayName" in data)) || data.displayName is string)
+            && (data.displayName == null || data.displayName is string)
             && (data.age is int || data.age is float)
             && data.timestamp is timestamp
-            && data.options.a is bool
+            && (!("options" in data) || data.options.a is bool)
         );
       }
 
@@ -274,138 +271,148 @@ service cloud.firestore {
 
 </details>
 
-### 3. コレクション・ドキュメントの操作
+<br>
 
-Fireschema の Firestore コントローラは `RefAdapter` と `WriteAdapter` に分かれています。
+### 3. Read/write collections and documents
 
-`RefAdapter` は web/admin 共通で、`WriteAdapter` は web と admin それぞれ作成する必要があります。
+The Firestore interface of Fireschema supports both **Web SDK and Admin SDK**.
 
-<!-- AUTO-GENERATED-CONTENT:START (CODE:src=./src/example/1-3-adapter.ts) -->
-<!-- The below code snippet is automatically added from ./src/example/1-3-adapter.ts -->
+<!-- AUTO-GENERATED-CONTENT:START (CODE:src=./src/example/1-3-typed-firestore.ts) -->
+<!-- The below code snippet is automatically added from ./src/example/1-3-typed-firestore.ts -->
 
 ```ts
-import firebase, { firestore, initializeApp } from 'firebase/app' // または firebase-admin
-import {
-  createFirestoreRefAdapter,
-  createFirestoreWriteAdapter,
-  FirestoreRefAdapter,
-  FirestoreWriteAdapter,
-} from 'fireschema'
+import firebase from 'firebase/app' // or firebase-admin
+import { TypedFirestore } from 'fireschema'
 import { firestoreSchema } from './1-1-schema'
 
-/**
- * コントローラの初期化
- */
-const app: firebase.app.App = initializeApp({
+const app: firebase.app.App = firebase.initializeApp({
   // ...
 })
-export const firestoreApp = app.firestore()
+const firestoreApp = app.firestore()
+firestoreApp.settings({ ignoreUndefinedProperties: true })
 
-export const $: FirestoreRefAdapter<typeof firestoreSchema> = createFirestoreRefAdapter(
-  firestoreSchema,
+/**
+ * Initialize TypedFirestore
+ */
+export const typedFirestore: TypedFirestore<
+  typeof firestoreSchema,
+  firebase.firestore.Firestore
+> = new TypedFirestore(firestoreSchema, firebase.firestore, firestoreApp)
+
+/**
+ * Reference collections/documents and get snapshot
+ */
+const users = typedFirestore.collection('users') // TypedCollectionRef instance
+const user = users.doc('userId') // TypedDocumentRef instance
+
+const posts = user.collection('posts')
+const post = posts.doc('123')
+const techPosts = user.collectionQuery(
+  'posts',
+  (q) => q.byTag('tech'), // selector defined in schema
 )
-export const $web: FirestoreWriteAdapter<firebase.firestore.Firestore> = createFirestoreWriteAdapter(
-  firestore,
-  firestoreApp,
+
+!(async () => {
+  await user.get() // DocumentSnapshot<User>
+
+  await post.get() // DocumentSnapshot<PostA | PostB>
+  await posts.get() // QuerySnapshot<PostA | PostB>
+  await techPosts.get() // QuerySnapshot<PostA | PostB>
+})
+
+/**
+ * Get child collection of retrived document snapshot
+ */
+!(async () => {
+  const snap = await users.get()
+  const firstUserRef = snap.docs[0]!.ref
+
+  await typedFirestore.wrapDocument(firstUserRef).collection('posts').get()
+})
+
+/**
+ * Reference parent collection/document
+ */
+const _posts = post.parentCollection()
+const _user = posts.parentDocument()
+
+/**
+ * Reference collections groups and get snapshot
+ */
+const postsGroup = typedFirestore.collectionGroup(
+  'posts', // collection name: passed to original collectionGroup method
+  'users.posts', // to get schema options
 )
-
-/**
- * コレクションの参照・データ取得
- */
-const users = $.collection(firestoreApp, 'users') // /users
-const user = users.doc('userId') // /users/userId
-
-const posts = $.collection(user, 'posts') // /users/userId/posts
-const post = posts.doc('123') // /users/userId/posts/123
-const techPosts = $.collectionQuery(user, 'posts', (q) => q.byTag('tech'))
-
-post.get() // Promise<DocumentSnapshot<PostA | PostB>>
-posts.get() // Promise<QuerySnapshot<PostA | PostB>>
-techPosts.get() // Promise<QuerySnapshot<PostA | PostB>>
-
-/**
- * コレクションの親ドキュメントを参照
- */
-const _user = $.getParentDocument(posts) // DocumentReference<User>
-
-/**
- * DocumentReference に型をつける
- */
-const untypedPostRef = firestoreApp.doc('users/{uid}/posts/post')
-const _post = $.typeDocument('users/{uid}/posts', untypedPostRef) // DocumentReference<PostA | PostB>
-
-/**
- * コレクショングループの参照・データ取得
- */
-const postsGroup = $.collectionGroup(firestoreApp, 'users/{uid}/posts')
-const techPostsGroup = $.collectionGroupQuery(
-  firestoreApp,
-  'users/{uid}/posts',
+const techPostsGroup = typedFirestore.collectionGroupQuery(
+  'posts',
+  'users.posts',
   (q) => q.byTag('tech'),
 )
 
-postsGroup.get() // Promise<QuerySnapshot<PostA | PostB>>
-techPostsGroup.get() // Promise<QuerySnapshot<PostA | PostB>>
+!(async () => {
+  await postsGroup.get() // QuerySnapshot<PostA | PostB>
+  await techPostsGroup.get() // QuerySnapshot<PostA | PostB>
+})
 
 /**
- * ドキュメントの作成・更新
+ * Write data
  */
-$web.create(user, {
-  name: 'test',
-  displayName: 'Test',
-  age: 20,
-  timestamp: $web.FieldValue.serverTimestamp(),
-  options: { a: true },
+!(async () => {
+  await user.create({
+    name: 'test',
+    displayName: 'Test',
+    age: 20,
+    timestamp: typedFirestore.firestoreStatic.FieldValue.serverTimestamp(),
+    options: { a: true },
+  })
+  await user.setMerge({
+    age: 21,
+  })
+  await user.update({
+    age: 21,
+  })
+  await user.delete()
 })
-$web.setMerge(user, {
-  age: 17,
-})
-$web.update(user, {
-  age: 17,
-})
-$web.delete(user)
 
 /**
- * トランザクション
+ * Transaction
  */
-$web.runTransaction(async (tc) => {
-  const snap = await tc.get(user)
-  tc.setMerge(user, {
-    age: snap.data()!.age + 1,
+!(async () => {
+  await typedFirestore.runTransaction(async (tt) => {
+    const snap = await tt.get(user)
+    tt.update(user, {
+      age: snap.data()!.age + 1,
+    })
   })
 })
 ```
 
 <!-- AUTO-GENERATED-CONTENT:END -->
 
-### 4. Hooks
+<br>
 
-<!-- AUTO-GENERATED-CONTENT:START (CODE:src=./src/example/1-4-hooks.tsx) -->
-<!-- The below code snippet is automatically added from ./src/example/1-4-hooks.tsx -->
+### 4. React Hooks
+
+<!-- AUTO-GENERATED-CONTENT:START (CODE:src=./src/example/1-4-react-hooks.tsx) -->
+<!-- The below code snippet is automatically added from ./src/example/1-4-react-hooks.tsx -->
 
 ```tsx
 import React from 'react'
-import {
-  useDocumentSnapData,
-  useQuerySnapData,
-  useTypedDocument,
-  useTypedQuery,
-} from 'fireschema/hooks'
-import { $, firestoreApp } from './1-3-adapter'
+import { useTypedDocument, useTypedQuery } from 'fireschema/hooks'
+import { typedFirestore } from './1-3-typed-firestore'
 
 /**
- * コレクション/クエリをリアルタイムで表示
+ * Get realtime updates of collection/query
  */
 export const UsersComponent = () => {
-  const users = useTypedQuery($.collection(firestoreApp, 'users'))
-  const usersData = useQuerySnapData(users.snap)
-  if (!usersData) {
+  const users = useTypedQuery(typedFirestore.collection('users'))
+  if (!users.data) {
     return <span>{'Loading...'}</span>
   }
 
   return (
     <ul>
-      {usersData.map((user, i) => (
+      {users.data.map((user, i) => (
         <li key={i}>{user.displayName}</li>
       ))}
     </ul>
@@ -413,42 +420,45 @@ export const UsersComponent = () => {
 }
 
 /**
- * ドキュメントをリアルタイムで表示
+ * Get realtime updates of document
  */
 export const UserComponent = ({ id }: { id: string }) => {
-  const user = useTypedDocument($.collection(firestoreApp, 'users').doc(id))
-  const userData = useDocumentSnapData(user.snap)
-  if (!userData) {
+  const user = useTypedDocument(typedFirestore.collection('users').doc(id))
+  if (!user.data) {
     return <span>{'Loading...'}</span>
   }
 
-  return <span>{userData.displayName}</span>
+  return <span>{user.data.displayName}</span>
 }
 ```
 
 <!-- AUTO-GENERATED-CONTENT:END -->
 
-## Usage (Functions)
+<br>
 
-Fireschema の Cloud Functions 型付け機能を利用するには、まず `FunctionRegisterer` を初期化し、各 Function で registerer をインポートしてスキーマや関数を定義します。
+---
 
-### 1. function の定義
+<br>
 
-<!-- AUTO-GENERATED-CONTENT:START (CODE:src=./src/example/2-1-registerer.ts) -->
-<!-- The below code snippet is automatically added from ./src/example/2-1-registerer.ts -->
+## Example - Cloud Functions
+
+### 1. Create functions
+
+<!-- AUTO-GENERATED-CONTENT:START (CODE:src=./src/example/2-1-typed-functions.ts) -->
+<!-- The below code snippet is automatically added from ./src/example/2-1-typed-functions.ts -->
 
 ```ts
 import { firestore } from 'firebase-admin'
 import * as functions from 'firebase-functions'
 import { Merge } from 'type-fest'
-import { $jsonSchema, FunctionRegisterer } from 'fireschema'
+import { $jsonSchema, TypedFunctions } from 'fireschema'
 import { firestoreSchema, User } from './1-1-schema'
 
 /**
- * Registererを初期化
+ * Initialize TypedFunctions
  */
 const timezone = 'Asia/Tokyo'
-const $register = FunctionRegisterer(
+const typedFunctions = new TypedFunctions(
   firestoreSchema,
   firestore,
   functions,
@@ -457,13 +467,15 @@ const $register = FunctionRegisterer(
 const builder = functions.region('asia-northeast1')
 
 /**
- * functionsのindexファイル (functions/index.tsなど)
- * (通常はfunctionごとにファイルを分割します)
+ * functions/index.ts file
  */
 export type UserJson = Merge<User, { timestamp: string }>
 export const callable = {
-  createUser: $register.callable({
-    schema: [$jsonSchema<UserJson>(), $jsonSchema<{ result: boolean }>()],
+  createUser: typedFunctions.callable({
+    schema: [
+      $jsonSchema<UserJson>(), // schema of request data (automatically validate on request)
+      $jsonSchema<{ result: boolean }>(), // schema of response data
+    ],
     builder,
     handler: async (data, context) => {
       console.log(data) // UserJson
@@ -474,18 +486,18 @@ export const callable = {
 }
 
 export const firestoreTrigger = {
-  onUserCreate: $register.firestoreTrigger.onCreate({
+  onUserCreate: typedFunctions.firestoreTrigger.onCreate({
     builder,
     path: 'users/{uid}',
     handler: async (decodedData, snap, context) => {
-      console.log(decodedData) // UserDecoded (パス文字列から自動で型付け)
+      console.log(decodedData) // UserDecoded (provided based on path string)
       console.log(snap) // QueryDocumentSnapshot<User>
     },
   }),
 }
 
 export const http = {
-  getKeys: $register.http({
+  getKeys: typedFunctions.http({
     builder,
     handler: (req, resp) => {
       if (req.method !== 'POST') {
@@ -498,7 +510,7 @@ export const http = {
 }
 
 export const topic = {
-  publishMessage: $register.topic('publish_message', {
+  publishMessage: typedFunctions.topic('publish_message', {
     schema: $jsonSchema<{ text: string }>(),
     builder,
     handler: async (data) => {
@@ -508,7 +520,7 @@ export const topic = {
 }
 
 export const schedule = {
-  cron: $register.schedule({
+  cron: typedFunctions.schedule({
     builder,
     schedule: '0 0 * * *',
     handler: async (context) => {
@@ -520,30 +532,32 @@ export const schedule = {
 
 <!-- AUTO-GENERATED-CONTENT:END -->
 
-### 2. callble function の呼び出し
+<br>
 
-callble function の client 作成時に functions の index モジュールの型をジェネリクスで渡すと、呼び出し時に自動で型付けが行われます。
+### 2. Call HTTPS callable function
 
-<!-- AUTO-GENERATED-CONTENT:START (CODE:src=./src/example/2-2-callable.tsx) -->
-<!-- The below code snippet is automatically added from ./src/example/2-2-callable.tsx -->
+Automatically provide types to request/response data based on passed functions module type.
+
+<!-- AUTO-GENERATED-CONTENT:START (CODE:src=./src/example/2-2-callable-function.tsx) -->
+<!-- The below code snippet is automatically added from ./src/example/2-2-callable-function.tsx -->
 
 ```tsx
-import { initializeApp } from 'firebase/app'
+import firebase from 'firebase/app'
 import React from 'react'
-import { Caller } from 'fireschema'
+import { TypedCaller } from 'fireschema'
 
-type FunctionsModule = typeof import('./2-1-registerer')
+type FunctionsModule = typeof import('./2-1-typed-functions')
 
-const app: firebase.app.App = initializeApp({
+const app: firebase.app.App = firebase.initializeApp({
   // ...
 })
 const functionsApp = app.functions('asia-northeast1')
 
-export const $call = Caller<FunctionsModule>(functionsApp)
+export const typedCaller = new TypedCaller<FunctionsModule>(functionsApp)
 
 const Component = () => {
   const createUser = async () => {
-    const result = await $call('createUser', {
+    const result = await typedCaller.call('createUser', {
       name: 'test',
       displayName: 'Test',
       age: 20,

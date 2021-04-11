@@ -1,14 +1,14 @@
 import { firestore } from 'firebase-admin'
 import * as functions from 'firebase-functions'
 import { Merge } from 'type-fest'
-import { $jsonSchema, FunctionRegisterer } from '..'
+import { $jsonSchema, TypedFunctions } from '..'
 import { firestoreSchema, User } from './1-1-schema'
 
 /**
- * Registererを初期化
+ * Initialize TypedFunctions
  */
 const timezone = 'Asia/Tokyo'
-const $register = FunctionRegisterer(
+const typedFunctions = new TypedFunctions(
   firestoreSchema,
   firestore,
   functions,
@@ -17,13 +17,15 @@ const $register = FunctionRegisterer(
 const builder = functions.region('asia-northeast1')
 
 /**
- * functionsのindexファイル (functions/index.tsなど)
- * (通常はfunctionごとにファイルを分割します)
+ * functions/index.ts file
  */
 export type UserJson = Merge<User, { timestamp: string }>
 export const callable = {
-  createUser: $register.callable({
-    schema: [$jsonSchema<UserJson>(), $jsonSchema<{ result: boolean }>()],
+  createUser: typedFunctions.callable({
+    schema: [
+      $jsonSchema<UserJson>(), // schema of request data (automatically validate on request)
+      $jsonSchema<{ result: boolean }>(), // schema of response data
+    ],
     builder,
     handler: async (data, context) => {
       console.log(data) // UserJson
@@ -34,18 +36,18 @@ export const callable = {
 }
 
 export const firestoreTrigger = {
-  onUserCreate: $register.firestoreTrigger.onCreate({
+  onUserCreate: typedFunctions.firestoreTrigger.onCreate({
     builder,
     path: 'users/{uid}',
     handler: async (decodedData, snap, context) => {
-      console.log(decodedData) // UserDecoded (パス文字列から自動で型付け)
+      console.log(decodedData) // UserDecoded (provided based on path string)
       console.log(snap) // QueryDocumentSnapshot<User>
     },
   }),
 }
 
 export const http = {
-  getKeys: $register.http({
+  getKeys: typedFunctions.http({
     builder,
     handler: (req, resp) => {
       if (req.method !== 'POST') {
@@ -58,7 +60,7 @@ export const http = {
 }
 
 export const topic = {
-  publishMessage: $register.topic('publish_message', {
+  publishMessage: typedFunctions.topic('publish_message', {
     schema: $jsonSchema<{ text: string }>(),
     builder,
     handler: async (data) => {
@@ -68,7 +70,7 @@ export const topic = {
 }
 
 export const schedule = {
-  cron: $register.schedule({
+  cron: typedFunctions.schedule({
     builder,
     schedule: '0 0 * * *',
     handler: async (context) => {

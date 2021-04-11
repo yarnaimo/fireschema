@@ -1,11 +1,10 @@
 import { firestore } from '@firebase/rules-unit-testing'
-import dayjs from 'dayjs'
 import { FTypes } from '../../core/types'
 import { Type } from '../../lib/type'
 import { IPostA, IUser } from './firestore-schema'
 
 export const userData: Type.Merge<IUser, { timestamp: FTypes.FieldValue }> = {
-  name: 'umi',
+  name: 'name1',
   displayName: null,
   age: 16,
   timestamp: firestore.FieldValue.serverTimestamp(),
@@ -18,7 +17,7 @@ export const userData: Type.Merge<IUser, { timestamp: FTypes.FieldValue }> = {
 
 export const userDataJson = {
   ...userData,
-  timestamp: dayjs().toISOString(),
+  timestamp: new Date().toISOString(),
 }
 
 export const postAData: IPostA = { type: 'a', text: 'value' }

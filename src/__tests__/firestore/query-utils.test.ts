@@ -1,10 +1,9 @@
 import dayjs from 'dayjs'
-import { IUser } from '../../../__tests__/_fixtures/firestore-schema'
-import { authedApp } from '../../../__tests__/_infrastructure/_app'
+import { Combine, CreatedWithin, FTypes } from '../../core'
+import { IUser } from '../_fixtures/firestore-schema'
+import { authedApp } from '../_infrastructure/_app'
 // import { $web } from '../_infrastructure/firestore-controller'
-import { expectEqualRef } from '../../../__tests__/_utils/firestore'
-import { FTypes } from '../../types'
-import { Combine, CreatedWithin } from './query-utils'
+import { expectEqualRef } from '../_utils/firestore'
 
 const app = authedApp('user').firestore()
 

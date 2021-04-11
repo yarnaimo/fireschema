@@ -1,19 +1,19 @@
 import firebase from 'firebase/app'
 import React from 'react'
-import { Caller } from '..'
+import { TypedCaller } from '..'
 
-type FunctionsModule = typeof import('./2-1-registerer')
+type FunctionsModule = typeof import('./2-1-typed-functions')
 
 const app: firebase.app.App = firebase.initializeApp({
   // ...
 })
 const functionsApp = app.functions('asia-northeast1')
 
-export const $call = Caller<FunctionsModule>(functionsApp)
+export const typedCaller = new TypedCaller<FunctionsModule>(functionsApp)
 
 const Component = () => {
   const createUser = async () => {
-    const result = await $call('createUser', {
+    const result = await typedCaller.call('createUser', {
       name: 'test',
       displayName: 'Test',
       age: 20,
@@ -21,11 +21,11 @@ const Component = () => {
       options: { a: true },
     })
 
-    if (!result.isOk) {
+    if (result.error) {
       console.error(result.error)
       return
     }
-    console.log(result.value)
+    console.log(result.data)
   }
 
   return <button onClick={createUser}></button>

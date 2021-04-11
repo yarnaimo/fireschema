@@ -1,20 +1,22 @@
-import { $topic } from '../_infrastructure/functions-client'
+import { typedTopic } from '../_infrastructure/functions-client'
 
 test('topic', async () => {
   !(async () => {
-    await $topic(
+    await typedTopic.publish(
       // @ts-expect-error: invalid path
       'publishMessage',
       { text: null },
     )
 
-    await $topic(
+    await typedTopic.publish(
       'publish_message',
       // @ts-expect-error: text
       { text: null },
     )
   })
 
-  const messageId = await $topic('publish_message', { text: 'test' })
+  const messageId = await typedTopic.publish('publish_message', {
+    text: 'test',
+  })
   expect(messageId).toEqual(expect.any(String))
 })

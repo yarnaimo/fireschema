@@ -1,3 +1,2 @@
-export * from './CollectionAdapter'
-export * from './DocumentSchema'
+export * from './CollectionSchema'
 export * from './FirestoreSchema'

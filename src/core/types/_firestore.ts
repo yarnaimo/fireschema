@@ -96,8 +96,8 @@ export type ParseDocumentPath<
   P extends string
 > = P extends `${infer C}/${infer DT}`
   ? DT extends `${infer D}/${infer T}`
-    ? [C, ...ParseDocumentPath<T>]
-    : [C]
+    ? `${C}.${ParseDocumentPath<T>}`
+    : C
   : never
 
 // export type SPath<

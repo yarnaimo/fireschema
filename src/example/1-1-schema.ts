@@ -1,11 +1,9 @@
 import { Merge } from 'type-fest'
 import {
-  $adapter,
   $allow,
-  $collectionAdapter,
   $collectionGroups,
+  $collectionSchema,
   $docLabel,
-  $documentSchema,
   $functions,
   $or,
   $schema,
@@ -19,20 +17,16 @@ export type User = {
   displayName: string | null
   age: number
   timestamp: FTypes.Timestamp
-  options: { a: boolean }
+  options: { a: boolean } | undefined
 }
 export type UserDecoded = Merge<User, { timestamp: Date }>
 
-const UserSchema = $documentSchema<User, UserDecoded>({
-  decoder: (snap, options) => {
-    const data = snap.data(options)
-    return {
-      ...data,
-      timestamp: data.timestamp.toDate(),
-    }
-  },
+const UserSchema = $collectionSchema<User, UserDecoded>()({
+  decoder: (data) => ({
+    ...data,
+    timestamp: data.timestamp.toDate(),
+  }),
 })
-const UserAdapter = $collectionAdapter<User>()({})
 
 // post
 type PostA = {
@@ -45,8 +39,7 @@ type PostB = {
   tags: { id: number; name: string }[]
   texts: string[]
 }
-const PostSchema = $documentSchema<PostA | PostB>()
-const PostAdapter = $collectionAdapter<PostA | PostB>()({
+const PostSchema = $collectionSchema<PostA | PostB>()({
   selectors: (q) => ({
     byTag: (tag: string) => q.where('tags', 'array-contains', tag),
   }),
@@ -54,22 +47,21 @@ const PostAdapter = $collectionAdapter<PostA | PostB>()({
 
 export const firestoreSchema = createFirestoreSchema({
   [$functions]: {
-    // /admins/<uid> が存在するかどうか
+    // whether /admins/<uid> exists
     ['isAdmin()']: `
       return exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     `,
 
-    // アクセスしようとするユーザーの uid が {uid} と一致するかどうか
+    // whether uid matches
     ['matchesUser(uid)']: `
       return request.auth.uid == uid;
     `,
   },
 
   [$collectionGroups]: {
-    users: {
-      [$docLabel]: 'uid',
-      [$schema]: UserSchema,
-      [$adapter]: UserAdapter,
+    posts: {
+      [$docLabel]: 'postId',
+      [$schema]: PostSchema,
       [$allow]: {
         read: true,
       },
@@ -78,20 +70,18 @@ export const firestoreSchema = createFirestoreSchema({
 
   // /users/{uid}
   users: {
-    [$docLabel]: 'uid', // {uid} の部分
-    [$schema]: UserSchema, // documentSchema
-    [$adapter]: UserAdapter, // collectionAdapter
+    [$docLabel]: 'uid', // {uid}
+    [$schema]: UserSchema, // collectionSchema
     [$allow]: {
-      // アクセス制御
-      read: true, // 誰でも可
-      write: $or(['matchesUser(uid)', 'isAdmin()']), // {uid} と一致するユーザー or 管理者のみ可
+      // access control
+      read: true, // all user
+      write: $or(['matchesUser(uid)', 'isAdmin()']), // only users matching {uid} or admins
     },
 
     // /users/{uid}/posts/{postId}
     posts: {
       [$docLabel]: 'postId',
       [$schema]: PostSchema,
-      [$adapter]: PostAdapter,
       [$allow]: {
         read: true,
         write: 'matchesUser(uid)',

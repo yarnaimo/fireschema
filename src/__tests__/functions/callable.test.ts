@@ -1,10 +1,10 @@
 import { expectType } from 'tsd'
 import { messages } from '../../core'
 import { userDataJson } from '../_fixtures/data'
-import { $call } from '../_infrastructure/functions-client'
+import { typedCaller } from '../_infrastructure/functions-client'
 
 !(async () => {
-  await $call(
+  await typedCaller.call(
     // @ts-expect-error invalid path
     '_createUser',
     userDataJson,
@@ -12,61 +12,66 @@ import { $call } from '../_infrastructure/functions-client'
 })
 
 test('call', async () => {
-  const result = await $call('createUser', userDataJson)
+  const result = await typedCaller.call('createUser', userDataJson)
 
-  expect(result.isOk).toBeTruthy()
-  expect(result.valueOrError).toEqual({ result: userDataJson.age ** 2 })
-  if (result.isOk) {
-    expectType<{ result: number }>(result.valueOrError)
+  expect(result).toEqual({
+    data: { result: userDataJson.age ** 2 },
+  })
+  if (!result.error) {
+    expectType<{ result: number }>(result.data)
   }
 })
 
 test('call - nested', async () => {
-  const result = await $call('nested-toUpperCase', { text: 'text' })
+  const result = await typedCaller.call('nested-toUpperCase', { text: 'text' })
 
-  expect(result.isOk).toBeTruthy()
-  expect(result.valueOrError).toEqual({ result: 'TEXT' })
-  if (result.isOk) {
-    expectType<{ result: string }>(result.valueOrError)
+  expect(result).toEqual({
+    data: { result: 'TEXT' },
+  })
+  if (!result.error) {
+    expectType<{ result: string }>(result.data)
   }
 })
 
 test('call - invalid-argument', async () => {
-  const result = await $call('createUser', {
+  const result = await typedCaller.call('createUser', {
     ...userDataJson,
     // @ts-expect-error: age
     age: '16',
   })
 
-  expect(result.isOk).toBeFalsy()
-  expect(result.valueOrError).toMatchObject({
-    message: messages.invalidRequest,
-    code: 'invalid-argument',
+  expect(result).toEqual({
+    error: expect.objectContaining({
+      message: messages.invalidRequest,
+      code: 'invalid-argument',
+    }),
   })
 })
 
 test('call - out-of-range', async () => {
-  const result = await $call('createUser', {
+  const result = await typedCaller.call('createUser', {
     ...userDataJson,
     age: -1,
   })
 
-  expect(result.isOk).toBeFalsy()
-  expect(result.valueOrError).toMatchObject({
-    message: expect.any(String),
-    code: 'out-of-range',
+  expect(result).toEqual({
+    error: expect.objectContaining({
+      message: expect.any(String),
+      code: 'out-of-range',
+    }),
   })
 })
 
 test('call - internal', async () => {
-  const result = await $call('createUser', {
+  const result = await typedCaller.call('createUser', {
     ...userDataJson,
     age: 100,
   })
 
-  expect(result.isOk).toBeFalsy()
-  expect(result.valueOrError).toMatchObject({
-    message: messages.unknown,
-    code: 'internal',
+  expect(result).toEqual({
+    error: expect.objectContaining({
+      message: messages.unknown,
+      code: 'internal',
+    }),
   })
 })
