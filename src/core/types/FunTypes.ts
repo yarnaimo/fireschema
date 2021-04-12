@@ -25,11 +25,11 @@ export declare namespace FunTypes {
   }
 
   export type FunctionsModule = {
-    callable: NestedFunctions
-    http: NestedFunctions
-    topic: NestedFunctions
-    schedule: NestedFunctions
-    firestoreTrigger: NestedFunctions
+    callable?: NestedFunctions
+    http?: NestedFunctions
+    topic?: NestedFunctions
+    schedule?: NestedFunctions
+    firestoreTrigger?: NestedFunctions
   }
 
   export type SchemaTuple<I, O> = readonly [
@@ -47,17 +47,17 @@ export declare namespace FunTypes {
     ) => Promise<O>
 
     export type GetByFP<
-      MC extends NestedFunctions,
+      MC extends NestedFunctions | undefined,
       FP extends ExtractFP<MC>
     > = EnsureMeta<GetDeep<MC, ParseFP<FP>>>
 
     export type InputOf<
-      MC extends NestedFunctions,
+      MC extends NestedFunctions | undefined,
       FP extends ExtractFP<MC>
     > = GetByFP<MC, FP>[typeof $input]
 
     export type OutputOf<
-      MC extends NestedFunctions,
+      MC extends NestedFunctions | undefined,
       FP extends ExtractFP<MC>
     > = GetByFP<MC, FP>[typeof $output]
 
