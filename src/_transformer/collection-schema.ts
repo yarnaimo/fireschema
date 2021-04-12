@@ -1,9 +1,21 @@
 import { P } from 'lifts'
 import { Type, TypeNode } from 'ts-morph'
 import ts, { factory as f } from 'typescript'
-import { $$and, $and, $or } from '../core/utils'
+import { _createdAt, _updatedAt } from '../core/constants'
+import { $$and, $and, $or, $rule } from '../core/utils'
 import { R } from '../lib/fp'
 import { is } from '../lib/type'
+
+const metaRules = [
+  $or([
+    $rule.notExists(_createdAt, 'data'),
+    $rule.isServerTimestamp(`data.${_createdAt}`),
+  ]),
+  $or([
+    $rule.notExists(_updatedAt, 'data'),
+    $rule.isServerTimestamp(`data.${_updatedAt}`),
+  ]),
+]
 
 const transformNode = (
   parent: string | null = null,
@@ -16,7 +28,7 @@ const transformNode = (
     : `${parent}.${key}`
 
   if (type.isBoolean() && !type.isBooleanLiteral()) {
-    return `${name} is bool`
+    return $rule.isBool(name)
   }
 
   if (type.isUnion()) {
@@ -32,17 +44,17 @@ const transformNode = (
   }
 
   const primitiveRuleExpression = type.isUndefined()
-    ? `!("${key}" in ${parent})`
+    ? $rule.notExists(key, parent)
     : type.isNull()
-    ? `${name} == null`
+    ? $rule.isNull(name)
     : type.isLiteral()
-    ? `${name} == ${type.getText()}`
+    ? $rule.isLiteralOf(name, type.getText())
     : type.isString()
-    ? `${name} is string`
+    ? $rule.isString(name)
     : type.isNumber()
-    ? $or([`${name} is int`, `${name} is float`])
+    ? $rule.isNumber(name)
     : type.getText().endsWith('.Timestamp')
-    ? `${name} is timestamp`
+    ? $rule.isTimestamp(name)
     : null
 
   if (primitiveRuleExpression) {
@@ -51,7 +63,7 @@ const transformNode = (
 
   if (type.isArray()) {
     const elementType = type.getArrayElementTypeOrThrow()
-    return $or([`${name}.size() == 0`, transformNode(name, 0)(elementType)])
+    return $or([$rule.isEmptyArray(name), transformNode(name, 0)(elementType)])
   }
 
   if (type.isObject()) {
@@ -61,6 +73,9 @@ const transformNode = (
         const valueDeclaration = p.getValueDeclarationOrThrow()
         return transformNode(name, p.getName())(valueDeclaration.getType())
       }),
+      (rules) => {
+        return name === 'data' ? [...metaRules, ...rules] : rules
+      },
       name === 'data' ? $$and : $and,
     )
   }
