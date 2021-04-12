@@ -235,7 +235,9 @@ service cloud.firestore {
     match /users/{uid} {
       function __validator_0__(data) {
         return (
-          data.name is string
+          (!("_createdAt" in data) || data._createdAt == request.time)
+            && (!("_updatedAt" in data) || data._updatedAt == request.time)
+            && data.name is string
             && (data.displayName == null || data.displayName is string)
             && (data.age is int || data.age is float)
             && data.timestamp is timestamp
@@ -249,11 +251,15 @@ service cloud.firestore {
       match /posts/{postId} {
         function __validator_1__(data) {
           return ((
-            data.type == "a"
+            (!("_createdAt" in data) || data._createdAt == request.time)
+              && (!("_updatedAt" in data) || data._updatedAt == request.time)
+              && data.type == "a"
               && (data.tags.size() == 0 || ((data.tags[0].id is int || data.tags[0].id is float) && data.tags[0].name is string))
               && data.text is string
           ) || (
-            data.type == "b"
+            (!("_createdAt" in data) || data._createdAt == request.time)
+              && (!("_updatedAt" in data) || data._updatedAt == request.time)
+              && data.type == "b"
               && (data.tags.size() == 0 || ((data.tags[0].id is int || data.tags[0].id is float) && data.tags[0].name is string))
               && (data.texts.size() == 0 || data.texts[0] is string)
           ));
@@ -565,11 +571,11 @@ const Component = () => {
       options: { a: true },
     })
 
-    if (!result.isOk) {
+    if (result.error) {
       console.error(result.error)
       return
     }
-    console.log(result.value)
+    console.log(result.data)
   }
 
   return <button onClick={createUser}></button>
