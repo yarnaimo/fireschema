@@ -387,6 +387,29 @@ describe('write', () => {
     await assertSucceeds(r.user.create({ ...userData, tags: [] }))
   })
 
+  test('create user (fails due to invalid timestamp)', async () => {
+    await assertSucceeds(
+      r.user.raw.set({
+        ...userData,
+        _createdAt: firestore.FieldValue.serverTimestamp(),
+        _updatedAt: firestore.FieldValue.serverTimestamp(),
+      } as any),
+    )
+    await assertSucceeds(
+      r.user.raw.set({
+        ...userData,
+        _createdAt: firestore.FieldValue.serverTimestamp(),
+      } as any),
+    )
+    await assertFails(
+      r.user.raw.set({
+        ...userData,
+        _createdAt: firestore.FieldValue.serverTimestamp(),
+        _updatedAt: firestore.Timestamp.fromDate(new Date()),
+      } as any),
+    )
+  })
+
   test('create user (fails due to wrong type)', async () => {
     await assertFails(
       r.user.create({
