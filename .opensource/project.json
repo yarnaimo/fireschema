@@ -1,0 +1,6 @@
+{
+  "name": "Fireschema",
+  "platforms": ["Web", "Admin"],
+  "content": "README.md",
+  "related": ["CSFrequency/react-firebase-hooks"]
+}
