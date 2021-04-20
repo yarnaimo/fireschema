@@ -39,7 +39,7 @@ export class TypedFirestore<
   collectionGroupQuery<L extends Loc<S>>(
     collectionName: Extract<keyof S[typeof $collectionGroups], string>,
     loc: L,
-    selector: STypes.Select<S, F, L>,
+    selector: STypes.Selector<S, F, L>,
   ) {
     return new TypedQueryRef<S, F, L>(
       this.schemaOptions,

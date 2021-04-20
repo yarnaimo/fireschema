@@ -51,8 +51,9 @@ export const decodeUser = (data: IUser) => ({
 export const UserSchema = $collectionSchema<IUser, IUserLocal>()({
   decoder: (data: IUser, snap: FTypes.QueryDocumentSnap<IUser>): IUserLocal =>
     decodeUser(data),
-  selectors: (q) => ({
+  selectors: (q, firestoreStatic) => ({
     teen: () => q.where('age', '>=', 10).where('age', '<', 20),
+    orderById: () => q.orderBy(firestoreStatic.FieldPath.documentId()),
   }),
 })
 void (() => {

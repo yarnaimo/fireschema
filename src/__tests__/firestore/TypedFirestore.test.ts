@@ -41,6 +41,7 @@ const _tcollections = (app: _web.Firestore) => {
   })
   const users = v1.collection('users')
   const teenUsers = v1.collectionQuery('users', (q) => q.teen())
+  const usersOrderedById = v1.collectionQuery('users', (q) => q.orderById())
   const user = users.doc('user')
 
   const posts = user.collection('posts')
@@ -60,6 +61,7 @@ const _tcollections = (app: _web.Firestore) => {
     users,
     user,
     teenUsers,
+    usersOrderedById,
     posts,
     post,
     usersGroup,
@@ -131,6 +133,11 @@ describe('refs', () => {
     expectEqualRef(
       r.usersGroup.raw.where('age', '>=', 10).where('age', '<', 20),
       r.teenUsersGroup.raw,
+    )
+
+    expectEqualRef(
+      r.users.raw.orderBy(firestore.FieldPath.documentId()),
+      r.usersOrderedById.raw,
     )
   })
 

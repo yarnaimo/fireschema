@@ -33,7 +33,7 @@ export class TypedFDBase<
 
   collectionQuery<N extends Extract<keyof _C, string>>(
     collectionName: N,
-    selector: STypes.Select<S, F, JoinLoc<L, N>>,
+    selector: STypes.Selector<S, F, JoinLoc<L, N>>,
   ) {
     return new TypedQueryRef<S, F, JoinLoc<L, N>>(
       this.schemaOptions,

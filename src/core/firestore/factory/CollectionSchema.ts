@@ -15,12 +15,15 @@ export function $collectionSchema<T, _U = undefined>() {
     decoder,
     selectors = () => ({} as SL),
   }: DecoderOptions & {
-    selectors?: (q: FTypes.Query<U>) => SL
+    selectors?: (
+      q: FTypes.Query<U>,
+      firestoreStatic: FTypes.FirestoreStatic<FTypes.FirestoreApp>,
+    ) => SL
   }): STypes.CollectionSchema<T, U, HasDecoder, SL> => {
     return {
       ...rawFirstArgument,
       decoder,
       selectors,
-    } as STypes.CollectionSchema<T, U, HasDecoder, SL>
+    }
   }
 }

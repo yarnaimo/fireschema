@@ -5,9 +5,10 @@ import { addQueryCache, findCachedQuery } from '../_query-cache'
 
 export const withSelectors = (
   schema: STypes.CollectionSchema<any, any, any>,
-  selector: STypes.Select<any, any, any> | undefined,
+  firestoreStatic: FTypes.FirestoreStatic<FTypes.FirestoreApp>,
+  selector: STypes.Selector<any, any, any> | undefined,
 ) => (query: FTypes.Query<unknown>) => {
-  return selector ? selector(schema.selectors(query)) : query
+  return selector ? selector(schema.selectors(query, firestoreStatic)) : query
 }
 
 export const withDecoder = (

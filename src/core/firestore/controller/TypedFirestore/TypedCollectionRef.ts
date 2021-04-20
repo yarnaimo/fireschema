@@ -22,7 +22,7 @@ export class TypedQueryRef<
     readonly firestoreStatic: FTypes.FirestoreStatic<F>,
     readonly loc: L,
     origQuery: FTypes.Query<any, F>,
-    selector?: STypes.Select<S, F, L>,
+    selector?: STypes.Selector<S, F, L>,
     skipDecoder?: boolean,
   ) {
     const name = getLastSegment(loc)
@@ -31,7 +31,7 @@ export class TypedQueryRef<
     const convertedQuery = P(
       origQuery,
       skipDecoder ? R.identity : withDecoder(options[$schema], name),
-      withSelectors(options[$schema], selector),
+      withSelectors(options[$schema], this.firestoreStatic, selector),
     ) as FTypes.Query<any, F>
 
     this.raw = convertedQuery

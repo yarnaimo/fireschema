@@ -92,7 +92,10 @@ export declare namespace STypes {
     __SL__: SL
     schema: string
     decoder: HasDecoder extends true ? Decoder<T, U> : undefined
-    selectors: (q: FTypes.Query<U>) => SL
+    selectors: (
+      q: FTypes.Query<U>,
+      firestoreStatic: FTypes.FirestoreStatic<FTypes.FirestoreApp>,
+    ) => SL
   }
 
   export namespace CollectionOptions {
@@ -114,7 +117,7 @@ export declare namespace STypes {
       typeof allowOptions.write)]+?: ConditionExp
   }
 
-  export type Select<
+  export type Selector<
     S extends RootOptions.All,
     F extends FTypes.FirestoreApp,
     L extends string,
@@ -123,10 +126,10 @@ export declare namespace STypes {
     // PC,
     _C = GetByLoc<S, L>
   > = (
-    q: Selectors<GetSchemaT<_C>, L, GetSL<_C>, F>,
+    q: SelectorOptions<GetSchemaT<_C>, L, GetSL<_C>, F>,
   ) => FTypes.Query<DocDataAt<S, F, L>, F>
 
-  export type Selectors<
+  export type SelectorOptions<
     T,
     L extends string | null,
     SL,
