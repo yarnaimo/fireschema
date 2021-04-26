@@ -4,9 +4,8 @@ import { is } from '../../../lib/type'
 import { allowOptions, STypes } from '../../types'
 import { $and } from '../../utils'
 import { join, _ } from '../../utils/_string'
+import { addValidatorIndex, validator, validatorCall } from './format'
 import { renderFunctions } from './functions'
-
-let index = 0
 
 export const renderRules = (
   $allow: STypes.AllowOptions,
@@ -21,25 +20,8 @@ export const renderRules = (
 
   const indent = pIndent + 2
 
-  const validator = (arg: string) => `__validator_${index}__(${arg})`
-
-  const validatorBody = schema.schema
-    .split('\n')
-    .map((line, i, arr) => {
-      return i === 0
-        ? line
-        : i === arr.length - 1 || line === ') || (' || line === ') && ('
-        ? `${_(indent + 2)}${line}`
-        : `${_(indent + 4)}${line}`
-    })
-    .join('\n')
-
   const functions = renderFunctions(
-    {
-      [validator('data')]: `
-        return ${validatorBody};
-      `,
-    },
+    validator('data', schema.schema, indent),
     pIndent,
   )
 
@@ -50,7 +32,7 @@ export const renderRules = (
     array,
     R.map(([op, condition]) => {
       if (op in allowOptions.write && op !== 'delete') {
-        return [op, $and([condition!, validator('request.resource.data')])] // eslint-disable-line @typescript-eslint/no-non-null-assertion
+        return [op, $and([condition!, validatorCall('request.resource.data')])] // eslint-disable-line @typescript-eslint/no-non-null-assertion
       }
       return [op, condition]
     }),
@@ -61,7 +43,7 @@ export const renderRules = (
   )
 
   if (hasWriteRules) {
-    index++
+    addValidatorIndex()
     return join('\n\n')([functions, rules])
   } else {
     return rules

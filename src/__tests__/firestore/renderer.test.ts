@@ -6,6 +6,13 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    function __validator_meta__(data) {
+      return (
+        (request.method != "create" || (!("_createdAt" in data) || data._createdAt == request.time))
+          && (!("_updatedAt" in data) || data._updatedAt == request.time)
+      );
+    }
+
     function isAdmin() {
       return getCurrentAuthUser().data.isAdmin == true;
     }
@@ -22,8 +29,7 @@ service cloud.firestore {
       match /users/{uid} {
         function __validator_0__(data) {
           return (
-            (!("_createdAt" in data) || data._createdAt == request.time)
-              && (!("_updatedAt" in data) || data._updatedAt == request.time)
+            __validator_meta__(data)
               && data.name is string
               && (data.displayName == null || data.displayName is string)
               && (data.age is int || data.age is float)
@@ -40,13 +46,11 @@ service cloud.firestore {
         match /posts/{postId} {
           function __validator_1__(data) {
             return ((
-              (!("_createdAt" in data) || data._createdAt == request.time)
-                && (!("_updatedAt" in data) || data._updatedAt == request.time)
+              __validator_meta__(data)
                 && data.type == "a"
                 && data.text is string
             ) || (
-              (!("_createdAt" in data) || data._createdAt == request.time)
-                && (!("_updatedAt" in data) || data._updatedAt == request.time)
+              __validator_meta__(data)
                 && data.type == "b"
                 && (data.texts.size() == 0 || data.texts[0] is string)
             ));
@@ -60,8 +64,7 @@ service cloud.firestore {
         match /privatePosts/{postId} {
           function __validator_2__(data) {
             return (
-              (!("_createdAt" in data) || data._createdAt == request.time)
-                && (!("_updatedAt" in data) || data._updatedAt == request.time)
+              __validator_meta__(data)
                 && data.type == "a"
                 && data.text is string
             );

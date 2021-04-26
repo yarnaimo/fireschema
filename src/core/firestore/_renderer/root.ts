@@ -1,8 +1,29 @@
-import { $collectionGroups, $functions } from '../../constants'
+import {
+  $collectionGroups,
+  $functions,
+  _createdAt,
+  _updatedAt,
+} from '../../constants'
 import { STypes } from '../../types'
+import { $$and, $or, $rule } from '../../utils'
 import { join } from '../../utils/_string'
 import { renderCollectionGroups, renderCollections } from './collections'
+import { validator } from './format'
 import { renderFunctions } from './functions'
+
+const metaRules = $$and([
+  $or([
+    'request.method != "create"',
+    $or([
+      $rule.notExists(_createdAt, 'data'),
+      $rule.isServerTimestamp(`data.${_createdAt}`),
+    ]),
+  ]),
+  $or([
+    $rule.notExists(_updatedAt, 'data'),
+    $rule.isServerTimestamp(`data.${_updatedAt}`),
+  ]),
+])
 
 export const renderRoot = (
   $functions: STypes.FunctionsOptions,
@@ -10,7 +31,13 @@ export const renderRoot = (
   collections: STypes.CollectionOptions.Children,
 ) => {
   const body = join('\n\n')([
-    renderFunctions($functions, 2),
+    renderFunctions(
+      {
+        ...validator('data', metaRules, 4, 'meta'),
+        ...$functions,
+      },
+      2,
+    ),
     renderCollectionGroups(collectionGroups, 2),
     renderCollections(collections, 2),
   ])

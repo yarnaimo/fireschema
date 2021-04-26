@@ -1,21 +1,9 @@
 import { P } from 'lifts'
 import { Type, TypeNode } from 'ts-morph'
 import ts, { factory as f } from 'typescript'
-import { _createdAt, _updatedAt } from '../core/constants'
 import { $$and, $and, $or, $rule } from '../core/utils'
 import { R } from '../lib/fp'
 import { is } from '../lib/type'
-
-const metaRules = [
-  $or([
-    $rule.notExists(_createdAt, 'data'),
-    $rule.isServerTimestamp(`data.${_createdAt}`),
-  ]),
-  $or([
-    $rule.notExists(_updatedAt, 'data'),
-    $rule.isServerTimestamp(`data.${_updatedAt}`),
-  ]),
-]
 
 const transformNode = (
   parent: string | null = null,
@@ -74,7 +62,7 @@ const transformNode = (
         return transformNode(name, p.getName())(valueDeclaration.getType())
       }),
       (rules) => {
-        return name === 'data' ? [...metaRules, ...rules] : rules
+        return name === 'data' ? [`__validator_meta__(data)`, ...rules] : rules
       },
       name === 'data' ? $$and : $and,
     )
