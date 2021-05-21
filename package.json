@@ -76,6 +76,6 @@
     "firebase-functions": "^3.13.2"
   },
   "engines": {
-    "node": "12"
+    "node": ">=12"
   }
 }
