@@ -32,10 +32,10 @@ export declare namespace FunTypes {
     firestoreTrigger?: NestedFunctions
   }
 
-  export type SchemaTuple<I, O> = readonly [
-    input: FunTypes.JsonSchema<I>,
-    output: FunTypes.JsonSchema<O>,
-  ]
+  export type SchemaTuple<I, O> = {
+    input: FunTypes.JsonSchema<I>
+    output: FunTypes.JsonSchema<O>
+  }
 
   export namespace Callable {
     export type Meta<I, O> = { [$input]: I; [$output]: O }
@@ -48,17 +48,17 @@ export declare namespace FunTypes {
 
     export type GetByFP<
       MC extends NestedFunctions | undefined,
-      FP extends ExtractFP<MC>
+      FP extends ExtractFP<MC>,
     > = EnsureMeta<GetDeep<MC, ParseFP<FP>>>
 
     export type InputOf<
       MC extends NestedFunctions | undefined,
-      FP extends ExtractFP<MC>
+      FP extends ExtractFP<MC>,
     > = GetByFP<MC, FP>[typeof $input]
 
     export type OutputOf<
       MC extends NestedFunctions | undefined,
-      FP extends ExtractFP<MC>
+      FP extends ExtractFP<MC>,
     > = GetByFP<MC, FP>[typeof $output]
 
     export type CallResult<T, E = _fweb.HttpsError> =

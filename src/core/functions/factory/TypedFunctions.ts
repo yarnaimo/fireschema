@@ -22,7 +22,7 @@ export class TypedFunctions<S extends STypes.RootOptions.All> {
   )
 
   callable<I extends Type.JsonObject, O extends Type.JsonObject>({
-    schema: [inputRuntype, outputRuntype],
+    schema: { input: inputRuntype, output: outputRuntype },
     builder,
     handler,
   }: {

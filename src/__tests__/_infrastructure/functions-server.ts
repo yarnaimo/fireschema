@@ -43,10 +43,10 @@ const wrap = async <T, U>(
   }
 }
 
-const createUserSchema = [
-  $jsonSchema<IUserJson>(),
-  $jsonSchema<{ result: number }>(),
-] as const
+const createUserSchema = {
+  input: $jsonSchema<IUserJson>(),
+  output: $jsonSchema<{ result: number }>(),
+}
 const createUserHandler: FunTypes.Callable.Handler<
   IUserJson,
   { result: number }
@@ -66,10 +66,10 @@ const createUserHandler: FunTypes.Callable.Handler<
   })
 }
 
-const toUpperCaseSchema = [
-  $jsonSchema<{ text: string }>(),
-  $jsonSchema<{ result: string }>(),
-] as const
+const toUpperCaseSchema = {
+  input: $jsonSchema<{ text: string }>(),
+  output: $jsonSchema<{ result: string }>(),
+}
 const toUpperCaseHandler: FunTypes.Callable.Handler<
   { text: string },
   { result: string }

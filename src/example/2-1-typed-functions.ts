@@ -22,10 +22,10 @@ const builder = functions.region('asia-northeast1')
 export type UserJson = Merge<User, { timestamp: string }>
 export const callable = {
   createUser: typedFunctions.callable({
-    schema: [
-      $jsonSchema<UserJson>(), // schema of request data (automatically validate on request)
-      $jsonSchema<{ result: boolean }>(), // schema of response data
-    ],
+    schema: {
+      input: $jsonSchema<UserJson>(), // schema of request data (automatically validate on request)
+      output: $jsonSchema<{ result: boolean }>(), // schema of response data
+    },
     builder,
     handler: async (data, context) => {
       console.log(data) // UserJson
