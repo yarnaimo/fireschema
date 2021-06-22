@@ -3,33 +3,34 @@ import { FTypes, STypes } from '../../../types'
 import { createConverter } from '../../../utils/_firestore'
 import { addQueryCache, findCachedQuery } from '../_query-cache'
 
-export const withSelectors = (
-  schema: STypes.CollectionSchema<any, any, any>,
-  firestoreStatic: FTypes.FirestoreStatic<FTypes.FirestoreApp>,
-  selector: STypes.Selector<any, any, any> | undefined,
-) => (query: FTypes.Query<unknown>) => {
-  return selector ? selector(schema.selectors(query, firestoreStatic)) : query
-}
-
-export const withDecoder = (
-  schema: STypes.CollectionSchema<any, any, any>,
-  collectionName: string,
-) => (rawQuery: FTypes.Query<any>) => {
-  const { decoder } = schema
-
-  const cachedQuery = findCachedQuery(collectionName, rawQuery)
-  if (cachedQuery) {
-    return cachedQuery
+export const withSelectors =
+  (
+    schema: STypes.CollectionSchema<any, any, any>,
+    firestoreStatic: FTypes.FirestoreStatic<FTypes.FirestoreApp>,
+    selector: STypes.Selector<any, any, any> | undefined,
+  ) =>
+  (query: FTypes.Query<unknown>) => {
+    return selector ? selector(schema.selectors(query, firestoreStatic)) : query
   }
 
-  const convertedQuery = (rawQuery.withConverter as any)(
-    createConverter(decoder),
-  ) as FTypes.Query<any>
+export const withDecoder =
+  (schema: STypes.CollectionSchema<any, any, any>, collectionName: string) =>
+  (rawQuery: FTypes.Query<any>) => {
+    const { decoder } = schema
 
-  addQueryCache(collectionName, rawQuery, convertedQuery)
+    const cachedQuery = findCachedQuery(collectionName, rawQuery)
+    if (cachedQuery) {
+      return cachedQuery
+    }
 
-  return convertedQuery
-}
+    const convertedQuery = (rawQuery.withConverter as any)(
+      createConverter(decoder),
+    ) as FTypes.Query<any>
+
+    addQueryCache(collectionName, rawQuery, convertedQuery)
+
+    return convertedQuery
+  }
 
 export class DocDataHelper<F extends FTypes.FirestoreApp> {
   mergeOptions = { merge: true }

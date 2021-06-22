@@ -48,13 +48,12 @@ export type JoinLoc<T extends string, U extends string> = T extends ''
   ? U
   : `${T}.${U}`
 
-export type OmitLastSegment<
-  L extends string
-> = L extends `${infer T}.${infer U}`
-  ? U extends `${string}.${string}`
-    ? `${T}.${OmitLastSegment<U>}`
-    : T
-  : L
+export type OmitLastSegment<L extends string> =
+  L extends `${infer T}.${infer U}`
+    ? U extends `${string}.${string}`
+      ? `${T}.${OmitLastSegment<U>}`
+      : T
+    : L
 
 export type ParseLocString<L extends string> = L extends ''
   ? []

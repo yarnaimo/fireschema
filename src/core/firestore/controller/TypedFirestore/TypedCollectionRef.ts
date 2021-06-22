@@ -13,7 +13,7 @@ export class TypedQueryRef<
   S extends STypes.RootOptions.All,
   F extends FTypes.FirestoreApp,
   L extends string,
-  U = STypes.DocDataAt<S, F, L>
+  U = STypes.DocDataAt<S, F, L>,
 > {
   readonly raw: FTypes.Query<U, F>
 
@@ -47,7 +47,7 @@ export class TypedCollectionRef<
   S extends STypes.RootOptions.All,
   F extends FTypes.FirestoreApp,
   L extends string,
-  U = STypes.DocDataAt<S, F, L>
+  U = STypes.DocDataAt<S, F, L>,
 > extends TypedQueryRef<S, F, L, U> {
   readonly id: string
   readonly path: string
@@ -86,7 +86,7 @@ export class TypedCollectionRef<
   }
 
   parentDocument<
-    PL extends OmitLastSegment<L> = OmitLastSegment<L>
+    PL extends OmitLastSegment<L> = OmitLastSegment<L>,
   >(): L extends JoinLoc<string, string>
     ? TypedDocumentRef<S, F, PL>
     : undefined {

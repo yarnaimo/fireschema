@@ -8,7 +8,7 @@ export class TypedTopic<M extends FunTypes.FunctionsModule> {
 
   async publish<
     TN extends ExtractTopicNames<M['topic']>,
-    C extends GetTopicMeta<M['topic'], TN> = GetTopicMeta<M['topic'], TN>
+    C extends GetTopicMeta<M['topic'], TN> = GetTopicMeta<M['topic'], TN>,
   >(topicName: TN, data: C[typeof $input], attributes?: Attributes) {
     const messageId = await this.pubSubClient
       .topic(topicName)

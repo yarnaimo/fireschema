@@ -10,7 +10,7 @@ import { TypedWriteBatch } from './TypedWriteBatch'
 
 export class TypedFirestore<
   S extends STypes.RootOptions.All,
-  F extends FTypes.FirestoreApp
+  F extends FTypes.FirestoreApp,
 > extends TypedFDBase<S, F, '', true> {
   constructor(
     schemaOptions: S,
@@ -53,7 +53,7 @@ export class TypedFirestore<
   // docref に L がある場合
   wrapDocument<
     D extends FTypes.DocumentRef<any, F>,
-    L extends string = STypes.InferDocT<D>['__loc__']
+    L extends string = STypes.InferDocT<D>['__loc__'],
   >(raw: D): TypedDocumentRef<S, F, L>
 
   // TODO: docref に L がない場合

@@ -9,7 +9,7 @@ export class TypedFDBase<
   L extends string,
   IsRoot extends boolean,
   U = STypes.DocDataAt<S, F, L>,
-  _C = GetByLoc<S, L>
+  _C = GetByLoc<S, L>,
 > {
   protected constructor(
     protected readonly schemaOptions: S,

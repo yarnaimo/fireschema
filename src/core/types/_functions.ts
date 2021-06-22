@@ -9,7 +9,7 @@ export type ParseFP<P extends string> = P extends `${infer P1}-${infer P2}`
 
 export type ExtractFP<
   S extends FunTypes.NestedFunctions | undefined,
-  D extends number = 5
+  D extends number = 5,
 > = [D] extends [never]
   ? never
   : {
@@ -23,7 +23,7 @@ export type ExtractFP<
 export type GetTopicMeta<
   S extends FunTypes.NestedFunctions | undefined,
   TN extends string,
-  D extends number = 5
+  D extends number = 5,
 > = [D] extends [never]
   ? never
   : {
@@ -38,7 +38,7 @@ export type GetTopicMeta<
 
 export type ExtractTopicNames<
   S extends FunTypes.NestedFunctions | undefined,
-  D extends number = 5
+  D extends number = 5,
 > = [D] extends [never]
   ? never
   : {

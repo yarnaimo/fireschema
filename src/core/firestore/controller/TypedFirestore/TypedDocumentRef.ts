@@ -8,7 +8,7 @@ export class TypedDocumentRef<
   S extends STypes.RootOptions.All,
   F extends FTypes.FirestoreApp,
   L extends string,
-  U = STypes.DocDataAt<S, F, L>
+  U = STypes.DocDataAt<S, F, L>,
 > extends TypedFDBase<S, F, L, false, U> {
   readonly id: string
   readonly path: string

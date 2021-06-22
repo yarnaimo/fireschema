@@ -58,7 +58,7 @@ export declare namespace FTypes {
   >
   export type FirestoreDataConverter<
     T,
-    F extends FirestoreApp = FirestoreApp
+    F extends FirestoreApp = FirestoreApp,
   > = Env<
     F,
     _web.FirestoreDataConverter<T>,

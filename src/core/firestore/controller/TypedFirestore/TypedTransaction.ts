@@ -5,7 +5,7 @@ import { DocDataHelper } from './_utils'
 
 export class TypedTransaction<
   S extends STypes.RootOptions.All,
-  F extends FTypes.FirestoreApp
+  F extends FTypes.FirestoreApp,
 > {
   private readonly dataHelper = new DocDataHelper<F>(this.firestoreStatic)
 

@@ -9,7 +9,7 @@ export const useQuerySnapData = <U, V = U>(
     () =>
       querySnap?.docs.map((snap) => {
         const data = snap.data({ serverTimestamps: 'estimate' })
-        return transformer?.(data, snap) ?? ((data as unknown) as V)
+        return transformer?.(data, snap) ?? (data as unknown as V)
       }),
     [querySnap],
   )
@@ -26,5 +26,5 @@ export const useDocumentSnapData = <U, V = U>(
     if (!data) {
       return undefined
     }
-    return transformer?.(data, snap) ?? ((data as unknown) as V)
+    return transformer?.(data, snap) ?? (data as unknown as V)
   }, [snap])
