@@ -33,9 +33,12 @@ export class TypedTransaction<
     )
   }
 
-  async getData<L extends string>(typedDoc: TypedDocumentRef<S, F, L>) {
+  async getData<L extends string>(
+    typedDoc: TypedDocumentRef<S, F, L>,
+    snapshotOptions?: FTypes.SnapshotOptions<F>,
+  ) {
     const typedSnap = await this.get(typedDoc)
-    return typedSnap.data()
+    return typedSnap.data(snapshotOptions)
   }
 
   create<L extends string>(
