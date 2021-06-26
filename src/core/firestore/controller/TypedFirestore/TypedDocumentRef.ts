@@ -97,9 +97,12 @@ export class TypedDocumentRef<
     )
   }
 
-  async getData(options?: _web.GetOptions) {
+  async getData(
+    options?: _web.GetOptions,
+    snapshotOptions?: FTypes.SnapshotOptions<F>,
+  ) {
     const typedSnap = await this.get(options)
-    return typedSnap.data()
+    return typedSnap.data(snapshotOptions)
   }
 
   async create(data: STypes.WriteData<S, F, L>) {

@@ -303,18 +303,21 @@ describe('read', () => {
     'get collection - users %#',
     async (ref) => {
       const snap = await ref.get()
+      const snapData = await ref.getData()
 
       expect(snap.typedDocs).toHaveLength(1)
-      const data = snap.typedDocs[0]!.data()
+      expect(snapData).toHaveLength(1)
 
-      expectType<UserU>(data)
-      // @ts-expect-error: wrong data type
-      expectType<PostU>(data)
-      expect(data).toMatchObject({
-        ...userData,
-        timestamp: expect.any(String),
-        id: snap.typedDocs[0].id,
-      })
+      for (const data of [snap.typedDocs[0]!.data(), snapData[0]!]) {
+        expectType<UserU>(data)
+        // @ts-expect-error: wrong data type
+        expectType<PostU>(data)
+        expect(data).toMatchObject({
+          ...userData,
+          timestamp: expect.any(String),
+          id: snap.typedDocs[0].id,
+        })
+      }
     },
   )
 
@@ -322,18 +325,21 @@ describe('read', () => {
     'get query - users %#',
     async (query) => {
       const snap = await query.get()
+      const snapData = await query.getData()
 
       expect(snap.typedDocs).toHaveLength(1)
-      const data = snap.typedDocs[0]!.data()
+      expect(snapData).toHaveLength(1)
 
-      expectType<UserU>(data)
-      // @ts-expect-error: wrong data type
-      expectType<PostU>(data)
-      expect(data).toMatchObject({
-        ...userData,
-        timestamp: expect.any(String),
-        id: snap.typedDocs[0].id,
-      })
+      for (const data of [snap.typedDocs[0]!.data(), snapData[0]!]) {
+        expectType<UserU>(data)
+        // @ts-expect-error: wrong data type
+        expectType<PostU>(data)
+        expect(data).toMatchObject({
+          ...userData,
+          timestamp: expect.any(String),
+          id: snap.typedDocs[0].id,
+        })
+      }
     },
   )
 
@@ -344,22 +350,30 @@ describe('read', () => {
         const userRef = usersSnap.typedDocs[0]!.typedRef
         return userRef.collection('posts').get()
       },
+      getData: async () => {
+        const usersSnap = await r.users.get()
+        const userRef = usersSnap.typedDocs[0]!.typedRef
+        return userRef.collection('posts').getData()
+      },
     },
     r.posts,
     r.post.parentCollection(),
   ])('get collection - posts %#', async (ref) => {
     const snap = await ref.get()
+    const snapData = await ref.getData()
 
     expect(snap.typedDocs).toHaveLength(1)
-    const data = snap.typedDocs[0]!.data()
+    expect(snapData).toHaveLength(1)
 
-    expectType<PostU>(data)
-    // @ts-expect-error: wrong data type
-    expectType<UserU>(data)
-    expect(data).toMatchObject({
-      ...postAData,
-      id: snap.typedDocs[0].id,
-    })
+    for (const data of [snap.typedDocs[0]!.data(), snapData[0]!]) {
+      expectType<PostU>(data)
+      // @ts-expect-error: wrong data type
+      expectType<UserU>(data)
+      expect(data).toMatchObject({
+        ...postAData,
+        id: snap.typedDocs[0].id,
+      })
+    }
   })
 })
 

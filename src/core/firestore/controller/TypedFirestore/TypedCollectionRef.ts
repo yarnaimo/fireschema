@@ -72,6 +72,14 @@ export class TypedQueryRef<
       snap as FTypes.QuerySnap<U, F>,
     )
   }
+
+  async getData(
+    options?: _web.GetOptions,
+    snapshotOptions?: FTypes.SnapshotOptions<F>,
+  ) {
+    const typedSnap = await this.get(options)
+    return typedSnap.typedDocs.map<U>((snap) => snap.data(snapshotOptions))
+  }
 }
 
 export class TypedCollectionRef<
