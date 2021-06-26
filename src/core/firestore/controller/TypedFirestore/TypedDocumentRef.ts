@@ -12,6 +12,7 @@ export class TypedDocumentSnap<
 > {
   readonly typedRef: TypedDocumentRef<S, F, L, U>
   readonly id: string
+  readonly exists: boolean
 
   constructor(
     readonly schemaOptions: S,
@@ -20,6 +21,7 @@ export class TypedDocumentSnap<
     readonly raw: FTypes.DocumentSnap<U, F>,
   ) {
     this.id = raw.id
+    this.exists = raw.exists
     this.typedRef = new TypedDocumentRef<S, F, L, U>(
       schemaOptions,
       firestoreStatic,
