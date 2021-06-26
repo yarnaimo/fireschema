@@ -42,9 +42,9 @@ const techPosts = user.collectionQuery(
  */
 !(async () => {
   const snap = await users.get()
-  const firstUserRef = snap.docs[0]!.ref
+  const firstUserRef = snap.typedDocs[0]!.typedRef
 
-  await typedFirestore.wrapDocument(firstUserRef).collection('posts').get()
+  await firstUserRef.collection('posts').get()
 })
 
 /**

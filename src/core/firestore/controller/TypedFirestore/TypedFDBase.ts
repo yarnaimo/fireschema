@@ -12,7 +12,7 @@ export class TypedFDBase<
   _C = GetByLoc<S, L>,
 > {
   protected constructor(
-    protected readonly schemaOptions: S,
+    readonly schemaOptions: S,
     readonly firestoreStatic: FTypes.FirestoreStatic<F>,
     readonly loc: L,
     readonly raw: IsRoot extends true ? F : FTypes.DocumentRef<U, F>,

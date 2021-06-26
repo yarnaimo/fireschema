@@ -6,8 +6,33 @@ import { FTypes, STypes } from '../../../types'
 import { JoinLoc, OmitLastSegment } from '../../../types/_object'
 import { getCollectionOptions } from '../../../utils/_firestore'
 import { getLastSegment, omitLastSegment } from '../../../utils/_object'
-import { TypedDocumentRef } from './TypedDocumentRef'
+import { TypedDocumentRef, TypedQueryDocumentSnap } from './TypedDocumentRef'
 import { withDecoder, withSelectors } from './_utils'
+
+export class TypedQuerySnap<
+  S extends STypes.RootOptions.All,
+  F extends FTypes.FirestoreApp,
+  L extends string,
+  U = STypes.DocDataAt<S, F, L>,
+> {
+  readonly typedDocs: TypedQueryDocumentSnap<S, F, L, U>[]
+
+  constructor(
+    readonly schemaOptions: S,
+    readonly firestoreStatic: FTypes.FirestoreStatic<F>,
+    readonly loc: L,
+    readonly raw: FTypes.QuerySnap<U, F>,
+  ) {
+    this.typedDocs = raw.docs.map((rawDocSnap) => {
+      return new TypedQueryDocumentSnap<S, F, L, U>(
+        schemaOptions,
+        firestoreStatic,
+        loc,
+        rawDocSnap as FTypes.QueryDocumentSnap<U, F>,
+      )
+    })
+  }
+}
 
 export class TypedQueryRef<
   S extends STypes.RootOptions.All,
@@ -18,7 +43,7 @@ export class TypedQueryRef<
   readonly raw: FTypes.Query<U, F>
 
   constructor(
-    protected readonly schemaOptions: S,
+    readonly schemaOptions: S,
     readonly firestoreStatic: FTypes.FirestoreStatic<F>,
     readonly loc: L,
     origQuery: FTypes.Query<any, F>,
@@ -39,7 +64,13 @@ export class TypedQueryRef<
 
   async get(options?: _web.GetOptions) {
     const snap = await this.raw.get(options)
-    return snap as FTypes.QuerySnap<U, F>
+
+    return new TypedQuerySnap<S, F, L, U>(
+      this.schemaOptions,
+      this.firestoreStatic,
+      this.loc,
+      snap as FTypes.QuerySnap<U, F>,
+    )
   }
 }
 
@@ -55,9 +86,9 @@ export class TypedCollectionRef<
   declare readonly raw: FTypes.CollectionRef<U, F>
 
   constructor(
-    schemaOptions: S,
-    firestoreStatic: FTypes.FirestoreStatic<F>,
-    loc: L,
+    readonly schemaOptions: S,
+    readonly firestoreStatic: FTypes.FirestoreStatic<F>,
+    readonly loc: L,
     origCollection: FTypes.CollectionRef<any, F>,
     skipDecoder?: boolean,
   ) {

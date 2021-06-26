@@ -246,56 +246,60 @@ describe('read', () => {
   beforeEach(createInitialUserAndPost)
 
   test.each([
-    { get: () => r.typedFirestore.runTransaction((tt) => tt.get(r.user)) },
+    {
+      get: () => r.typedFirestore.runTransaction((tt) => tt.get(r.user)),
+      getData: () =>
+        r.typedFirestore.runTransaction((tt) => tt.getData(r.user)),
+    },
     r.user,
     r.posts.parentDocument(),
     r.typedFirestore.wrapDocument(r.user.raw),
   ])('get doc - user %#', async (ref) => {
-    const snap: _web.DocumentSnapshot<UserU> = await ref.get()
-    // @ts-expect-error: wrong data type
-    const snapError: _web.DocumentSnapshot<PostU> = await ref.get()
+    const snap = await ref.get()
+    const snapData = await ref.getData()
 
-    const data = snap.data()!
-
-    expectType<UserU>(data)
-    // @ts-expect-error: wrong data type
-    expectType<PostU>(data)
-    expect(data).toMatchObject({
-      ...userData,
-      timestamp: expect.any(String),
-      id: snap.id,
-    })
+    for (const data of [snap.data()!, snapData!]) {
+      expectType<UserU>(data)
+      // @ts-expect-error: wrong data type
+      expectType<PostU>(data)
+      expect(data).toMatchObject({
+        ...userData,
+        timestamp: expect.any(String),
+        id: snap.id,
+      })
+    }
   })
 
   test.each([
-    { get: () => r.typedFirestore.runTransaction((tt) => tt.get(r.post)) },
+    {
+      get: () => r.typedFirestore.runTransaction((tt) => tt.get(r.post)),
+      getData: () =>
+        r.typedFirestore.runTransaction((tt) => tt.getData(r.post)),
+    },
     r.post,
     r.typedFirestore.wrapDocument(r.post.raw),
   ])('get doc - post %#', async (ref) => {
-    const snap: _web.DocumentSnapshot<PostU> = await ref.get()
-    // @ts-expect-error: wrong data type
-    const snapError: _web.DocumentSnapshot<UserU> = await ref.get()
+    const snap = await ref.get()
+    const snapData = await ref.getData()
 
-    const data = snap.data()!
-
-    expectType<PostU>(data)
-    // @ts-expect-error: wrong data type
-    expectType<UserU>(data)
-    expect(data).toMatchObject({
-      ...postAData,
-      id: snap.id,
-    })
+    for (const data of [snap.data()!, snapData!]) {
+      expectType<PostU>(data)
+      // @ts-expect-error: wrong data type
+      expectType<UserU>(data)
+      expect(data).toMatchObject({
+        ...postAData,
+        id: snap.id,
+      })
+    }
   })
 
   test.each([r.users, r.user.parentCollection()])(
     'get collection - users %#',
     async (ref) => {
-      const snap: _web.QuerySnapshot<UserU> = await ref.get()
-      // @ts-expect-error: wrong data type
-      const snapError: _web.QuerySnapshot<PostU> = await ref.get()
+      const snap = await ref.get()
 
-      expect(snap.docs).toHaveLength(1)
-      const data = snap.docs[0]!.data()
+      expect(snap.typedDocs).toHaveLength(1)
+      const data = snap.typedDocs[0]!.data()
 
       expectType<UserU>(data)
       // @ts-expect-error: wrong data type
@@ -303,7 +307,7 @@ describe('read', () => {
       expect(data).toMatchObject({
         ...userData,
         timestamp: expect.any(String),
-        id: snap.docs[0].id,
+        id: snap.typedDocs[0].id,
       })
     },
   )
@@ -311,12 +315,10 @@ describe('read', () => {
   test.each([r.teenUsers, r.teenUsersGroup])(
     'get query - users %#',
     async (query) => {
-      const snap: _web.QuerySnapshot<UserU> = await query.get()
-      // @ts-expect-error: wrong data type
-      const snapError: _web.QuerySnapshot<PostU> = await query.get()
+      const snap = await query.get()
 
-      expect(snap.docs).toHaveLength(1)
-      const data = snap.docs[0]!.data()
+      expect(snap.typedDocs).toHaveLength(1)
+      const data = snap.typedDocs[0]!.data()
 
       expectType<UserU>(data)
       // @ts-expect-error: wrong data type
@@ -324,7 +326,7 @@ describe('read', () => {
       expect(data).toMatchObject({
         ...userData,
         timestamp: expect.any(String),
-        id: snap.docs[0].id,
+        id: snap.typedDocs[0].id,
       })
     },
   )
@@ -333,26 +335,24 @@ describe('read', () => {
     {
       get: async () => {
         const usersSnap = await r.users.get()
-        const userRef = r.typedFirestore.wrapDocument(usersSnap.docs[0]!.ref)
+        const userRef = usersSnap.typedDocs[0]!.typedRef
         return userRef.collection('posts').get()
       },
     },
     r.posts,
     r.post.parentCollection(),
   ])('get collection - posts %#', async (ref) => {
-    const snap: _web.QuerySnapshot<PostU> = await ref.get()
-    // @ts-expect-error: wrong data type
-    const snapError: _web.QuerySnapshot<UserU> = await ref.get()
+    const snap = await ref.get()
 
-    expect(snap.docs).toHaveLength(1)
-    const data = snap.docs[0]!.data()
+    expect(snap.typedDocs).toHaveLength(1)
+    const data = snap.typedDocs[0]!.data()
 
     expectType<PostU>(data)
     // @ts-expect-error: wrong data type
     expectType<UserU>(data)
     expect(data).toMatchObject({
       ...postAData,
-      id: snap.docs[0].id,
+      id: snap.typedDocs[0].id,
     })
   })
 })

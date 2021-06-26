@@ -13,9 +13,9 @@ export class TypedFirestore<
   F extends FTypes.FirestoreApp,
 > extends TypedFDBase<S, F, '', true> {
   constructor(
-    schemaOptions: S,
-    firestoreStatic: FTypes.FirestoreStatic<F>,
-    raw: F,
+    readonly schemaOptions: S,
+    readonly firestoreStatic: FTypes.FirestoreStatic<F>,
+    readonly raw: F,
   ) {
     super(schemaOptions, firestoreStatic, '', raw)
   }
@@ -62,14 +62,14 @@ export class TypedFirestore<
   // ): TypedDocumentRef<S, F, L>
 
   wrapDocument<L extends string>(
-    raw: FTypes.DocumentRef<any, F>,
+    rawDocRef: FTypes.DocumentRef<any, F>,
   ): TypedDocumentRef<S, F, L> {
-    const loc = firestorePathToLoc(raw.path) as L
+    const loc = firestorePathToLoc(rawDocRef.path) as L
     return new TypedDocumentRef<S, F, L>(
       this.schemaOptions,
       this.firestoreStatic,
       loc,
-      raw,
+      rawDocRef,
     )
   }
 
@@ -78,6 +78,7 @@ export class TypedFirestore<
   ): Promise<T> {
     return this.raw.runTransaction(async (_t: any) => {
       const tt = new TypedTransaction<S, F>(
+        this.schemaOptions,
         this.firestoreStatic,
         _t as FTypes.Transaction<F>,
       )
