@@ -557,7 +557,7 @@ describe('hooks', () => {
       loading: false,
       data: { ...userData, timestamp: expect.any(String) },
     })
-    expectEqualRef(result.current.snap!.ref, r.user.raw)
+    expectEqualRef(result.current.snap!.typedRef.raw, r.user.raw)
 
     expectType<UserU>(result.current.data!)
     // @ts-expect-error: wrong data type
@@ -577,7 +577,7 @@ describe('hooks', () => {
       loading: false,
       data: userData.name,
     })
-    expectEqualRef(result.current.snap!.ref, r.user.raw)
+    expectEqualRef(result.current.snap!.typedRef.raw, r.user.raw)
 
     expectType<string>(result.current.data!)
     // @ts-expect-error: wrong data type
@@ -597,7 +597,7 @@ describe('hooks', () => {
       loading: false,
       data: [{ ...userData, timestamp: expect.any(String) }],
     })
-    expectEqualRef(result.current.snap!.docs[0]!.ref, r.user.raw)
+    expectEqualRef(result.current.snap!.typedDocs[0]!.typedRef.raw, r.user.raw)
 
     expectType<UserU>(result.current.data![0]!)
     // @ts-expect-error: wrong data type
@@ -617,7 +617,7 @@ describe('hooks', () => {
       loading: false,
       data: [userData.name],
     })
-    expectEqualRef(result.current.snap!.docs[0]!.ref, r.user.raw)
+    expectEqualRef(result.current.snap!.typedDocs[0]!.typedRef.raw, r.user.raw)
 
     expectType<string>(result.current.data![0]!)
     // @ts-expect-error: wrong data type
