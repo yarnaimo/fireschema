@@ -5,7 +5,13 @@ import {
 } from '@firebase/rules-unit-testing'
 import { renderHook } from '@testing-library/react-hooks'
 import { expectType } from 'tsd'
-import { FTypes, STypes, TypedFirestore } from '../../core'
+import {
+  FTypes,
+  STypes,
+  TypedDocumentSnap,
+  TypedFirestore,
+  TypedQueryDocumentSnap,
+} from '../../core'
 import { useTypedDocument, useTypedQuery } from '../../hooks'
 import { _web } from '../../lib/firestore-types'
 import { postAData, userData } from '../_fixtures/data'
@@ -567,7 +573,16 @@ describe('hooks', () => {
 
   test('useTypedDocument with transformer', async () => {
     const { result, waitForNextUpdate, unmount } = renderHook(() =>
-      useTypedDocument(r.user, (data) => data.name),
+      useTypedDocument(r.user, (data, snap) => {
+        expectType<
+          TypedDocumentSnap<
+            typeof firestoreSchema,
+            _web.Firestore,
+            'versions.users'
+          >
+        >(snap)
+        return data.name
+      }),
     )
     expect(result.current).toEqual(initialResult)
     await waitForNextUpdate()
@@ -607,7 +622,16 @@ describe('hooks', () => {
 
   test('useTypedQuery with transformer', async () => {
     const { result, waitForNextUpdate, unmount } = renderHook(() =>
-      useTypedQuery(r.users, (data) => data.name),
+      useTypedQuery(r.users, (data, snap) => {
+        expectType<
+          TypedQueryDocumentSnap<
+            typeof firestoreSchema,
+            _web.Firestore,
+            'versions.users'
+          >
+        >(snap)
+        return data.name
+      }),
     )
     expect(result.current).toEqual(initialResult)
     await waitForNextUpdate()
