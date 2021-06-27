@@ -1,12 +1,15 @@
 import { P } from 'lifts'
-import { _web } from '../../../../lib/firestore-types'
 import { R } from '../../../../lib/fp'
 import { $schema } from '../../../constants'
 import { FTypes, STypes } from '../../../types'
 import { JoinLoc, OmitLastSegment } from '../../../types/_object'
 import { getCollectionOptions } from '../../../utils/_firestore'
 import { getLastSegment, omitLastSegment } from '../../../utils/_object'
-import { TypedDocumentRef, TypedQueryDocumentSnap } from './TypedDocumentRef'
+import {
+  QueryDocumentSnapDataOptions,
+  TypedDocumentRef,
+  TypedQueryDocumentSnap,
+} from './TypedDocumentRef'
 import { withDecoder, withSelectors } from './_utils'
 
 export class TypedQuerySnap<
@@ -62,8 +65,8 @@ export class TypedQueryRef<
     this.raw = convertedQuery
   }
 
-  async get(options?: _web.GetOptions) {
-    const snap = await this.raw.get(options)
+  async get(getOptions?: FTypes.GetOptions<F>) {
+    const snap = await this.raw.get(getOptions)
 
     return new TypedQuerySnap<S, F, L, U>(
       this.schemaOptions,
@@ -73,12 +76,14 @@ export class TypedQueryRef<
     )
   }
 
-  async getData(
-    options?: _web.GetOptions,
-    snapshotOptions?: FTypes.SnapshotOptions<F>,
-  ) {
-    const typedSnap = await this.get(options)
-    return typedSnap.typedDocs.map<U>((snap) => snap.data(snapshotOptions))
+  async getData<V = U>({
+    getOptions,
+    ...dataOptions
+  }: {
+    getOptions?: FTypes.GetOptions<F>
+  } & QueryDocumentSnapDataOptions<S, F, L, U, V> = {}): Promise<V[]> {
+    const typedSnap = await this.get(getOptions)
+    return typedSnap.typedDocs.map<V>((snap) => snap.data(dataOptions))
   }
 }
 

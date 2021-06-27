@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@sindresorhus/is": "^4.0.1",
+    "@yarnaimo/type-extends": "^0.0.1",
     "dayjs": "^1.10.5",
     "lifts": "^0.1.4",
     "react-firebase-hooks": "^3.0.4",

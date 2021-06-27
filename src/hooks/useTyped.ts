@@ -1,7 +1,9 @@
 import { useEffect, useMemo } from 'react'
 import { useCollection, useDocument } from 'react-firebase-hooks/firestore'
 import {
+  DocumentSnapDataOptions,
   FTypes,
+  QueryDocumentSnapDataOptions,
   STypes,
   TypedDocumentRef,
   TypedDocumentSnap,
@@ -9,13 +11,12 @@ import {
   TypedQuerySnap,
 } from '../core'
 import { _web } from '../lib/firestore-types'
-import {
-  DocumentSnapTransformer,
-  QueryDocumentSnapTransformer,
-  useDocumentSnapData,
-  useQuerySnapData,
-} from './useSnapData'
+import { useDocumentSnapData, useQuerySnapData } from './useSnapData'
 import { useRefChangeLimitExceeded } from './utils'
+
+type HasSnapshotListenOptions = {
+  snapshotListenOptions?: _web.SnapshotListenOptions
+}
 
 export type UseTypedDocument<
   S extends STypes.RootOptions.All,
@@ -37,17 +38,17 @@ export const useTypedDocument = <
   V = U,
 >(
   typedDoc: TypedDocumentRef<S, _web.Firestore, L, U> | null | undefined,
-  transformer?: DocumentSnapTransformer<S, L, U, V>,
-  options?: {
-    snapshotListenOptions?: _web.SnapshotListenOptions
-    snapshotOptions?: _web.SnapshotOptions
-  },
+  {
+    snapshotListenOptions,
+    ...dataOptions
+  }: HasSnapshotListenOptions &
+    DocumentSnapDataOptions<S, _web.Firestore, L, U, V> = {},
 ): UseTypedDocument<S, _web.Firestore, L, U, V> => {
   const { exceeded } = useRefChangeLimitExceeded(typedDoc?.raw)
 
   const [_snap, loading, error] = useDocument<U>(
     exceeded() ? undefined : typedDoc?.raw,
-    options,
+    { snapshotListenOptions },
   )
 
   useEffect(() => {
@@ -69,7 +70,7 @@ export const useTypedDocument = <
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [_snap])
 
-  const data = useDocumentSnapData(snap, transformer, options?.snapshotOptions)
+  const data = useDocumentSnapData(snap, dataOptions)
 
   return { data, snap, loading, error }
 }
@@ -94,17 +95,17 @@ export const useTypedQuery = <
   V = U,
 >(
   typedQuery: TypedQueryRef<S, _web.Firestore, L, U> | null | undefined,
-  transformer?: QueryDocumentSnapTransformer<S, L, U, V>,
-  options?: {
-    snapshotListenOptions?: _web.SnapshotListenOptions
-    snapshotOptions?: _web.SnapshotOptions
-  },
+  {
+    snapshotListenOptions,
+    ...dataOptions
+  }: HasSnapshotListenOptions &
+    QueryDocumentSnapDataOptions<S, _web.Firestore, L, U, V> = {},
 ): UseTypedQuery<S, _web.Firestore, L, U, V> => {
   const { exceeded } = useRefChangeLimitExceeded(typedQuery?.raw)
 
   const [_snap, loading, error] = useCollection<U>(
     exceeded() ? undefined : typedQuery?.raw,
-    options,
+    { snapshotListenOptions },
   )
 
   useEffect(() => {
@@ -126,7 +127,7 @@ export const useTypedQuery = <
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [_snap])
 
-  const data = useQuerySnapData(snap, transformer, options?.snapshotOptions)
+  const data = useQuerySnapData(snap, dataOptions)
 
   return { data, snap, loading, error }
 }

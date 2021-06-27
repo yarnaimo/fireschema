@@ -1,8 +1,55 @@
-import { _web } from '../../../../lib/firestore-types'
 import { FTypes, STypes } from '../../../types'
 import { TypedCollectionRef } from './TypedCollectionRef'
 import { TypedFDBase } from './TypedFDBase'
 import { DocDataHelper } from './_utils'
+
+export type DocumentSnapTransformer<
+  S extends STypes.RootOptions.All,
+  F extends FTypes.FirestoreApp,
+  L extends string,
+  U,
+  V,
+> = (data: U, snap: TypedDocumentSnap<S, F, L, U>) => V
+
+export type QueryDocumentSnapTransformer<
+  S extends STypes.RootOptions.All,
+  F extends FTypes.FirestoreApp,
+  L extends string,
+  U,
+  V,
+> = (data: U, snap: TypedQueryDocumentSnap<S, F, L, U>) => V
+
+export const withRefTransformer = <
+  S extends STypes.RootOptions.All,
+  F extends FTypes.FirestoreApp,
+  L extends string,
+  U,
+>(
+  data: U,
+  snap: TypedDocumentSnap<S, F, L, U>,
+) => ({ ...data, ref: snap.typedRef })
+
+export type DocumentSnapDataOptions<
+  S extends STypes.RootOptions.All,
+  F extends FTypes.FirestoreApp,
+  L extends string,
+  U,
+  V,
+> = {
+  snapshotOptions?: FTypes.SnapshotOptions<F>
+  transformer?: DocumentSnapTransformer<S, F, L, U, V>
+}
+
+export type QueryDocumentSnapDataOptions<
+  S extends STypes.RootOptions.All,
+  F extends FTypes.FirestoreApp,
+  L extends string,
+  U,
+  V,
+> = {
+  snapshotOptions?: FTypes.SnapshotOptions<F>
+  transformer?: QueryDocumentSnapTransformer<S, F, L, U, V>
+}
 
 export class TypedDocumentSnap<
   S extends STypes.RootOptions.All,
@@ -30,8 +77,15 @@ export class TypedDocumentSnap<
     )
   }
 
-  data(options?: FTypes.SnapshotOptions<F>) {
-    return this.raw.data(options)
+  data<V = U>({
+    snapshotOptions,
+    transformer,
+  }: DocumentSnapDataOptions<S, F, L, U, V> = {}): V | undefined {
+    const data = this.raw.data(snapshotOptions)
+    if (!data) {
+      return undefined
+    }
+    return transformer?.(data, this) ?? (data as unknown as V)
   }
 }
 
@@ -50,8 +104,12 @@ export class TypedQueryDocumentSnap<
     super(schemaOptions, firestoreStatic, loc, raw)
   }
 
-  data(options?: FTypes.SnapshotOptions<F>) {
-    return this.raw.data(options)
+  data<V = U>({
+    snapshotOptions,
+    transformer,
+  }: QueryDocumentSnapDataOptions<S, F, L, U, V> = {}): V {
+    const data = this.raw.data(snapshotOptions)
+    return transformer?.(data, this) ?? (data as unknown as V)
   }
 }
 
@@ -86,8 +144,8 @@ export class TypedDocumentRef<
     )
   }
 
-  async get(options?: _web.GetOptions) {
-    const snap = await this.raw.get(options)
+  async get(getOptions?: FTypes.GetOptions<F>) {
+    const snap = await this.raw.get(getOptions)
 
     return new TypedDocumentSnap<S, F, L, U>(
       this.schemaOptions,
@@ -97,12 +155,14 @@ export class TypedDocumentRef<
     )
   }
 
-  async getData(
-    options?: _web.GetOptions,
-    snapshotOptions?: FTypes.SnapshotOptions<F>,
-  ) {
-    const typedSnap = await this.get(options)
-    return typedSnap.data(snapshotOptions)
+  async getData<V = U>({
+    getOptions,
+    ...dataOptions
+  }: {
+    getOptions?: FTypes.GetOptions<F>
+  } & DocumentSnapDataOptions<S, F, L, U, V> = {}): Promise<V | undefined> {
+    const typedSnap = await this.get(getOptions)
+    return typedSnap.data(dataOptions)
   }
 
   async create(data: STypes.WriteData<S, F, L>) {
