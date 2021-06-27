@@ -1,6 +1,10 @@
 import { _web } from '../../../../lib/firestore-types'
 import { FTypes, STypes } from '../../../types'
-import { TypedDocumentRef, TypedDocumentSnap } from './TypedDocumentRef'
+import {
+  DocumentSnapDataOptions,
+  TypedDocumentRef,
+  TypedDocumentSnap,
+} from './TypedDocumentRef'
 import { DocDataHelper } from './_utils'
 
 export class TypedTransaction<
@@ -33,12 +37,16 @@ export class TypedTransaction<
     )
   }
 
-  async getData<L extends string>(
+  async getData<
+    L extends string,
+    U extends STypes.DocDataAt<S, F, L> = STypes.DocDataAt<S, F, L>,
+    V = U,
+  >(
     typedDoc: TypedDocumentRef<S, F, L>,
-    snapshotOptions?: FTypes.SnapshotOptions<F>,
+    dataOptions: DocumentSnapDataOptions<S, F, L, U, V> = {},
   ) {
     const typedSnap = await this.get(typedDoc)
-    return typedSnap.data(snapshotOptions)
+    return typedSnap.data(dataOptions)
   }
 
   create<L extends string>(
