@@ -21,16 +21,16 @@ export class TypedQuerySnap<
   readonly typedDocs: TypedQueryDocumentSnap<S, F, L, U>[]
 
   constructor(
-    readonly schemaOptions: S,
-    readonly firestoreStatic: FTypes.FirestoreStatic<F>,
-    readonly loc: L,
+    readonly options: {
+      schemaOptions: S
+      firestoreStatic: FTypes.FirestoreStatic<F>
+      loc: L
+    },
     readonly raw: FTypes.QuerySnap<U, F>,
   ) {
     this.typedDocs = raw.docs.map((rawDocSnap) => {
       return new TypedQueryDocumentSnap<S, F, L, U>(
-        schemaOptions,
-        firestoreStatic,
-        loc,
+        options,
         rawDocSnap as FTypes.QueryDocumentSnap<U, F>,
       )
     })
@@ -46,20 +46,29 @@ export class TypedQueryRef<
   readonly raw: FTypes.Query<U, F>
 
   constructor(
-    readonly schemaOptions: S,
-    readonly firestoreStatic: FTypes.FirestoreStatic<F>,
-    readonly loc: L,
+    readonly options: {
+      schemaOptions: S
+      firestoreStatic: FTypes.FirestoreStatic<F>
+      loc: L
+    },
     origQuery: FTypes.Query<any, F>,
     selector?: STypes.Selector<S, F, L>,
     skipDecoder?: boolean,
   ) {
-    const name = getLastSegment(loc)
-    const options = getCollectionOptions(schemaOptions, loc)
+    const name = getLastSegment(options.loc)
+    const collectionOptions = getCollectionOptions(
+      options.schemaOptions,
+      options.loc,
+    )
 
     const convertedQuery = P(
       origQuery,
-      skipDecoder ? R.identity : withDecoder(options[$schema], name),
-      withSelectors(options[$schema], this.firestoreStatic, selector),
+      skipDecoder ? R.identity : withDecoder(collectionOptions[$schema], name),
+      withSelectors(
+        collectionOptions[$schema],
+        this.options.firestoreStatic,
+        selector,
+      ),
     ) as FTypes.Query<any, F>
 
     this.raw = convertedQuery
@@ -69,9 +78,7 @@ export class TypedQueryRef<
     const snap = await this.raw.get(getOptions)
 
     return new TypedQuerySnap<S, F, L, U>(
-      this.schemaOptions,
-      this.firestoreStatic,
-      this.loc,
+      this.options,
       snap as FTypes.QuerySnap<U, F>,
     )
   }
@@ -99,20 +106,15 @@ export class TypedCollectionRef<
   declare readonly raw: FTypes.CollectionRef<U, F>
 
   constructor(
-    readonly schemaOptions: S,
-    readonly firestoreStatic: FTypes.FirestoreStatic<F>,
-    readonly loc: L,
+    readonly options: {
+      schemaOptions: S
+      firestoreStatic: FTypes.FirestoreStatic<F>
+      loc: L
+    },
     origCollection: FTypes.CollectionRef<any, F>,
     skipDecoder?: boolean,
   ) {
-    super(
-      schemaOptions,
-      firestoreStatic,
-      loc,
-      origCollection,
-      undefined,
-      skipDecoder,
-    )
+    super(options, origCollection, undefined, skipDecoder)
     this.id = this.raw.id
     this.path = this.raw.path
   }
@@ -121,12 +123,7 @@ export class TypedCollectionRef<
     const idArgs = id ? [id] : []
     const docRaw = this.raw.doc(...idArgs) as FTypes.DocumentRef<any, F>
 
-    return new TypedDocumentRef<S, F, L>(
-      this.schemaOptions,
-      this.firestoreStatic,
-      this.loc,
-      docRaw,
-    )
+    return new TypedDocumentRef<S, F, L>(this.options, docRaw)
   }
 
   parentDocument<
@@ -134,16 +131,14 @@ export class TypedCollectionRef<
   >(): L extends JoinLoc<string, string>
     ? TypedDocumentRef<S, F, PL>
     : undefined {
-    if (!this.loc.includes('.')) {
+    if (!this.options.loc.includes('.')) {
       return undefined as any
     }
-    const parentDocLoc = omitLastSegment(this.loc) as PL
+    const parentDocLoc = omitLastSegment(this.options.loc) as PL
     const origPDoc = this.raw.parent! as FTypes.DocumentRef<any, F>
 
     const parentTypedCollection = new TypedCollectionRef<S, F, PL>(
-      this.schemaOptions,
-      this.firestoreStatic,
-      parentDocLoc,
+      { ...this.options, loc: parentDocLoc },
       origPDoc.parent as FTypes.CollectionRef<any, F>,
     )
     return parentTypedCollection.doc(origPDoc.id) as any
