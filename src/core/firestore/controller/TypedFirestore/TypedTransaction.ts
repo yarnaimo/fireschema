@@ -11,11 +11,15 @@ export class TypedTransaction<
   S extends STypes.RootOptions.All,
   F extends FTypes.FirestoreApp,
 > {
-  private readonly dataHelper = new DocDataHelper<F>(this.firestoreStatic)
+  private readonly dataHelper = new DocDataHelper<F>(
+    this.options.firestoreStatic,
+  )
 
   constructor(
-    readonly schemaOptions: S,
-    readonly firestoreStatic: FTypes.FirestoreStatic<F>,
+    readonly options: {
+      schemaOptions: S
+      firestoreStatic: FTypes.FirestoreStatic<F>
+    },
     readonly raw: FTypes.Transaction<F>,
   ) {}
 
@@ -30,9 +34,7 @@ export class TypedTransaction<
     const snap = await this._raw.get(this._doc(typedDoc.raw))
 
     return new TypedDocumentSnap<S, F, L>(
-      this.schemaOptions,
-      this.firestoreStatic,
-      typedDoc.loc,
+      { ...this.options, loc: typedDoc.options.loc },
       snap as FTypes.DocumentSnap<STypes.DocDataAt<S, F, L>, F>,
     )
   }

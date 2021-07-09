@@ -62,17 +62,17 @@ export class TypedDocumentSnap<
   readonly exists: boolean
 
   constructor(
-    readonly schemaOptions: S,
-    readonly firestoreStatic: FTypes.FirestoreStatic<F>,
-    readonly loc: L,
+    readonly options: {
+      schemaOptions: S
+      firestoreStatic: FTypes.FirestoreStatic<F>
+      loc: L
+    },
     readonly raw: FTypes.DocumentSnap<U, F>,
   ) {
     this.id = raw.id
     this.exists = raw.exists
     this.typedRef = new TypedDocumentRef<S, F, L, U>(
-      schemaOptions,
-      firestoreStatic,
-      loc,
+      this.options,
       raw.ref as FTypes.DocumentRef<U, F>,
     )
   }
@@ -96,12 +96,14 @@ export class TypedQueryDocumentSnap<
   U = STypes.DocDataAt<S, F, L>,
 > extends TypedDocumentSnap<S, F, L, U> {
   constructor(
-    readonly schemaOptions: S,
-    readonly firestoreStatic: FTypes.FirestoreStatic<F>,
-    readonly loc: L,
+    readonly options: {
+      schemaOptions: S
+      firestoreStatic: FTypes.FirestoreStatic<F>
+      loc: L
+    },
     readonly raw: FTypes.QueryDocumentSnap<U, F>,
   ) {
-    super(schemaOptions, firestoreStatic, loc, raw)
+    super(options, raw)
   }
 
   data<V = U>({
@@ -121,24 +123,26 @@ export class TypedDocumentRef<
 > extends TypedFDBase<S, F, L, false, U> {
   readonly id: string
   readonly path: string
-  private readonly dataHelper = new DocDataHelper<F>(this.firestoreStatic)
+  private readonly dataHelper = new DocDataHelper<F>(
+    this.options.firestoreStatic,
+  )
 
   constructor(
-    readonly schemaOptions: S,
-    readonly firestoreStatic: FTypes.FirestoreStatic<F>,
-    readonly loc: L,
+    readonly options: {
+      schemaOptions: S
+      firestoreStatic: FTypes.FirestoreStatic<F>
+      loc: L
+    },
     readonly raw: FTypes.DocumentRef<U, F>,
   ) {
-    super(schemaOptions, firestoreStatic, loc, raw)
+    super(options, raw)
     this.id = raw.id
     this.path = raw.path
   }
 
   parentCollection() {
     return new TypedCollectionRef<S, F, L>(
-      this.schemaOptions,
-      this.firestoreStatic,
-      this.loc,
+      this.options,
       this.raw.parent as FTypes.CollectionRef<any, F>,
       true,
     )
@@ -148,9 +152,7 @@ export class TypedDocumentRef<
     const snap = await this.raw.get(getOptions)
 
     return new TypedDocumentSnap<S, F, L, U>(
-      this.schemaOptions,
-      this.firestoreStatic,
-      this.loc,
+      this.options,
       snap as FTypes.DocumentSnap<U, F>,
     )
   }

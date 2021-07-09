@@ -1,10 +1,8 @@
 import { renderHook } from '@testing-library/react-hooks'
 import dayjs from 'dayjs'
 import { authedApp } from '../__tests__/_infrastructure/_app'
+import { sleep } from '../__tests__/_utils/common'
 import { useRefChangeLimitExceeded } from './utils'
-
-const sleep = (ms: number) =>
-  new Promise<void>((resolve) => setTimeout(resolve, ms))
 
 const logTimestamps = (timestamps: dayjs.Dayjs[]) => {
   console.log(
@@ -31,6 +29,7 @@ test('exceeded', async () => {
 
   expect(result.current.timestamps.current.length).toBeGreaterThan(1)
   expect(result.current.exceeded()).toBe(true)
+  expect(result.current.safeRef()).toBeFalsy()
 
   await sleep(5100)
 
@@ -38,6 +37,7 @@ test('exceeded', async () => {
 
   expect(result.current.timestamps.current.length).toBeGreaterThan(1)
   expect(result.current.exceeded()).toBe(false)
+  expect(result.current.safeRef()).toBeTruthy()
 
   unmount()
 })
@@ -54,11 +54,13 @@ test('not exceeded', async () => {
 
   expect(result.current.timestamps.current.length).toBe(1)
   expect(result.current.exceeded()).toBe(false)
+  expect(result.current.safeRef()).toBeTruthy()
 
   await sleep(5100)
 
   expect(result.current.timestamps.current.length).toBe(1)
   expect(result.current.exceeded()).toBe(false)
+  expect(result.current.safeRef()).toBeTruthy()
 
   unmount()
 })

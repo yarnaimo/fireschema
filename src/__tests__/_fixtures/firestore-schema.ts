@@ -53,6 +53,7 @@ export const UserSchema = $collectionSchema<IUser, IUserLocal>()({
     decodeUser(data),
   selectors: (q, firestoreStatic) => ({
     teen: () => q.where('age', '>=', 10).where('age', '<', 20),
+    _teen: () => q.where('age', '>=', 10).where('age', '<', 20 + Math.random()),
     orderById: () => q.orderBy(firestoreStatic.FieldPath.documentId()),
   }),
 })

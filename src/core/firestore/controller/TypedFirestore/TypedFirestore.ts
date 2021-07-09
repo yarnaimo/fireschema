@@ -17,7 +17,7 @@ export class TypedFirestore<
     readonly firestoreStatic: FTypes.FirestoreStatic<F>,
     readonly raw: F,
   ) {
-    super(schemaOptions, firestoreStatic, '', raw)
+    super({ schemaOptions, firestoreStatic, loc: '' }, raw)
   }
 
   private origGroup(collectionName: string) {
@@ -29,9 +29,7 @@ export class TypedFirestore<
     loc: L,
   ) {
     return new TypedQueryRef<S, F, L>(
-      this.schemaOptions,
-      this.firestoreStatic,
-      loc,
+      { ...this.options, loc },
       this.origGroup(collectionName),
     )
   }
@@ -42,9 +40,7 @@ export class TypedFirestore<
     selector: STypes.Selector<S, F, L>,
   ) {
     return new TypedQueryRef<S, F, L>(
-      this.schemaOptions,
-      this.firestoreStatic,
-      loc,
+      { ...this.options, loc },
       this.origGroup(collectionName),
       selector,
     )
@@ -65,12 +61,7 @@ export class TypedFirestore<
     rawDocRef: FTypes.DocumentRef<any, F>,
   ): TypedDocumentRef<S, F, L> {
     const loc = firestorePathToLoc(rawDocRef.path) as L
-    return new TypedDocumentRef<S, F, L>(
-      this.schemaOptions,
-      this.firestoreStatic,
-      loc,
-      rawDocRef,
-    )
+    return new TypedDocumentRef<S, F, L>({ ...this.options, loc }, rawDocRef)
   }
 
   async runTransaction<T>(
@@ -78,8 +69,7 @@ export class TypedFirestore<
   ): Promise<T> {
     return this.raw.runTransaction(async (_t: any) => {
       const tt = new TypedTransaction<S, F>(
-        this.schemaOptions,
-        this.firestoreStatic,
+        this.options,
         _t as FTypes.Transaction<F>,
       )
       return fn(tt)

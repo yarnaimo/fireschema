@@ -1,6 +1,16 @@
 import dayjs, { Dayjs } from 'dayjs'
+import firebase from 'firebase/app'
 import { useEffect, useRef } from 'react'
 import { HasIsEqual } from 'react-firebase-hooks/firestore/dist/util'
+import { _web } from '../lib/firestore-types'
+
+export type HasGetOptions = {
+  getOptions?: _web.GetOptions
+}
+
+export type HasSnapListenOptions = {
+  snapshotListenOptions?: _web.SnapshotListenOptions
+}
 
 type RefHook<T> = {
   current: T
@@ -40,8 +50,8 @@ const isEqual = <T extends HasIsEqual<T>>(
 //   return useComparatorRef(value, isEqual, onChange)
 // }
 
-export const useRefChangeLimitExceeded = (
-  fref: HasIsEqual<any> | null | undefined,
+export const useRefChangeLimitExceeded = <T extends HasIsEqual<any>>(
+  fref: T | null | undefined,
 ) => {
   const timestampsRef = useRef<Dayjs[]>([])
 
@@ -59,6 +69,8 @@ export const useRefChangeLimitExceeded = (
     return a || b
   }
 
+  const safeRef = () => (exceeded() ? undefined : fref)
+
   if (exceeded()) {
     console.error(
       '%cRef change limit exceeded!!!',
@@ -66,5 +78,15 @@ export const useRefChangeLimitExceeded = (
     )
   }
 
-  return { exceeded, timestamps: timestampsRef }
+  return { exceeded, safeRef, timestamps: timestampsRef }
+}
+
+export const useFirebaseErrorLogger = (
+  error: firebase.FirebaseError | undefined,
+) => {
+  useEffect(() => {
+    if (error) {
+      console.error(error)
+    }
+  }, [error])
 }

@@ -12,9 +12,11 @@ export class TypedFDBase<
   _C = GetByLoc<S, L>,
 > {
   protected constructor(
-    readonly schemaOptions: S,
-    readonly firestoreStatic: FTypes.FirestoreStatic<F>,
-    readonly loc: L,
+    readonly options: {
+      schemaOptions: S
+      firestoreStatic: FTypes.FirestoreStatic<F>
+      loc: L
+    },
     readonly raw: IsRoot extends true ? F : FTypes.DocumentRef<U, F>,
   ) {}
 
@@ -23,10 +25,10 @@ export class TypedFDBase<
   }
 
   collection<N extends Extract<keyof _C, string>>(collectionName: N) {
+    const loc = joinLoc(this.options.loc, collectionName)
+
     return new TypedCollectionRef<S, F, JoinLoc<L, N>>(
-      this.schemaOptions,
-      this.firestoreStatic,
-      joinLoc(this.loc, collectionName),
+      { ...this.options, loc },
       this.origCollection(collectionName),
     )
   }
@@ -35,10 +37,10 @@ export class TypedFDBase<
     collectionName: N,
     selector: STypes.Selector<S, F, JoinLoc<L, N>>,
   ) {
+    const loc = joinLoc(this.options.loc, collectionName)
+
     return new TypedQueryRef<S, F, JoinLoc<L, N>>(
-      this.schemaOptions,
-      this.firestoreStatic,
-      joinLoc(this.loc, collectionName),
+      { ...this.options, loc },
       this.origCollection(collectionName),
       selector,
     )
