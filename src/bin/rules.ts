@@ -16,7 +16,7 @@ export const generateRules = (path: string) => {
     : '../../src/core/firestore/_renderer/root'
   const rendererModule = require(rendererPath) // eslint-disable-line
 
-  const rendered = rendererModule.renderSchema(schemaModule.firestoreSchema)
+  const rendered = rendererModule.renderSchema(schemaModule.default)
 
   writeFileSync(rulesPath, rendered)
   console.log('🎉 Generated firestore.rules')

@@ -1,4 +1,4 @@
-import { FTypes, STypes } from '../../../types'
+import { FTypes, STypes } from '../../types'
 import { TypedCollectionRef } from './TypedCollectionRef'
 import { TypedFDBase } from './TypedFDBase'
 import { DocDataHelper } from './_utils'

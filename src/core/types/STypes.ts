@@ -4,8 +4,14 @@ import {
   $collectionGroups,
   $docLabel,
   $functions,
-  $schema,
+  $model,
 } from '../constants'
+import {
+  DataModel,
+  InferDataModelSL,
+  InferDataModelT,
+  InferDataModelU,
+} from '../firestore'
 import { FTypes } from './FTypes'
 import { GetByLoc } from './_object'
 
@@ -31,28 +37,25 @@ export declare namespace STypes {
   export type InferCollectionT<C extends FTypes.CollectionRef<unknown>> =
     C extends FTypes.CollectionRef<infer T> ? T : never
 
-  export type GetSchemaU<_C> = EnsureOptions<_C>[typeof $schema]['__U__']
+  export type GetModelU<_C> = InferDataModelU<EnsureOptions<_C>[typeof $model]>
 
-  export type GetSchemaT<_C> = EnsureOptions<_C>[typeof $schema]['__T__']
+  export type GetModelT<_C> = InferDataModelT<EnsureOptions<_C>[typeof $model]>
 
   export type EnsureOptions<_C> = _C extends CollectionOptions.Meta ? _C : never
 
-  export type GetSL<_C> =
-    EnsureOptions<_C>[typeof $schema] extends CollectionSchema<any, any, any>
-      ? EnsureOptions<_C>[typeof $schema]['__SL__']
-      : {}
+  export type GetSL<_C> = InferDataModelSL<EnsureOptions<_C>[typeof $model]>
 
   export type DocDataAt<
     S extends RootOptions.All,
     F extends FTypes.FirestoreApp,
     L extends string,
-  > = DocData<F, GetSchemaU<GetByLoc<S, L>>, L, GetSchemaT<GetByLoc<S, L>>>
+  > = DocData<F, GetModelU<GetByLoc<S, L>>, L, GetModelT<GetByLoc<S, L>>>
 
   export type FTDocDataAt<
     S extends RootOptions.All,
     F extends FTypes.FirestoreApp,
     L extends string,
-  > = DocData<F, GetSchemaT<GetByLoc<S, L>>, L, GetSchemaT<GetByLoc<S, L>>>
+  > = DocData<F, GetModelT<GetByLoc<S, L>>, L, GetModelT<GetByLoc<S, L>>>
 
   export type DocData<
     F extends FTypes.FirestoreApp,
@@ -84,22 +87,10 @@ export declare namespace STypes {
     snapshot: FTypes.QueryDocumentSnap<T>,
   ) => U
 
-  export type CollectionSchema<T, U, HasDecoder extends boolean, SL = {}> = {
-    __T__: T
-    __U__: U
-    __SL__: SL
-    schema: string
-    decoder: HasDecoder extends true ? Decoder<T, U> : undefined
-    selectors: (
-      q: FTypes.Query<U>,
-      firestoreStatic: FTypes.FirestoreStatic<FTypes.FirestoreApp>,
-    ) => SL
-  }
-
   export namespace CollectionOptions {
     export type Meta = {
       [$docLabel]: string
-      [$schema]: CollectionSchema<any, any, any>
+      [$model]: DataModel<any, any, any>
       // [$collectionGroup]?: boolean
       [$allow]: AllowOptions
     }
@@ -115,6 +106,11 @@ export declare namespace STypes {
       typeof allowOptions.write)]+?: ConditionExp
   }
 
+  export type SelectorsFunction<U, SL> = (
+    q: FTypes.Query<U>,
+    firestoreStatic: FTypes.FirestoreStatic<FTypes.FirestoreApp>,
+  ) => SL
+
   export type Selector<
     S extends RootOptions.All,
     F extends FTypes.FirestoreApp,
@@ -124,7 +120,7 @@ export declare namespace STypes {
     // PC,
     _C = GetByLoc<S, L>,
   > = (
-    q: SelectorOptions<GetSchemaT<_C>, L, GetSL<_C>, F>,
+    q: SelectorOptions<GetModelT<_C>, L, GetSL<_C>, F>,
   ) => FTypes.Query<DocDataAt<S, F, L>, F>
 
   export type SelectorOptions<

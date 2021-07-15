@@ -19,7 +19,7 @@
 
 ## Requirement
 
-- **TypeScript** (>= 4.2)
+- **TypeScript** (>= 4.3)
 
 <br />
 
@@ -34,71 +34,26 @@ yarn add -D typescript ts-node
 
 ## Setup
 
-### Custom Transformer
+> 🎉 Since Fireschema v5, you no longer need to compile codes via custom transformer.
 
-To generate Firestore security rules or embedding type validation code into Callable Function, you need to compile codes via **Fireschema's custom transformer** that retrives type information from TypeScript AST.
-
-Currently official TypeScript package doesn't support custom transformers, and you need to use **[ttypescript](https://github.com/cevek/ttypescript)** that wraps TypeScript compiler.
-
-Add following options to your **`tsconfig.json`**,
-
-```json
-{
-  "compilerOptions": {
-    "plugins": [
-      {
-        "transform": "fireschema/transformer"
-      }
-    ]
-  }
-}
-```
-
-and replace the commands.
-
-|            | before    | after                                  |
-| ---------- | --------- | -------------------------------------- |
-| typescript | `tsc`     | `ttsc` (ttypescript's compile command) |
-| ts-node    | `ts-node` | `ts-node --compiler ttypescript`       |
-
-> `ttsc` and `ts-node` supports specifying `tsconfig.json` by using environment variable `TS_NODE_PROJECT`.
-
-If you use ts-jest, add following options to jest config.
-
-```js
-module.exports = {
-  globals: {
-    'ts-jest': {
-      tsconfig: 'tsconfig.json',
-      compiler: 'ttypescript',
-    },
-  },
-}
-```
-
-<br>
-
----
-
-<br>
+<br />
 
 ## Example - Firestore
-
-> **Do not use following variable names except importing from fireschema**.
->
-> - `$collectionSchema`
-> - `__$__`
 
 #### Data structure of examples
 
 - `users/{uid}` - `User`
-- `users/{uid}/posts/{postId}` - `PostA | PostB`
+- `users/{uid}/posts/{postId}` - `Post`
 
 <br>
 
 ### 1. Define schema
 
-The schema definition must be named exported as **`firestoreSchema`**.
+The schema definition must be default exported.
+
+```txt
+SchemaType  ->  DataModel  ->  FirestoreModel
+```
 
 <!-- AUTO-GENERATED-CONTENT:START (CODE:src=./src/example/1-1-schema.ts) -->
 <!-- The below code snippet is automatically added from ./src/example/1-1-schema.ts -->
@@ -106,52 +61,59 @@ The schema definition must be named exported as **`firestoreSchema`**.
 ```ts
 import { Merge } from 'type-fest'
 import {
+  $,
   $allow,
   $collectionGroups,
-  $collectionSchema,
   $docLabel,
   $functions,
+  $model,
   $or,
-  $schema,
-  createFirestoreSchema,
-  FTypes,
+  DataModel,
+  FirestoreModel,
+  InferSchemaType,
 } from 'fireschema'
 
 // user
-export type User = {
+export const UserType = {
+  name: $.string,
+  displayName: $.union($.string, $.null),
+  age: $.int,
+  timestamp: $.timestamp,
+  options: $.optional({ a: $.bool }),
+}
+type User = InferSchemaType<typeof UserType>
+/* => {
   name: string
   displayName: string | null
   age: number
   timestamp: FTypes.Timestamp
   options: { a: boolean } | undefined
-}
-export type UserDecoded = Merge<User, { timestamp: Date }>
+} */
 
-const UserSchema = $collectionSchema<User, UserDecoded>()({
-  decoder: (data) => ({
+type UserDecoded = Merge<User, { timestamp: Date }>
+
+const UserModel = new DataModel({
+  schema: UserType,
+  decoder: (data: User): UserDecoded => ({
     ...data,
     timestamp: data.timestamp.toDate(),
   }),
 })
 
 // post
-type PostA = {
-  type: 'a'
-  tags: { id: number; name: string }[]
-  text: string
+const PostType = {
+  tags: $.array({ id: $.int, name: $.string }),
+  text: $.string,
 }
-type PostB = {
-  type: 'b'
-  tags: { id: number; name: string }[]
-  texts: string[]
-}
-const PostSchema = $collectionSchema<PostA | PostB>()({
+
+const PostModel = new DataModel({
+  schema: PostType,
   selectors: (q) => ({
     byTag: (tag: string) => q.where('tags', 'array-contains', tag),
   }),
 })
 
-export const firestoreSchema = createFirestoreSchema({
+export const firestoreModel = new FirestoreModel({
   [$functions]: {
     // whether /admins/<uid> exists
     ['isAdmin()']: `
@@ -167,7 +129,7 @@ export const firestoreSchema = createFirestoreSchema({
   [$collectionGroups]: {
     posts: {
       [$docLabel]: 'postId',
-      [$schema]: PostSchema,
+      [$model]: PostModel,
       [$allow]: {
         read: true,
       },
@@ -177,7 +139,7 @@ export const firestoreSchema = createFirestoreSchema({
   // /users/{uid}
   users: {
     [$docLabel]: 'uid', // {uid}
-    [$schema]: UserSchema, // collectionSchema
+    [$model]: UserModel, // collectionSchema
     [$allow]: {
       // access control
       read: true, // all user
@@ -187,7 +149,7 @@ export const firestoreSchema = createFirestoreSchema({
     // /users/{uid}/posts/{postId}
     posts: {
       [$docLabel]: 'postId',
-      [$schema]: PostSchema,
+      [$model]: PostModel,
       [$allow]: {
         read: true,
         write: 'matchesUser(uid)',
@@ -195,6 +157,8 @@ export const firestoreSchema = createFirestoreSchema({
     },
   },
 })
+
+export default firestoreModel
 ```
 
 <!-- AUTO-GENERATED-CONTENT:END -->
@@ -204,10 +168,10 @@ export const firestoreSchema = createFirestoreSchema({
 ### 2. Generate firestore.rules
 
 ```sh
-yarn fireschema <path-to-schema>.ts
+yarn fireschema rules <path-to-schema>.ts
 ```
 
-> Environment variable `TS_NODE_PROJECT` is supported similarly to `ttsc` and `ts-node`.
+> Environment variable `TS_NODE_PROJECT` is supported.
 
 <details>
   <summary>Example of generated firestore.rules</summary>
@@ -244,10 +208,10 @@ service cloud.firestore {
         return (
           __validator_meta__(data)
             && data.name is string
-            && (data.displayName == null || data.displayName is string)
-            && (data.age is int || data.age is float)
+            && (data.displayName is string || data.displayName == null)
+            && data.age is int
             && data.timestamp is timestamp
-            && (!("options" in data) || data.options.a is bool)
+            && (data.options.a is bool || !("options" in data))
         );
       }
 
@@ -256,17 +220,11 @@ service cloud.firestore {
 
       match /posts/{postId} {
         function __validator_1__(data) {
-          return ((
+          return (
             __validator_meta__(data)
-              && data.type == "a"
-              && (data.tags.size() == 0 || ((data.tags[0].id is int || data.tags[0].id is float) && data.tags[0].name is string))
+              && (data.tags.size() == 0 || (data.tags[0].id is int && data.tags[0].name is string))
               && data.text is string
-          ) || (
-            __validator_meta__(data)
-              && data.type == "b"
-              && (data.tags.size() == 0 || ((data.tags[0].id is int || data.tags[0].id is float) && data.tags[0].name is string))
-              && (data.texts.size() == 0 || data.texts[0] is string)
-          ));
+          );
         }
 
         allow read: if true;
@@ -293,7 +251,7 @@ The Firestore interface of Fireschema supports both **Web SDK and Admin SDK**.
 ```ts
 import firebase from 'firebase/app' // or firebase-admin
 import { TypedFirestore } from 'fireschema'
-import { firestoreSchema } from './1-1-schema'
+import { firestoreModel } from './1-1-schema'
 
 const app: firebase.app.App = firebase.initializeApp({
   // ...
@@ -305,9 +263,9 @@ firestoreApp.settings({ ignoreUndefinedProperties: true })
  * Initialize TypedFirestore
  */
 export const typedFirestore: TypedFirestore<
-  typeof firestoreSchema,
+  typeof firestoreModel,
   firebase.firestore.Firestore
-> = new TypedFirestore(firestoreSchema, firebase.firestore, firestoreApp)
+> = new TypedFirestore(firestoreModel, firebase.firestore, firestoreApp)
 
 /**
  * Reference collections/documents and get snapshot
@@ -324,9 +282,11 @@ const techPosts = user.collectionQuery(
 
 !(async () => {
   await user.get() // DocumentSnapshot<User>
+  await user.getData() // User
 
   await post.get() // DocumentSnapshot<PostA | PostB>
   await posts.get() // QuerySnapshot<PostA | PostB>
+  await posts.getData() // (PostA | PostB)[]
   await techPosts.get() // QuerySnapshot<PostA | PostB>
 })
 
@@ -335,9 +295,9 @@ const techPosts = user.collectionQuery(
  */
 !(async () => {
   const snap = await users.get()
-  const firstUserRef = snap.docs[0]!.ref
+  const firstUserRef = snap.typedDocs[0]!.typedRef
 
-  await typedFirestore.wrapDocument(firstUserRef).collection('posts').get()
+  await firstUserRef.collection('posts').get()
 })
 
 /**
@@ -460,16 +420,15 @@ export const UserComponent = ({ id }: { id: string }) => {
 ```ts
 import { firestore } from 'firebase-admin'
 import * as functions from 'firebase-functions'
-import { Merge } from 'type-fest'
-import { $jsonSchema, TypedFunctions } from 'fireschema'
-import { firestoreSchema, User } from './1-1-schema'
+import { $, TypedFunctions } from 'fireschema'
+import { firestoreModel, UserType } from './1-1-schema'
 
 /**
  * Initialize TypedFunctions
  */
 const timezone = 'Asia/Tokyo'
 const typedFunctions = new TypedFunctions(
-  firestoreSchema,
+  firestoreModel,
   firestore,
   functions,
   timezone,
@@ -479,12 +438,12 @@ const builder = functions.region('asia-northeast1')
 /**
  * functions/index.ts file
  */
-export type UserJson = Merge<User, { timestamp: string }>
+export const UserJsonType = { ...UserType, timestamp: $.string }
 export const callable = {
   createUser: typedFunctions.callable({
     schema: {
-      input: $jsonSchema<UserJson>(), // schema of request data (automatically validate on request)
-      output: $jsonSchema<{ result: boolean }>(), // schema of response data
+      input: UserJsonType, // schema of request data (automatically validate on request)
+      output: { result: $.bool }, // schema of response data
     },
     builder,
     handler: async (data, context) => {
@@ -521,7 +480,7 @@ export const http = {
 
 export const topic = {
   publishMessage: typedFunctions.topic('publish_message', {
-    schema: $jsonSchema<{ text: string }>(),
+    schema: { text: $.string },
     builder,
     handler: async (data) => {
       data // { text: string }

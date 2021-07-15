@@ -1,56 +1,59 @@
 import { _admin } from '../../../lib/firestore-types'
 import { _fadmin } from '../../../lib/functions-types'
-import { Type } from '../../../lib/type'
 import { messages } from '../../constants'
-import { FunTypes, STypes } from '../../types'
+import { FirestoreModel, InferFirestoreModelS } from '../../firestore'
+import { FunTypes, InferSchemaType, SchemaType, STypes } from '../../types'
 import { withType } from '../../utils/_type'
-import { assertJsonSchema } from './JsonSchema'
 import { TypedFirestoreTrigger } from './TypedFirestoreTrigger'
+import { validateJsonSchema } from './_validator'
 
-export class TypedFunctions<S extends STypes.RootOptions.All> {
+export class TypedFunctions<
+  M extends FirestoreModel<STypes.RootOptions.All>,
+  S extends InferFirestoreModelS<M> = InferFirestoreModelS<M>,
+> {
   constructor(
-    readonly firestoreSchema: S,
+    readonly model: M,
     readonly firestoreStatic: typeof _admin,
     readonly functions: typeof import('firebase-functions'),
     readonly timezone: string,
   ) {}
 
   firestoreTrigger = new TypedFirestoreTrigger(
-    this.firestoreSchema,
+    this.model.schemaOptions as S,
     this.firestoreStatic,
     this.functions,
   )
 
-  callable<I extends Type.JsonObject, O extends Type.JsonObject>({
-    schema: { input: inputRuntype, output: outputRuntype },
+  callable<SI extends SchemaType._JsonData, SO extends SchemaType._JsonData>({
+    schema: { input, output },
     builder,
     handler,
   }: {
-    schema: FunTypes.SchemaTuple<I, O>
+    schema: {
+      input: SI
+      output: SO
+    }
     builder: _fadmin.FunctionBuilder
-    handler: FunTypes.Callable.Handler<I, O>
+    handler: FunTypes.Callable.Handler<InferSchemaType<SI>, InferSchemaType<SO>>
   }) {
-    assertJsonSchema(inputRuntype)
-    assertJsonSchema(outputRuntype)
-
     const wrapped = async (
       data: unknown,
       context: _fadmin.https.CallableContext,
     ) => {
-      const validated = inputRuntype.validate(data)
+      const valid = validateJsonSchema(input, data)
 
-      if (!validated.success) {
+      if (!valid) {
         throw new this.functions.https.HttpsError(
           'invalid-argument',
-          messages.invalidRequest,
+          messages.validationFailed,
         )
       }
 
-      const output = await handler(validated.value as any, context)
+      const output = await handler(data as any, context)
       return output
     }
 
-    return withType<FunTypes.Callable.Meta<I, O>>()(
+    return withType<FunTypes.Callable.Meta<SI, SO>>()(
       builder.https.onCall(wrapped),
     )
   }
@@ -65,27 +68,26 @@ export class TypedFunctions<S extends STypes.RootOptions.All> {
     return builder.https.onRequest(handler)
   }
 
-  topic<N extends string, I extends Type.JsonObject>(
+  topic<N extends string, S extends SchemaType._JsonData>(
     topicName: N,
     {
-      schema,
       builder,
       handler,
     }: {
-      schema: FunTypes.JsonSchema<I>
+      schema: S
       builder: _fadmin.FunctionBuilder
-      handler: FunTypes.Topic.Handler<I>
+      handler: FunTypes.Topic.Handler<InferSchemaType<S>>
     },
   ) {
     const wrapped = async (
       message: _fadmin.pubsub.Message,
       context: _fadmin.EventContext,
     ) => {
-      const input = message.json as I
+      const input = message.json as InferSchemaType<S>
       await handler(input, message, context)
     }
 
-    return withType<FunTypes.Topic.Meta<N, I>>()(
+    return withType<FunTypes.Topic.Meta<N, S>>()(
       builder.pubsub.topic(topicName).onPublish(wrapped),
     )
   }

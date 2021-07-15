@@ -13,6 +13,8 @@ export const $rule = {
   isString: (name: string) => `${name} is string`,
 
   isNumber: (name: string) => $or([`${name} is int`, `${name} is float`]),
+  isInt: (name: string) => `${name} is int`,
+  isFloat: (name: string) => `${name} is float`,
 
   isTimestamp: (name: string) => `${name} is timestamp`,
   isServerTimestamp: (name: string) => `${name} == request.time`,
