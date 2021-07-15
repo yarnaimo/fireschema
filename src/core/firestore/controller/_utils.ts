@@ -1,22 +1,23 @@
-import { _createdAt, _updatedAt } from '../../../constants'
-import { FTypes, STypes } from '../../../types'
-import { createConverter } from '../../../utils/_firestore'
-import { addQueryCache, findCachedQuery } from '../_query-cache'
+import { _createdAt, _updatedAt } from '../../constants'
+import { FTypes, STypes } from '../../types'
+import { createConverter } from '../../utils/_firestore'
+import { DataModel } from '../model'
+import { addQueryCache, findCachedQuery } from './_query-cache'
 
 export const withSelectors =
   (
-    schema: STypes.CollectionSchema<any, any, any>,
+    model: DataModel<any, any, any>,
     firestoreStatic: FTypes.FirestoreStatic<FTypes.FirestoreApp>,
     selector: STypes.Selector<any, any, any> | undefined,
   ) =>
   (query: FTypes.Query<unknown>) => {
-    return selector ? selector(schema.selectors(query, firestoreStatic)) : query
+    return selector ? selector(model.selectors(query, firestoreStatic)) : query
   }
 
 export const withDecoder =
-  (schema: STypes.CollectionSchema<any, any, any>, collectionName: string) =>
+  (model: DataModel<any, any, any>, collectionName: string) =>
   (rawQuery: FTypes.Query<any>) => {
-    const { decoder } = schema
+    const { decoder } = model
 
     const cachedQuery = findCachedQuery(collectionName, rawQuery)
     if (cachedQuery) {

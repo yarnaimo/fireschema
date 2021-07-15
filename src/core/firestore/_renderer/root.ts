@@ -7,6 +7,7 @@ import {
 import { STypes } from '../../types'
 import { $$and, $or, $rule } from '../../utils'
 import { join } from '../../utils/_string'
+import { FirestoreModel } from '../model'
 import { renderCollectionGroups, renderCollections } from './collections'
 import { validator } from './format'
 import { renderFunctions } from './functions'
@@ -52,9 +53,9 @@ export const renderRoot = (
   ]
 }
 
-export const renderSchema = <S extends STypes.RootOptions.All>(
-  schemaOptions: S,
-) => {
+export const renderSchema = <S extends STypes.RootOptions.All>({
+  schemaOptions,
+}: FirestoreModel<S>) => {
   const {
     [$functions]: functions,
     [$collectionGroups]: collectionGroups,

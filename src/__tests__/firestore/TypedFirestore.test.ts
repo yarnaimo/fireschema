@@ -27,23 +27,23 @@ import { _web } from '../../lib/firestore-types'
 import { R } from '../../lib/fp'
 import { postAData, userData } from '../_fixtures/data'
 import {
-  firestoreSchema,
+  firestoreModel,
   IPostA,
   IPostB,
   IUser,
   IUserLocal,
-  PostSchema,
-  UserSchema,
+  PostModel,
+  UserModel,
 } from '../_fixtures/firestore-schema'
 import { authedApp } from '../_infrastructure/_app'
 import { sleep } from '../_utils/common'
 import { expectAnyTimestamp, expectEqualRef } from '../_utils/firestore'
 
-type S = typeof firestoreSchema
+type S = typeof firestoreModel.schemaOptions
 type F = _web.Firestore
 
 const _tcollections = (app: F) => {
-  const typedFirestore = new TypedFirestore(firestoreSchema, firestore, app)
+  const typedFirestore = new TypedFirestore(firestoreModel, firestore, app)
 
   void (() => {
     typedFirestore.collection(
@@ -112,9 +112,9 @@ describe('types', () => {
   test('decoder', () => {
     expectType<
       (data: IUser, snap: FTypes.QueryDocumentSnap<IUser>) => IUserLocal
-    >(UserSchema.decoder)
+    >(UserModel.decoder)
 
-    expectType<undefined>(PostSchema.decoder)
+    expectType<undefined>(PostModel.decoder)
   })
 
   test('UAt', () => {

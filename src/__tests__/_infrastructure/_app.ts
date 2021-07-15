@@ -7,10 +7,10 @@ import {
 import type firebase from 'firebase/app'
 import { MapAsync } from 'lifts'
 import { renderSchema } from '../../core/firestore/_renderer/root'
-import { firestoreSchema } from '../_fixtures/firestore-schema'
+import { firestoreModel } from '../_fixtures/firestore-schema'
 import { projectId } from './_config'
 
-const rules = renderSchema(firestoreSchema)
+const rules = renderSchema(firestoreModel)
 beforeAll(async () => {
   await loadFirestoreRules({ projectId, rules })
 })

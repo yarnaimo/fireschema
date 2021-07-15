@@ -1,5 +1,5 @@
 import { renderSchema } from '../../core/firestore/_renderer/root'
-import { firestoreSchema } from '../_fixtures/firestore-schema'
+import { firestoreModel } from '../_fixtures/firestore-schema'
 
 const expected = `
 rules_version = '2';
@@ -31,11 +31,11 @@ service cloud.firestore {
           return (
             __validator_meta__(data)
               && data.name is string
-              && (data.displayName == null || data.displayName is string)
-              && (data.age is int || data.age is float)
-              && (data.tags.size() == 0 || ((data.tags[0].id is int || data.tags[0].id is float) && data.tags[0].name is string))
+              && (data.displayName is string || data.displayName == null)
+              && data.age is int
+              && (data.tags.size() == 0 || (data.tags[0].id is int && data.tags[0].name is string))
               && data.timestamp is timestamp
-              && (!("options" in data) || (data.options.a is bool && data.options.b is string))
+              && ((data.options.a is bool && data.options.b is string) || !("options" in data))
           );
         }
 
@@ -79,6 +79,6 @@ service cloud.firestore {
 }`.trim()
 
 test('render', () => {
-  const result = renderSchema(firestoreSchema)
+  const result = renderSchema(firestoreModel)
   expect(result).toBe(expected)
 })

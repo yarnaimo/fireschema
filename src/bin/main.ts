@@ -6,7 +6,6 @@ import { generateRules } from './rules'
 
 register({
   project: process.env['TS_NODE_PROJECT'],
-  compiler: 'ttypescript',
   files: true,
 })
 

@@ -16,7 +16,6 @@ module.exports = {
   globals: {
     'ts-jest': {
       diagnostics: false,
-      compiler: 'ttypescript',
     },
   },
 }

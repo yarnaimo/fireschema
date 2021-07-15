@@ -1,6 +1,6 @@
 import { EntriesStrict, P } from 'lifts'
 import { R } from '../../../lib/fp'
-import { $allow, $docLabel, $schema } from '../../constants'
+import { $allow, $docLabel, $model } from '../../constants'
 import { STypes } from '../../types'
 import { join, _ } from '../../utils/_string'
 import { renderRules } from './rules'
@@ -21,14 +21,14 @@ const renderFromArray =
         ([
           collectionPath,
           {
-            [$schema]: schema,
+            [$model]: model,
             [$docLabel]: docLabel,
             [$allow]: allow,
             ...collections
           },
         ]) => {
           const body = join('\n\n')([
-            renderRules(allow, schema, indent),
+            renderRules(allow, model, indent),
             renderCollections(collections, indent),
           ])
           return join('\n')([

@@ -1,6 +1,6 @@
 import firebase from 'firebase/app' // or firebase-admin
 import { TypedFirestore } from '..'
-import { firestoreSchema } from './1-1-schema'
+import { firestoreModel } from './1-1-schema'
 
 const app: firebase.app.App = firebase.initializeApp({
   // ...
@@ -12,9 +12,9 @@ firestoreApp.settings({ ignoreUndefinedProperties: true })
  * Initialize TypedFirestore
  */
 export const typedFirestore: TypedFirestore<
-  typeof firestoreSchema,
+  typeof firestoreModel,
   firebase.firestore.Firestore
-> = new TypedFirestore(firestoreSchema, firebase.firestore, firestoreApp)
+> = new TypedFirestore(firestoreModel, firebase.firestore, firestoreApp)
 
 /**
  * Reference collections/documents and get snapshot
@@ -31,9 +31,11 @@ const techPosts = user.collectionQuery(
 
 !(async () => {
   await user.get() // DocumentSnapshot<User>
+  await user.getData() // User
 
   await post.get() // DocumentSnapshot<PostA | PostB>
   await posts.get() // QuerySnapshot<PostA | PostB>
+  await posts.getData() // (PostA | PostB)[]
   await techPosts.get() // QuerySnapshot<PostA | PostB>
 })
 

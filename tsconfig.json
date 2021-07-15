@@ -13,12 +13,7 @@
     "paths": {
       "*": ["node_modules/@types/*", "src/@types/*"]
     },
-    "types": ["@types/node", "@types/jest"],
-    "plugins": [
-      {
-        "transform": "./src/_transformer/main.ts"
-      }
-    ]
+    "types": ["@types/node", "@types/jest"]
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules", "dist", "esm"]

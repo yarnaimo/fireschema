@@ -1,6 +1,6 @@
-import { FTypes, STypes } from '../../../types'
-import { GetByLoc, JoinLoc } from '../../../types/_object'
-import { joinLoc } from '../../../utils/_object'
+import { FTypes, STypes } from '../../types'
+import { GetByLoc, JoinLoc } from '../../types/_object'
+import { joinLoc } from '../../utils/_object'
 import { TypedCollectionRef, TypedQueryRef } from './TypedCollectionRef'
 
 export class TypedFDBase<

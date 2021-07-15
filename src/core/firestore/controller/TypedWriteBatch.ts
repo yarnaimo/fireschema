@@ -1,5 +1,5 @@
-import { _web } from '../../../../lib/firestore-types'
-import { FTypes, STypes } from '../../../types'
+import { _web } from '../../../lib/firestore-types'
+import { FTypes, STypes } from '../../types'
 import { TypedDocumentRef } from './TypedDocumentRef'
 import { DocDataHelper } from './_utils'
 

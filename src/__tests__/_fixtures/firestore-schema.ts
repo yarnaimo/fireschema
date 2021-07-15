@@ -1,19 +1,30 @@
+import { expectType } from 'tsd'
 import {
-  $adapter,
+  $,
   $allow,
   $collectionGroups,
-  $collectionSchema,
   $docLabel,
   $functions,
+  $model,
   $or,
-  $schema,
-  createFirestoreSchema,
+  DataModel,
+  FTypes,
+  InferSchemaType,
 } from '../..'
-import { FTypes } from '../../core/types'
+import { FirestoreModel } from '../../core'
 import { Type } from '../../lib/type'
 
-export type IVersion = {}
+const VersionType = {}
+type IVersion = {}
 
+const UserType = {
+  name: $.string,
+  displayName: $.union($.string, $.null),
+  age: $.int,
+  tags: $.array({ id: $.int, name: $.string }),
+  timestamp: $.timestamp,
+  options: $.optional({ a: $.bool, b: $.string }),
+}
 export type IUser = {
   name: string
   displayName: string | null
@@ -22,9 +33,20 @@ export type IUser = {
   timestamp: FTypes.Timestamp
   options: { a: boolean; b: string } | undefined
 }
+expectType<IUser>({} as InferSchemaType<typeof UserType>)
 export type IUserLocal = Type.Merge<IUser, { timestamp: string }>
 export type IUserJson = Type.Merge<IUser, { timestamp: string }>
+export const UserJsonType = { ...UserType, timestamp: $.string }
 
+const PostAType = {
+  type: $.literal('a'),
+  text: $.string,
+}
+const PostBType = {
+  type: $.literal('b'),
+  texts: $.array($.string),
+}
+const PostType = $.union(PostAType, PostBType)
 export type IPostA = {
   type: 'a'
   text: string
@@ -33,14 +55,16 @@ export type IPostB = {
   type: 'b'
   texts: string[]
 }
+export type IPost = IPostA | IPostB
+expectType<IPost>({} as InferSchemaType<typeof PostType>)
 
-const VersionSchema = $collectionSchema<IVersion>()({})
-void (() => {
-  const VersionSchemaError = $collectionSchema<IVersion>()({
-    // @ts-expect-error decoder without U type
-    decoder: (data) => data,
-  })
-})
+const VersionModel = new DataModel({ schema: VersionType })
+// void (() => {
+//   const VersionSchemaError = $collectionSchema<IVersion>()({
+//     // @ts-expect-error decoder without U type
+//     decoder: (data) => data,
+//   })
+// })
 
 export const decodeUser = (data: IUser) => ({
   ...data,
@@ -48,7 +72,8 @@ export const decodeUser = (data: IUser) => ({
   id: undefined, // decode -> id追加 の順に行われるのを確認する用
 })
 
-export const UserSchema = $collectionSchema<IUser, IUserLocal>()({
+export const UserModel = new DataModel({
+  schema: UserType,
   decoder: (data: IUser, snap: FTypes.QueryDocumentSnap<IUser>): IUserLocal =>
     decodeUser(data),
   selectors: (q, firestoreStatic) => ({
@@ -57,21 +82,21 @@ export const UserSchema = $collectionSchema<IUser, IUserLocal>()({
     orderById: () => q.orderBy(firestoreStatic.FieldPath.documentId()),
   }),
 })
-void (() => {
-  const UserSchemaError = $collectionSchema<IUser, IUserLocal>()({
-    // @ts-expect-error decoder not specified
-    decoder: undefined,
-  })
-})
+// void (() => {
+//   const UserSchemaError = $collectionSchema<IUser, IUserLocal>()({
+//     // @ts-expect-error decoder not specified
+//     decoder: undefined,
+//   })
+// })
 
-export const PostSchema = $collectionSchema<IPostA | IPostB>()({})
-export const PostASchema = $collectionSchema<IPostA>()({})
+export const PostModel = new DataModel({ schema: PostType })
+export const PostAModel = new DataModel({ schema: PostAType })
 
 const getCurrentAuthUser = () => `getCurrentAuthUser()`
 const isAdmin = () => `isAdmin()`
 const isUserScope = (arg: string) => `isUserScope(${arg})`
 
-export const firestoreSchema = createFirestoreSchema({
+export const firestoreModel = new FirestoreModel({
   [$functions]: {
     // [getCurrentAuthUser()]: `
     //   return get(/databases/$(database)/documents/authUsers/$(request.auth.uid));
@@ -87,7 +112,7 @@ export const firestoreSchema = createFirestoreSchema({
   [$collectionGroups]: {
     users: {
       [$docLabel]: 'uid',
-      [$schema]: UserSchema,
+      [$model]: UserModel,
       [$allow]: {
         read: true,
       },
@@ -96,13 +121,12 @@ export const firestoreSchema = createFirestoreSchema({
 
   versions: {
     [$docLabel]: 'version',
-    [$schema]: VersionSchema,
-    [$adapter]: null,
+    [$model]: VersionModel,
     [$allow]: {},
 
     users: {
       [$docLabel]: 'uid',
-      [$schema]: UserSchema,
+      [$model]: UserModel,
       [$allow]: {
         read: true,
         write: $or([isUserScope('uid')]),
@@ -111,7 +135,7 @@ export const firestoreSchema = createFirestoreSchema({
 
       posts: {
         [$docLabel]: 'postId',
-        [$schema]: PostSchema,
+        [$model]: PostModel,
         [$allow]: {
           read: true,
           write: $or([isUserScope('uid')]),
@@ -121,7 +145,7 @@ export const firestoreSchema = createFirestoreSchema({
 
       privatePosts: {
         [$docLabel]: 'postId',
-        [$schema]: PostASchema,
+        [$model]: PostAModel,
         [$allow]: {
           read: $or(['isAdmin()', 'isUserScope(uid)']),
           write: $or(['isUserScope(uid)']),
@@ -130,3 +154,5 @@ export const firestoreSchema = createFirestoreSchema({
     },
   },
 })
+
+export default firestoreModel

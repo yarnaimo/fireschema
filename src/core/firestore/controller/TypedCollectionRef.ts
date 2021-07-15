@@ -1,10 +1,10 @@
 import { P } from 'lifts'
-import { R } from '../../../../lib/fp'
-import { $schema } from '../../../constants'
-import { FTypes, STypes } from '../../../types'
-import { JoinLoc, OmitLastSegment } from '../../../types/_object'
-import { getCollectionOptions } from '../../../utils/_firestore'
-import { getLastSegment, omitLastSegment } from '../../../utils/_object'
+import { R } from '../../../lib/fp'
+import { $model } from '../../constants'
+import { FTypes, STypes } from '../../types'
+import { JoinLoc, OmitLastSegment } from '../../types/_object'
+import { getCollectionOptions } from '../../utils/_firestore'
+import { getLastSegment, omitLastSegment } from '../../utils/_object'
 import {
   QueryDocumentSnapDataOptions,
   TypedDocumentRef,
@@ -63,9 +63,9 @@ export class TypedQueryRef<
 
     const convertedQuery = P(
       origQuery,
-      skipDecoder ? R.identity : withDecoder(collectionOptions[$schema], name),
+      skipDecoder ? R.identity : withDecoder(collectionOptions[$model], name),
       withSelectors(
-        collectionOptions[$schema],
+        collectionOptions[$model],
         this.options.firestoreStatic,
         selector,
       ),

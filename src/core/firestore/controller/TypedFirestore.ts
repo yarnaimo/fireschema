@@ -1,7 +1,8 @@
-import { $collectionGroups } from '../../../constants'
-import { FTypes, STypes } from '../../../types'
-import { Loc } from '../../../types/_object'
-import { firestorePathToLoc } from '../../../utils/_firestore'
+import { $collectionGroups } from '../../constants'
+import { FTypes, STypes } from '../../types'
+import { Loc } from '../../types/_object'
+import { firestorePathToLoc } from '../../utils/_firestore'
+import { FirestoreModel, InferFirestoreModelS } from '../model'
 import { TypedQueryRef } from './TypedCollectionRef'
 import { TypedDocumentRef } from './TypedDocumentRef'
 import { TypedFDBase } from './TypedFDBase'
@@ -9,15 +10,23 @@ import { TypedTransaction } from './TypedTransaction'
 import { TypedWriteBatch } from './TypedWriteBatch'
 
 export class TypedFirestore<
-  S extends STypes.RootOptions.All,
+  M extends FirestoreModel<STypes.RootOptions.All>,
   F extends FTypes.FirestoreApp,
+  S extends InferFirestoreModelS<M> = InferFirestoreModelS<M>,
 > extends TypedFDBase<S, F, '', true> {
   constructor(
-    readonly schemaOptions: S,
+    readonly model: M,
     readonly firestoreStatic: FTypes.FirestoreStatic<F>,
     readonly raw: F,
   ) {
-    super({ schemaOptions, firestoreStatic, loc: '' }, raw)
+    super(
+      {
+        schemaOptions: model.schemaOptions as S,
+        firestoreStatic,
+        loc: '',
+      },
+      raw,
+    )
   }
 
   private origGroup(collectionName: string) {
