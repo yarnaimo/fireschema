@@ -14,8 +14,9 @@ import {
 import { FirestoreModel } from '../../core'
 import { Type } from '../../lib/type'
 
-const VersionType = {}
-type IVersion = {}
+const VersionType = { unknown: $.unknown }
+expectType<{ unknown: unknown }>({} as InferSchemaType<typeof VersionType>)
+expectType<InferSchemaType<typeof VersionType>>({} as { unknown: unknown })
 
 const UserType = {
   name: $.string,

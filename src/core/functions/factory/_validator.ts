@@ -11,6 +11,8 @@ export const validateJsonSchema = (
     case 'intersection':
       return t.valueTypes.every((_t) => validateJsonSchema(_t, value))
 
+    case 'unknown':
+      return true
     case 'undefined':
       return is.undefined(value)
     case 'null':
