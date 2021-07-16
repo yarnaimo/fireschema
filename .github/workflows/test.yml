@@ -13,6 +13,6 @@ jobs:
           node-version: '14.x'
           cache: yarn
       - run: yarn global add firebase-tools
-      - run: yarn
+      - run: yarn install
       - run: yarn build
       - run: yarn test:all
