@@ -1,30 +1,89 @@
 import { useMemo } from 'react'
+import {
+  DocumentSnapDataOptions,
+  QueryDocumentSnapDataOptions,
+  STypes,
+  TypedDocumentRef,
+  TypedDocumentSnap,
+  TypedQueryRef,
+  TypedQuerySnap,
+} from '../core'
 import { _web } from '../lib/firestore-types'
 
-export const useQuerySnapData = <U, V = U>(
-  querySnap: _web.QuerySnapshot<U> | undefined,
-  transformer?: (data: U, snap: _web.QueryDocumentSnapshot<U>) => V,
-): V[] | undefined =>
-  useMemo(
+export const useDocumentSnapData = <
+  S extends STypes.RootOptions.All,
+  L extends string,
+  U,
+  V = U,
+>(
+  typedDoc: TypedDocumentRef<S, _web.Firestore, L, U> | null | undefined,
+  _snap: _web.DocumentSnapshot<U> | undefined,
+  {
+    transformer,
+    snapshotOptions,
+  }: DocumentSnapDataOptions<S, _web.Firestore, L, U, V> = {},
+) => {
+  const snap = useMemo(
     () =>
-      querySnap?.docs.map((snap) => {
-        const data = snap.data({ serverTimestamps: 'estimate' })
-        return transformer?.(data, snap) ?? ((data as unknown) as V)
-      }),
-    [querySnap],
+      typedDoc && _snap
+        ? new TypedDocumentSnap(typedDoc.options, _snap)
+        : undefined,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [_snap],
   )
 
-export const useDocumentSnapData = <U, V = U>(
-  snap: _web.DocumentSnapshot<U> | undefined,
-  transformer?: (data: U, snap: _web.DocumentSnapshot<U>) => V,
-): V | undefined =>
-  useMemo(() => {
-    if (!snap) {
-      return undefined
-    }
-    const data = snap.data({ serverTimestamps: 'estimate' })
-    if (!data) {
-      return undefined
-    }
-    return transformer?.(data, snap) ?? ((data as unknown) as V)
-  }, [snap])
+  const data = useMemo(
+    () =>
+      snap?.data({
+        transformer,
+        snapshotOptions: {
+          serverTimestamps: 'estimate',
+          ...snapshotOptions,
+        },
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [snap],
+  )
+
+  return { snap, data }
+}
+
+export const useQuerySnapData = <
+  S extends STypes.RootOptions.All,
+  L extends string,
+  U,
+  V = U,
+>(
+  typedQuery: TypedQueryRef<S, _web.Firestore, L, U> | null | undefined,
+  _snap: _web.QuerySnapshot<U> | undefined,
+  {
+    transformer,
+    snapshotOptions,
+  }: QueryDocumentSnapDataOptions<S, _web.Firestore, L, U, V>,
+) => {
+  const snap = useMemo(
+    () =>
+      typedQuery && _snap
+        ? new TypedQuerySnap(typedQuery.options, _snap)
+        : undefined,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [_snap],
+  )
+
+  const data = useMemo(
+    () =>
+      snap?.typedDocs.map((docSnap) =>
+        docSnap.data({
+          transformer,
+          snapshotOptions: {
+            serverTimestamps: 'estimate',
+            ...snapshotOptions,
+          },
+        }),
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [snap],
+  )
+
+  return { snap, data }
+}

@@ -4,25 +4,46 @@ import {
   firestore,
 } from '@firebase/rules-unit-testing'
 import { renderHook } from '@testing-library/react-hooks'
+import { typeExtends } from '@yarnaimo/type-extends'
 import { expectType } from 'tsd'
-import { FTypes, STypes, TypedFirestore } from '../../core'
-import { useTypedDocument, useTypedQuery } from '../../hooks'
+import {
+  FTypes,
+  STypes,
+  TypedDocumentRef,
+  TypedDocumentSnap,
+  TypedFirestore,
+  TypedQueryDocumentSnap,
+  TypedQueryRef,
+  TypedQuerySnap,
+  withRefTransformer,
+} from '../../core'
+import {
+  useTypedDocument,
+  useTypedDocumentOnce,
+  useTypedQuery,
+  useTypedQueryOnce,
+} from '../../hooks'
 import { _web } from '../../lib/firestore-types'
+import { R } from '../../lib/fp'
 import { postAData, userData } from '../_fixtures/data'
 import {
-  firestoreSchema,
+  firestoreModel,
   IPostA,
   IPostB,
   IUser,
   IUserLocal,
-  PostSchema,
-  UserSchema,
+  PostModel,
+  UserModel,
 } from '../_fixtures/firestore-schema'
 import { authedApp } from '../_infrastructure/_app'
+import { sleep } from '../_utils/common'
 import { expectAnyTimestamp, expectEqualRef } from '../_utils/firestore'
 
-const _tcollections = (app: _web.Firestore) => {
-  const typedFirestore = new TypedFirestore(firestoreSchema, firestore, app)
+type S = typeof firestoreModel.schemaOptions
+type F = _web.Firestore
+
+const _tcollections = (app: F) => {
+  const typedFirestore = new TypedFirestore(firestoreModel, firestore, app)
 
   void (() => {
     typedFirestore.collection(
@@ -76,13 +97,13 @@ const r = _tcollections(app)
 const ur = _tcollections(appUnauthed)
 
 type UserU = IUserLocal &
-  STypes.DocumentMeta<_web.Firestore> &
+  STypes.DocumentMeta<F> &
   STypes.HasLoc<'versions.users'> &
   STypes.HasT<IUser> &
   STypes.HasId
 
 type PostU = (IPostA | IPostB) &
-  STypes.DocumentMeta<_web.Firestore> &
+  STypes.DocumentMeta<F> &
   STypes.HasLoc<'versions.users.posts'> &
   STypes.HasT<IPostA | IPostB> &
   STypes.HasId
@@ -91,26 +112,16 @@ describe('types', () => {
   test('decoder', () => {
     expectType<
       (data: IUser, snap: FTypes.QueryDocumentSnap<IUser>) => IUserLocal
-    >(UserSchema.decoder)
+    >(UserModel.decoder)
 
-    expectType<undefined>(PostSchema.decoder)
+    expectType<undefined>(PostModel.decoder)
   })
 
   test('UAt', () => {
-    expectType<UserU>(
-      {} as STypes.DocDataAt<
-        typeof firestoreSchema,
-        _web.Firestore,
-        'versions.users'
-      >,
-    )
+    expectType<UserU>({} as STypes.DocDataAt<S, F, 'versions.users'>)
     expectType<PostU>(
       // @ts-expect-error: wrong U type
-      {} as STypes.DocDataAt<
-        typeof firestoreSchema,
-        _web.Firestore,
-        'versions.users'
-      >,
+      {} as STypes.DocDataAt<S, F, 'versions.users'>,
     )
   })
 })
@@ -205,7 +216,7 @@ describe('class structure', () => {
     const firstInstance = instances[0]!
     for (const instance of instances) {
       expect(instance.path).toBe(p)
-      expect(instance.loc).toEqual(l)
+      expect(instance.options.loc).toEqual(l)
       expectEqualRef(instance.raw, firstInstance.raw)
     }
   })
@@ -225,7 +236,7 @@ describe('class structure', () => {
     },
   ])('loc (Q): %p', ({ l, instances }) => {
     for (const instance of instances) {
-      expect(instance.loc).toEqual(l)
+      expect(instance.options.loc).toEqual(l)
     }
   })
 })
@@ -242,90 +253,155 @@ const createInitialUserAndPost = async () => {
     .set(postAData as any)
 }
 
+const transformer = withRefTransformer
+
 describe('read', () => {
   beforeEach(createInitialUserAndPost)
 
   test.each([
-    { get: () => r.typedFirestore.runTransaction((tt) => tt.get(r.user)) },
+    {
+      get: () => r.typedFirestore.runTransaction((tt) => tt.get(r.user)),
+      getData: typeExtends<
+        TypedDocumentRef<S, F, 'versions.users'>['getData']
+      >()((options) =>
+        r.typedFirestore.runTransaction((tt) => tt.getData(r.user, options)),
+      ),
+    },
     r.user,
     r.posts.parentDocument(),
     r.typedFirestore.wrapDocument(r.user.raw),
   ])('get doc - user %#', async (ref) => {
-    const snap: _web.DocumentSnapshot<UserU> = await ref.get()
-    // @ts-expect-error: wrong data type
-    const snapError: _web.DocumentSnapshot<PostU> = await ref.get()
+    const snap = await ref.get()
+    const [get, getR, getData, getDataR] = [
+      snap.data()!,
+      snap.data({ transformer })!,
+      (await ref.getData({}))!,
+      (await ref.getData({ transformer }))!,
+    ]
 
-    const data = snap.data()!
+    for (const data of [get, getR, getData, getDataR]) {
+      // @ts-expect-error: ref not exists
+      data.ref
+      // @ts-expect-error: wrong data type
+      expectType<PostU>(data)
+      expect<UserU>(data).toMatchObject({
+        ...userData,
+        timestamp: expect.any(String),
+        id: snap.id,
+      })
+    }
 
-    expectType<UserU>(data)
-    // @ts-expect-error: wrong data type
-    expectType<PostU>(data)
-    expect(data).toMatchObject({
-      ...userData,
-      timestamp: expect.any(String),
-      id: snap.id,
-    })
+    for (const data of [getR, getDataR]) {
+      expectType<UserU & { ref: TypedDocumentRef<S, F, 'versions.users'> }>(
+        data,
+      )
+      expectEqualRef(data.ref.raw, r.user.raw)
+    }
   })
 
   test.each([
-    { get: () => r.typedFirestore.runTransaction((tt) => tt.get(r.post)) },
+    {
+      get: () => r.typedFirestore.runTransaction((tt) => tt.get(r.post)),
+      getData: typeExtends<
+        TypedDocumentRef<S, F, 'versions.users.posts'>['getData']
+      >()((options) =>
+        r.typedFirestore.runTransaction((tt) => tt.getData(r.post, options)),
+      ),
+    },
     r.post,
     r.typedFirestore.wrapDocument(r.post.raw),
   ])('get doc - post %#', async (ref) => {
-    const snap: _web.DocumentSnapshot<PostU> = await ref.get()
-    // @ts-expect-error: wrong data type
-    const snapError: _web.DocumentSnapshot<UserU> = await ref.get()
+    const snap = await ref.get()
+    const [get, getR, getData, getDataR] = [
+      snap.data()!,
+      snap.data({ transformer })!,
+      (await ref.getData({}))!,
+      (await ref.getData({ transformer }))!,
+    ]
 
-    const data = snap.data()!
+    for (const data of [get, getR, getData, getDataR]) {
+      // @ts-expect-error: ref not exists
+      data.ref
+      // @ts-expect-error: wrong data type
+      expectType<UserU>(data)
+      expect<PostU>(data).toMatchObject({
+        ...postAData,
+        id: snap.id,
+      })
+    }
 
-    expectType<PostU>(data)
-    // @ts-expect-error: wrong data type
-    expectType<UserU>(data)
-    expect(data).toMatchObject({
-      ...postAData,
-      id: snap.id,
-    })
+    for (const data of [getR, getDataR]) {
+      expectType<
+        PostU & { ref: TypedDocumentRef<S, F, 'versions.users.posts'> }
+      >(data)
+      expectEqualRef(data.ref.raw, r.post.raw)
+    }
   })
 
   test.each([r.users, r.user.parentCollection()])(
     'get collection - users %#',
     async (ref) => {
-      const snap: _web.QuerySnapshot<UserU> = await ref.get()
-      // @ts-expect-error: wrong data type
-      const snapError: _web.QuerySnapshot<PostU> = await ref.get()
+      const snap = await ref.get()
+      const [get, getR, getData, getDataR] = [
+        snap.typedDocs[0]!.data(),
+        snap.typedDocs[0]!.data({ transformer })!,
+        (await ref.getData({}))[0]!,
+        (await ref.getData({ transformer }))[0]!,
+      ]
 
-      expect(snap.docs).toHaveLength(1)
-      const data = snap.docs[0]!.data()
+      expect(snap.typedDocs).toHaveLength(1)
 
-      expectType<UserU>(data)
-      // @ts-expect-error: wrong data type
-      expectType<PostU>(data)
-      expect(data).toMatchObject({
-        ...userData,
-        timestamp: expect.any(String),
-        id: snap.docs[0].id,
-      })
+      for (const data of [get, getR, getData, getDataR]) {
+        // @ts-expect-error: ref not exists
+        data.ref
+        // @ts-expect-error: wrong data type
+        expectType<PostU>(data)
+        expect<UserU>(data).toMatchObject({
+          ...userData,
+          timestamp: expect.any(String),
+          id: snap.typedDocs[0].id,
+        })
+      }
+
+      for (const data of [getR, getDataR]) {
+        expectType<UserU & { ref: TypedDocumentRef<S, F, 'versions.users'> }>(
+          data,
+        )
+        expectEqualRef(data.ref.raw, r.user.raw)
+      }
     },
   )
 
   test.each([r.teenUsers, r.teenUsersGroup])(
     'get query - users %#',
     async (query) => {
-      const snap: _web.QuerySnapshot<UserU> = await query.get()
-      // @ts-expect-error: wrong data type
-      const snapError: _web.QuerySnapshot<PostU> = await query.get()
+      const snap = await query.get()
+      const [get, getR, getData, getDataR] = [
+        snap.typedDocs[0]!.data(),
+        snap.typedDocs[0]!.data({ transformer })!,
+        (await query.getData({}))[0]!,
+        (await query.getData({ transformer }))[0]!,
+      ]
 
-      expect(snap.docs).toHaveLength(1)
-      const data = snap.docs[0]!.data()
+      expect(snap.typedDocs).toHaveLength(1)
 
-      expectType<UserU>(data)
-      // @ts-expect-error: wrong data type
-      expectType<PostU>(data)
-      expect(data).toMatchObject({
-        ...userData,
-        timestamp: expect.any(String),
-        id: snap.docs[0].id,
-      })
+      for (const data of [get, getR, getData, getDataR]) {
+        // @ts-expect-error: ref not exists
+        data.ref
+        // @ts-expect-error: wrong data type
+        expectType<PostU>(data)
+        expect<UserU>(data).toMatchObject({
+          ...userData,
+          timestamp: expect.any(String),
+          id: snap.typedDocs[0].id,
+        })
+      }
+
+      for (const data of [getR, getDataR]) {
+        expectType<UserU & { ref: TypedDocumentRef<S, F, 'versions.users'> }>(
+          data,
+        )
+      }
     },
   )
 
@@ -333,27 +409,47 @@ describe('read', () => {
     {
       get: async () => {
         const usersSnap = await r.users.get()
-        const userRef = r.typedFirestore.wrapDocument(usersSnap.docs[0]!.ref)
+        const userRef = usersSnap.typedDocs[0]!.typedRef
         return userRef.collection('posts').get()
       },
+      getData: typeExtends<
+        TypedQueryRef<S, F, 'versions.users.posts'>['getData']
+      >()(async (options) => {
+        const usersSnap = await r.users.get()
+        const userRef = usersSnap.typedDocs[0]!.typedRef
+        return userRef.collection('posts').getData(options)
+      }),
     },
     r.posts,
     r.post.parentCollection(),
   ])('get collection - posts %#', async (ref) => {
-    const snap: _web.QuerySnapshot<PostU> = await ref.get()
-    // @ts-expect-error: wrong data type
-    const snapError: _web.QuerySnapshot<UserU> = await ref.get()
+    const snap = await ref.get()
+    const [get, getR, getData, getDataR] = [
+      snap.typedDocs[0]!.data(),
+      snap.typedDocs[0]!.data({ transformer })!,
+      (await ref.getData({}))[0]!,
+      (await ref.getData({ transformer }))[0]!,
+    ]
 
-    expect(snap.docs).toHaveLength(1)
-    const data = snap.docs[0]!.data()
+    expect(snap.typedDocs).toHaveLength(1)
 
-    expectType<PostU>(data)
-    // @ts-expect-error: wrong data type
-    expectType<UserU>(data)
-    expect(data).toMatchObject({
-      ...postAData,
-      id: snap.docs[0].id,
-    })
+    for (const data of [get, getR, getData, getDataR]) {
+      // @ts-expect-error: ref not exists
+      data.ref
+      // @ts-expect-error: wrong data type
+      expectType<UserU>(data)
+      expect<PostU>(data).toMatchObject({
+        ...postAData,
+        id: snap.typedDocs[0].id,
+      })
+    }
+
+    for (const data of [getR, getDataR]) {
+      expectType<
+        PostU & { ref: TypedDocumentRef<S, F, 'versions.users.posts'> }
+      >(data)
+      expectEqualRef(data.ref.raw, r.post.raw)
+    }
   })
 })
 
@@ -545,83 +641,196 @@ describe('hooks', () => {
     snap: undefined,
   }
 
-  test('useTypedDocument', async () => {
-    const { result, waitForNextUpdate, unmount } = renderHook(() =>
-      useTypedDocument(r.user),
-    )
-    expect(result.current).toEqual(initialResult)
-    await waitForNextUpdate()
+  describe('useTypedDocument', () => {
+    test('safeRef', async () => {
+      let ref: any
+      const updateRef = () => {
+        const typedDoc = r.users.doc('user')
+        ;(typedDoc.raw as any) = (typedDoc.raw.withConverter as any)({
+          toFirestore: (data: any) => data,
+          fromFirestore: (snap: any) => snap.data(),
+        })
+        ref = typedDoc
+      }
+      updateRef()
 
-    expect(result.current).toMatchObject({
-      error: undefined,
-      loading: false,
-      data: { ...userData, timestamp: expect.any(String) },
+      const { result, rerender, waitForNextUpdate, unmount } = renderHook(() =>
+        useTypedDocument(ref),
+      )
+      await waitForNextUpdate()
+
+      expect(result.current).toMatchObject({
+        error: undefined,
+        loading: false,
+        snap: expect.any(TypedDocumentSnap),
+      })
+
+      const consoleMock = jest.spyOn(console, 'error').mockImplementation()
+      for (const _ of R.range(0, 3)) {
+        updateRef()
+        rerender()
+        await sleep(500)
+      }
+      consoleMock.mockRestore()
+
+      expect(result.current).toMatchObject({
+        error: undefined,
+        loading: false,
+        snap: undefined,
+        data: undefined,
+      })
+
+      unmount()
     })
-    expectEqualRef(result.current.snap!.ref, r.user.raw)
 
-    expectType<UserU>(result.current.data!)
-    // @ts-expect-error: wrong data type
-    expectType<PostU>(result.current.data!)
-    unmount()
+    test.each([useTypedDocument, useTypedDocumentOnce])(
+      'without transformer %#',
+      async (hook) => {
+        const { result, waitForNextUpdate, unmount } = renderHook(() =>
+          hook(r.user),
+        )
+        expect(result.current).toEqual(initialResult)
+        await waitForNextUpdate()
+
+        expect(result.current).toMatchObject({
+          error: undefined,
+          loading: false,
+          snap: expect.any(TypedDocumentSnap),
+          data: { ...userData, timestamp: expect.any(String) },
+        })
+        expectEqualRef(result.current.snap!.typedRef.raw, r.user.raw)
+
+        expectType<UserU>(result.current.data!)
+        // @ts-expect-error: wrong data type
+        expectType<PostU>(result.current.data!)
+        unmount()
+      },
+    )
+
+    test.each([useTypedDocument, useTypedDocumentOnce])(
+      'with transformer %#',
+      async (hook) => {
+        const { result, waitForNextUpdate, unmount } = renderHook(() =>
+          hook(r.user, {
+            transformer: (data, snap) => {
+              expectType<TypedDocumentSnap<S, F, 'versions.users'>>(snap)
+              return data.name
+            },
+          }),
+        )
+        expect(result.current).toEqual(initialResult)
+        await waitForNextUpdate()
+
+        expect(result.current).toMatchObject({
+          error: undefined,
+          loading: false,
+          snap: expect.any(TypedDocumentSnap),
+          data: userData.name,
+        })
+        expectEqualRef(result.current.snap!.typedRef.raw, r.user.raw)
+
+        expectType<string>(result.current.data!)
+        // @ts-expect-error: wrong data type
+        expectType<number>(result.current.data!)
+        unmount()
+      },
+    )
   })
 
-  test('useTypedDocument with transformer', async () => {
-    const { result, waitForNextUpdate, unmount } = renderHook(() =>
-      useTypedDocument(r.user, (data) => data.name),
-    )
-    expect(result.current).toEqual(initialResult)
-    await waitForNextUpdate()
+  describe('useTypedQuery', () => {
+    test('safeRef', async () => {
+      let ref: any
+      const updateRef = () => {
+        ref = r.v1.collectionQuery('users', (q) => q._teen())
+      }
+      updateRef()
 
-    expect(result.current).toMatchObject({
-      error: undefined,
-      loading: false,
-      data: userData.name,
+      const { result, rerender, waitForNextUpdate, unmount } = renderHook(() =>
+        useTypedQuery(ref),
+      )
+      await waitForNextUpdate()
+
+      expect(result.current).toMatchObject({
+        error: undefined,
+        loading: false,
+        snap: expect.any(TypedQuerySnap),
+      })
+
+      const consoleMock = jest.spyOn(console, 'error').mockImplementation()
+      for (const _ of R.range(0, 3)) {
+        updateRef()
+        rerender()
+        await sleep(500)
+      }
+      consoleMock.mockRestore()
+
+      expect(result.current).toMatchObject({
+        error: undefined,
+        loading: false,
+        snap: undefined,
+        data: undefined,
+      })
+
+      unmount()
     })
-    expectEqualRef(result.current.snap!.ref, r.user.raw)
 
-    expectType<string>(result.current.data!)
-    // @ts-expect-error: wrong data type
-    expectType<number>(result.current.data!)
-    unmount()
-  })
+    test.each([useTypedQuery, useTypedQueryOnce])(
+      'without transformer %#',
+      async (hook) => {
+        const { result, waitForNextUpdate, unmount } = renderHook(() =>
+          hook(r.teenUsers),
+        )
+        expect(result.current).toEqual(initialResult)
+        await waitForNextUpdate()
 
-  test('useTypedQuery', async () => {
-    const { result, waitForNextUpdate, unmount } = renderHook(() =>
-      useTypedQuery(r.users),
+        expect(result.current).toMatchObject({
+          error: undefined,
+          loading: false,
+          snap: expect.any(TypedQuerySnap),
+          data: [{ ...userData, timestamp: expect.any(String) }],
+        })
+        expectEqualRef(
+          result.current.snap!.typedDocs[0]!.typedRef.raw,
+          r.user.raw,
+        )
+
+        expectType<UserU>(result.current.data![0]!)
+        // @ts-expect-error: wrong data type
+        expectType<PostU>(result.current.data![0]!)
+        unmount()
+      },
     )
-    expect(result.current).toEqual(initialResult)
-    await waitForNextUpdate()
 
-    expect(result.current).toMatchObject({
-      error: undefined,
-      loading: false,
-      data: [{ ...userData, timestamp: expect.any(String) }],
-    })
-    expectEqualRef(result.current.snap!.docs[0]!.ref, r.user.raw)
+    test.each([useTypedQuery, useTypedQueryOnce])(
+      'with transformer %#',
+      async (hook) => {
+        const { result, waitForNextUpdate, unmount } = renderHook(() =>
+          hook(r.teenUsers, {
+            transformer: (data, snap) => {
+              expectType<TypedQueryDocumentSnap<S, F, 'versions.users'>>(snap)
+              return data.name
+            },
+          }),
+        )
+        expect(result.current).toEqual(initialResult)
+        await waitForNextUpdate()
 
-    expectType<UserU>(result.current.data![0]!)
-    // @ts-expect-error: wrong data type
-    expectType<PostU>(result.current.data![0]!)
-    unmount()
-  })
+        expect(result.current).toMatchObject({
+          error: undefined,
+          loading: false,
+          snap: expect.any(TypedQuerySnap),
+          data: [userData.name],
+        })
+        expectEqualRef(
+          result.current.snap!.typedDocs[0]!.typedRef.raw,
+          r.user.raw,
+        )
 
-  test('useTypedQuery with transformer', async () => {
-    const { result, waitForNextUpdate, unmount } = renderHook(() =>
-      useTypedQuery(r.users, (data) => data.name),
+        expectType<string>(result.current.data![0]!)
+        // @ts-expect-error: wrong data type
+        expectType<number>(result.current.data![0]!)
+        unmount()
+      },
     )
-    expect(result.current).toEqual(initialResult)
-    await waitForNextUpdate()
-
-    expect(result.current).toMatchObject({
-      error: undefined,
-      loading: false,
-      data: [userData.name],
-    })
-    expectEqualRef(result.current.snap!.docs[0]!.ref, r.user.raw)
-
-    expectType<string>(result.current.data![0]!)
-    // @ts-expect-error: wrong data type
-    expectType<number>(result.current.data![0]!)
-    unmount()
   })
 })

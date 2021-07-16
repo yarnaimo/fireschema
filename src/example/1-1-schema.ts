@@ -1,51 +1,58 @@
 import { Merge } from 'type-fest'
 import {
+  $,
   $allow,
   $collectionGroups,
-  $collectionSchema,
   $docLabel,
   $functions,
+  $model,
   $or,
-  $schema,
-  createFirestoreSchema,
-  FTypes,
+  DataModel,
+  FirestoreModel,
+  InferSchemaType,
 } from '..'
 
 // user
-export type User = {
+export const UserType = {
+  name: $.string,
+  displayName: $.union($.string, $.null),
+  age: $.int,
+  timestamp: $.timestamp,
+  options: $.optional({ a: $.bool }),
+}
+type User = InferSchemaType<typeof UserType>
+/* => {
   name: string
   displayName: string | null
   age: number
   timestamp: FTypes.Timestamp
   options: { a: boolean } | undefined
-}
-export type UserDecoded = Merge<User, { timestamp: Date }>
+} */
 
-const UserSchema = $collectionSchema<User, UserDecoded>()({
-  decoder: (data) => ({
+type UserDecoded = Merge<User, { timestamp: Date }>
+
+const UserModel = new DataModel({
+  schema: UserType,
+  decoder: (data: User): UserDecoded => ({
     ...data,
     timestamp: data.timestamp.toDate(),
   }),
 })
 
 // post
-type PostA = {
-  type: 'a'
-  tags: { id: number; name: string }[]
-  text: string
+const PostType = {
+  tags: $.array({ id: $.int, name: $.string }),
+  text: $.string,
 }
-type PostB = {
-  type: 'b'
-  tags: { id: number; name: string }[]
-  texts: string[]
-}
-const PostSchema = $collectionSchema<PostA | PostB>()({
+
+const PostModel = new DataModel({
+  schema: PostType,
   selectors: (q) => ({
     byTag: (tag: string) => q.where('tags', 'array-contains', tag),
   }),
 })
 
-export const firestoreSchema = createFirestoreSchema({
+export const firestoreModel = new FirestoreModel({
   [$functions]: {
     // whether /admins/<uid> exists
     ['isAdmin()']: `
@@ -61,7 +68,7 @@ export const firestoreSchema = createFirestoreSchema({
   [$collectionGroups]: {
     posts: {
       [$docLabel]: 'postId',
-      [$schema]: PostSchema,
+      [$model]: PostModel,
       [$allow]: {
         read: true,
       },
@@ -71,7 +78,7 @@ export const firestoreSchema = createFirestoreSchema({
   // /users/{uid}
   users: {
     [$docLabel]: 'uid', // {uid}
-    [$schema]: UserSchema, // collectionSchema
+    [$model]: UserModel, // collectionSchema
     [$allow]: {
       // access control
       read: true, // all user
@@ -81,7 +88,7 @@ export const firestoreSchema = createFirestoreSchema({
     // /users/{uid}/posts/{postId}
     posts: {
       [$docLabel]: 'postId',
-      [$schema]: PostSchema,
+      [$model]: PostModel,
       [$allow]: {
         read: true,
         write: 'matchesUser(uid)',
@@ -89,3 +96,5 @@ export const firestoreSchema = createFirestoreSchema({
     },
   },
 })
+
+export default firestoreModel

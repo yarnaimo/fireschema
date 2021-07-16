@@ -1,15 +1,14 @@
 import { firestore } from 'firebase-admin'
 import * as functions from 'firebase-functions'
-import { Merge } from 'type-fest'
-import { $jsonSchema, TypedFunctions } from '..'
-import { firestoreSchema, User } from './1-1-schema'
+import { $, TypedFunctions } from '..'
+import { firestoreModel, UserType } from './1-1-schema'
 
 /**
  * Initialize TypedFunctions
  */
 const timezone = 'Asia/Tokyo'
 const typedFunctions = new TypedFunctions(
-  firestoreSchema,
+  firestoreModel,
   firestore,
   functions,
   timezone,
@@ -19,13 +18,13 @@ const builder = functions.region('asia-northeast1')
 /**
  * functions/index.ts file
  */
-export type UserJson = Merge<User, { timestamp: string }>
+export const UserJsonType = { ...UserType, timestamp: $.string }
 export const callable = {
   createUser: typedFunctions.callable({
-    schema: [
-      $jsonSchema<UserJson>(), // schema of request data (automatically validate on request)
-      $jsonSchema<{ result: boolean }>(), // schema of response data
-    ],
+    schema: {
+      input: UserJsonType, // schema of request data (automatically validate on request)
+      output: { result: $.bool }, // schema of response data
+    },
     builder,
     handler: async (data, context) => {
       console.log(data) // UserJson
@@ -61,7 +60,7 @@ export const http = {
 
 export const topic = {
   publishMessage: typedFunctions.topic('publish_message', {
-    schema: $jsonSchema<{ text: string }>(),
+    schema: { text: $.string },
     builder,
     handler: async (data) => {
       data // { text: string }

@@ -58,7 +58,7 @@ export declare namespace FTypes {
   >
   export type FirestoreDataConverter<
     T,
-    F extends FirestoreApp = FirestoreApp
+    F extends FirestoreApp = FirestoreApp,
   > = Env<
     F,
     _web.FirestoreDataConverter<T>,
@@ -84,6 +84,11 @@ export declare namespace FTypes {
     F,
     _web.QueryDocumentSnapshot<T>,
     _admin.QueryDocumentSnapshot<T>
+  >
+  export type GetOptions<F extends FirestoreApp = FirestoreApp> = Env<
+    F,
+    _web.GetOptions,
+    undefined
   >
   export type SnapshotOptions<F extends FirestoreApp = FirestoreApp> = Env<
     F,

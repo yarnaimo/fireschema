@@ -1,8 +1,8 @@
 import type express from 'express'
 import { _admin } from '../../lib/firestore-types'
 import { _fadmin, _fweb } from '../../lib/functions-types'
-import { $_ } from '../../runtypes'
 import { $input, $output, $topicName } from '../constants'
+import { InferSchemaType } from './SchemaType'
 import { ExtractFP, ParseFP } from './_functions'
 import { GetDeep } from './_object'
 
@@ -14,8 +14,6 @@ export declare namespace FunTypes {
   //     ? T[K]
   //     : Jsonfy<T[K]>
   // }
-
-  export type JsonSchema<T> = $_.Runtype<unknown> & { __T__: T }
 
   export type NestedFunctions = {
     [K in string]:
@@ -32,11 +30,6 @@ export declare namespace FunTypes {
     firestoreTrigger?: NestedFunctions
   }
 
-  export type SchemaTuple<I, O> = readonly [
-    input: FunTypes.JsonSchema<I>,
-    output: FunTypes.JsonSchema<O>,
-  ]
-
   export namespace Callable {
     export type Meta<I, O> = { [$input]: I; [$output]: O }
     export type EnsureMeta<_C> = _C extends Meta<any, any> ? _C : never
@@ -48,18 +41,18 @@ export declare namespace FunTypes {
 
     export type GetByFP<
       MC extends NestedFunctions | undefined,
-      FP extends ExtractFP<MC>
+      FP extends ExtractFP<MC>,
     > = EnsureMeta<GetDeep<MC, ParseFP<FP>>>
 
     export type InputOf<
       MC extends NestedFunctions | undefined,
-      FP extends ExtractFP<MC>
-    > = GetByFP<MC, FP>[typeof $input]
+      FP extends ExtractFP<MC>,
+    > = InferSchemaType<GetByFP<MC, FP>[typeof $input]>
 
     export type OutputOf<
       MC extends NestedFunctions | undefined,
-      FP extends ExtractFP<MC>
-    > = GetByFP<MC, FP>[typeof $output]
+      FP extends ExtractFP<MC>,
+    > = InferSchemaType<GetByFP<MC, FP>[typeof $output]>
 
     export type CallResult<T, E = _fweb.HttpsError> =
       | { data: T; error?: never }

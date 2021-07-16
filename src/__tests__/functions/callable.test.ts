@@ -42,7 +42,7 @@ test('call - invalid-argument', async () => {
 
   expect(result).toEqual({
     error: expect.objectContaining({
-      message: messages.invalidRequest,
+      message: messages.validationFailed,
       code: 'invalid-argument',
     }),
   })

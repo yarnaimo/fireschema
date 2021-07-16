@@ -1,7 +1,8 @@
-import { $collectionGroups } from '../../../constants'
-import { FTypes, STypes } from '../../../types'
-import { Loc } from '../../../types/_object'
-import { firestorePathToLoc } from '../../../utils/_firestore'
+import { $collectionGroups } from '../../constants'
+import { FTypes, STypes } from '../../types'
+import { Loc } from '../../types/_object'
+import { firestorePathToLoc } from '../../utils/_firestore'
+import { FirestoreModel, InferFirestoreModelS } from '../model'
 import { TypedQueryRef } from './TypedCollectionRef'
 import { TypedDocumentRef } from './TypedDocumentRef'
 import { TypedFDBase } from './TypedFDBase'
@@ -9,15 +10,23 @@ import { TypedTransaction } from './TypedTransaction'
 import { TypedWriteBatch } from './TypedWriteBatch'
 
 export class TypedFirestore<
-  S extends STypes.RootOptions.All,
-  F extends FTypes.FirestoreApp
+  M extends FirestoreModel<STypes.RootOptions.All>,
+  F extends FTypes.FirestoreApp,
+  S extends InferFirestoreModelS<M> = InferFirestoreModelS<M>,
 > extends TypedFDBase<S, F, '', true> {
   constructor(
-    schemaOptions: S,
-    firestoreStatic: FTypes.FirestoreStatic<F>,
-    raw: F,
+    readonly model: M,
+    readonly firestoreStatic: FTypes.FirestoreStatic<F>,
+    readonly raw: F,
   ) {
-    super(schemaOptions, firestoreStatic, '', raw)
+    super(
+      {
+        schemaOptions: model.schemaOptions as S,
+        firestoreStatic,
+        loc: '',
+      },
+      raw,
+    )
   }
 
   private origGroup(collectionName: string) {
@@ -29,9 +38,7 @@ export class TypedFirestore<
     loc: L,
   ) {
     return new TypedQueryRef<S, F, L>(
-      this.schemaOptions,
-      this.firestoreStatic,
-      loc,
+      { ...this.options, loc },
       this.origGroup(collectionName),
     )
   }
@@ -42,9 +49,7 @@ export class TypedFirestore<
     selector: STypes.Selector<S, F, L>,
   ) {
     return new TypedQueryRef<S, F, L>(
-      this.schemaOptions,
-      this.firestoreStatic,
-      loc,
+      { ...this.options, loc },
       this.origGroup(collectionName),
       selector,
     )
@@ -53,7 +58,7 @@ export class TypedFirestore<
   // docref に L がある場合
   wrapDocument<
     D extends FTypes.DocumentRef<any, F>,
-    L extends string = STypes.InferDocT<D>['__loc__']
+    L extends string = STypes.InferDocT<D>['__loc__'],
   >(raw: D): TypedDocumentRef<S, F, L>
 
   // TODO: docref に L がない場合
@@ -62,15 +67,10 @@ export class TypedFirestore<
   // ): TypedDocumentRef<S, F, L>
 
   wrapDocument<L extends string>(
-    raw: FTypes.DocumentRef<any, F>,
+    rawDocRef: FTypes.DocumentRef<any, F>,
   ): TypedDocumentRef<S, F, L> {
-    const loc = firestorePathToLoc(raw.path) as L
-    return new TypedDocumentRef<S, F, L>(
-      this.schemaOptions,
-      this.firestoreStatic,
-      loc,
-      raw,
-    )
+    const loc = firestorePathToLoc(rawDocRef.path) as L
+    return new TypedDocumentRef<S, F, L>({ ...this.options, loc }, rawDocRef)
   }
 
   async runTransaction<T>(
@@ -78,7 +78,7 @@ export class TypedFirestore<
   ): Promise<T> {
     return this.raw.runTransaction(async (_t: any) => {
       const tt = new TypedTransaction<S, F>(
-        this.firestoreStatic,
+        this.options,
         _t as FTypes.Transaction<F>,
       )
       return fn(tt)

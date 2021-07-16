@@ -1,6 +1,6 @@
 import type { Attributes, PubSub } from '@google-cloud/pubsub'
 import { $input } from '../../constants'
-import { FunTypes } from '../../types'
+import { FunTypes, InferSchemaType } from '../../types'
 import { ExtractTopicNames, GetTopicMeta } from '../../types/_functions'
 
 export class TypedTopic<M extends FunTypes.FunctionsModule> {
@@ -8,8 +8,12 @@ export class TypedTopic<M extends FunTypes.FunctionsModule> {
 
   async publish<
     TN extends ExtractTopicNames<M['topic']>,
-    C extends GetTopicMeta<M['topic'], TN> = GetTopicMeta<M['topic'], TN>
-  >(topicName: TN, data: C[typeof $input], attributes?: Attributes) {
+    C extends GetTopicMeta<M['topic'], TN> = GetTopicMeta<M['topic'], TN>,
+  >(
+    topicName: TN,
+    data: InferSchemaType<C[typeof $input]>,
+    attributes?: Attributes,
+  ) {
     const messageId = await this.pubSubClient
       .topic(topicName)
       .publishJSON(data as object, attributes)

@@ -1,16 +1,25 @@
-import { _web } from '../../../../lib/firestore-types'
-import { FTypes, STypes } from '../../../types'
-import { TypedDocumentRef } from './TypedDocumentRef'
+import { _web } from '../../../lib/firestore-types'
+import { FTypes, STypes } from '../../types'
+import {
+  DocumentSnapDataOptions,
+  TypedDocumentRef,
+  TypedDocumentSnap,
+} from './TypedDocumentRef'
 import { DocDataHelper } from './_utils'
 
 export class TypedTransaction<
   S extends STypes.RootOptions.All,
-  F extends FTypes.FirestoreApp
+  F extends FTypes.FirestoreApp,
 > {
-  private readonly dataHelper = new DocDataHelper<F>(this.firestoreStatic)
+  private readonly dataHelper = new DocDataHelper<F>(
+    this.options.firestoreStatic,
+  )
 
   constructor(
-    readonly firestoreStatic: FTypes.FirestoreStatic<F>,
+    readonly options: {
+      schemaOptions: S
+      firestoreStatic: FTypes.FirestoreStatic<F>
+    },
     readonly raw: FTypes.Transaction<F>,
   ) {}
 
@@ -23,7 +32,23 @@ export class TypedTransaction<
 
   async get<L extends string>(typedDoc: TypedDocumentRef<S, F, L>) {
     const snap = await this._raw.get(this._doc(typedDoc.raw))
-    return snap as FTypes.DocumentSnap<STypes.DocDataAt<S, F, L>, F>
+
+    return new TypedDocumentSnap<S, F, L>(
+      { ...this.options, loc: typedDoc.options.loc },
+      snap as FTypes.DocumentSnap<STypes.DocDataAt<S, F, L>, F>,
+    )
+  }
+
+  async getData<
+    L extends string,
+    U extends STypes.DocDataAt<S, F, L> = STypes.DocDataAt<S, F, L>,
+    V = U,
+  >(
+    typedDoc: TypedDocumentRef<S, F, L>,
+    dataOptions: DocumentSnapDataOptions<S, F, L, U, V> = {},
+  ) {
+    const typedSnap = await this.get(typedDoc)
+    return typedSnap.data(dataOptions)
   }
 
   create<L extends string>(

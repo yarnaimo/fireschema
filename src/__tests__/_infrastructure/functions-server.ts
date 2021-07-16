@@ -1,24 +1,24 @@
 import { firestore } from 'firebase-admin'
 import * as functions from 'firebase-functions'
 import { expectType } from 'tsd'
-import { $jsonSchema, FunTypes, messages, TypedFunctions } from '../..'
-import { STypes } from '../../core'
+import { $, FunTypes, messages, STypes, TypedFunctions } from '../..'
 import { _admin } from '../../lib/firestore-types'
 import { _fadmin } from '../../lib/functions-types'
 import { Type } from '../../lib/type'
 import {
-  firestoreSchema,
+  firestoreModel,
   IPostA,
   IPostB,
   IUser,
   IUserJson,
   IUserLocal,
+  UserJsonType,
 } from '../_fixtures/firestore-schema'
 import { region } from './_config'
 
 const timezone = 'Asia/Tokyo'
 const typedFunctions = new TypedFunctions(
-  firestoreSchema,
+  firestoreModel,
   firestore,
   functions,
   timezone,
@@ -43,10 +43,10 @@ const wrap = async <T, U>(
   }
 }
 
-const createUserSchema = [
-  $jsonSchema<IUserJson>(),
-  $jsonSchema<{ result: number }>(),
-] as const
+const createUserSchema = {
+  input: UserJsonType,
+  output: { result: $.int },
+}
 const createUserHandler: FunTypes.Callable.Handler<
   IUserJson,
   { result: number }
@@ -66,10 +66,10 @@ const createUserHandler: FunTypes.Callable.Handler<
   })
 }
 
-const toUpperCaseSchema = [
-  $jsonSchema<{ text: string }>(),
-  $jsonSchema<{ result: string }>(),
-] as const
+const toUpperCaseSchema = {
+  input: { text: $.string },
+  output: { result: $.string },
+}
 const toUpperCaseHandler: FunTypes.Callable.Handler<
   { text: string },
   { result: string }
@@ -129,7 +129,7 @@ export const http = {
 
 export const topic = {
   publishMessage: typedFunctions.topic('publish_message', {
-    schema: $jsonSchema<{ text: string }>(),
+    schema: { text: $.string },
     builder,
     handler: async (data) => {
       expectType<{ text: string }>(data)
