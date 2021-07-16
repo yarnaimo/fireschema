@@ -5,4 +5,4 @@ export const emulatorOrigin = {
   pubsub: 'http://localhost:8085',
 }
 
-export const projectId = 'fireschema'
+export const projectId = 'fireschema-app'
