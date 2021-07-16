@@ -34,7 +34,9 @@ export type IUser = {
   timestamp: FTypes.Timestamp
   options: { a: boolean; b: string } | undefined
 }
-expectType<IUser>({} as InferSchemaType<typeof UserType>)
+type InferredUser = InferSchemaType<typeof UserType>
+
+expectType<IUser>({} as InferredUser)
 export type IUserLocal = Type.Merge<IUser, { timestamp: string }>
 export type IUserJson = Type.Merge<IUser, { timestamp: string }>
 export const UserJsonType = { ...UserType, timestamp: $.string }

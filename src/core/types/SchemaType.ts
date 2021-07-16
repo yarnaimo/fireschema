@@ -1,31 +1,50 @@
 import { UnionToIntersection } from 'type-fest'
 import { FTypes } from '.'
-import { Subtract } from './_object'
+
+export const $type = Symbol('Fireschema - schema type')
+
+export type InferSchemaType<T, Depth extends number = 7> = [Depth] extends [
+  never,
+]
+  ? never
+  : T extends { [$type]: infer U }
+  ? U
+  : { [K in keyof T]: InferSchemaType<T[K]> }
 
 export namespace SchemaType {
   export type _LiteralType = string | number | boolean
 
-  export type Union<T extends Value[]> = { type: 'union'; valueTypes: T }
+  export type Union<T extends Value[]> = {
+    type: 'union'
+    valueTypes: T
+    [$type]: InferSchemaType<T[number]>
+  }
   export type UnionJson<T extends JsonValue[]> = Union<T>
   export type Intersection<T extends Value[]> = {
     type: 'intersection'
     valueTypes: T
+    [$type]: UnionToIntersection<InferSchemaType<T[number]>>
   }
   export type IntersectionJson<T extends JsonValue[]> = Intersection<T>
 
-  export type Unknown = { type: 'unknown' }
-  export type Undefined = { type: 'undefined' }
-  export type Null = { type: 'null' }
-  export type Bool = { type: 'bool' }
-  export type String = { type: 'string' }
-  export type Literal<T extends _LiteralType> = {
+  export type Unknown = { type: 'unknown'; [$type]: unknown }
+  export type Undefined = { type: 'undefined'; [$type]: undefined }
+  export type Null = { type: 'null'; [$type]: null }
+  export type Bool = { type: 'bool'; [$type]: boolean }
+  export type String = { type: 'string'; [$type]: string }
+  export type Literal<L extends _LiteralType> = {
     type: 'literal'
-    literal: T
+    literal: L
+    [$type]: L
   }
-  export type Int = { type: 'int' }
-  export type Float = { type: 'float' }
-  export type Timestamp = { type: 'timestamp' }
-  export type Array<T extends Value> = { type: 'array'; valueType: T }
+  export type Int = { type: 'int'; [$type]: number }
+  export type Float = { type: 'float'; [$type]: number }
+  export type Timestamp = { type: 'timestamp'; [$type]: FTypes.Timestamp }
+  export type Array<T extends Value> = {
+    type: 'array'
+    valueType: T
+    [$type]: InferSchemaType<T>[]
+  }
   export type ArrayJson<T extends JsonValue> = Array<T>
   export type Map = { [key: string]: Value }
   export type MapJson = { [key: string]: JsonValue }
@@ -57,80 +76,47 @@ export namespace SchemaType {
   export type _JsonData = MapJson | UnionJson<any[]> | IntersectionJson<any[]>
 }
 
-export type InferSchemaType<
-  T extends SchemaType.Value,
-  Depth extends number = 7,
-> = [Depth] extends [never]
-  ? never
-  : T extends SchemaType.Union<infer U>
-  ? InferSchemaType<U[number], Subtract[Depth]>
-  : T extends SchemaType.Intersection<infer U>
-  ? UnionToIntersection<InferSchemaType<U[number], Subtract[Depth]>>
-  : T extends SchemaType.Unknown
-  ? unknown
-  : T extends SchemaType.Undefined
-  ? undefined
-  : T extends SchemaType.Null
-  ? null
-  : T extends SchemaType.Bool
-  ? boolean
-  : T extends SchemaType.String
-  ? string
-  : T extends SchemaType.Literal<infer U>
-  ? U
-  : T extends SchemaType.Int
-  ? number
-  : T extends SchemaType.Float
-  ? number
-  : T extends SchemaType.Timestamp
-  ? FTypes.Timestamp
-  : T extends SchemaType.Array<infer U>
-  ? InferSchemaType<U, Subtract[Depth]>[]
-  : T extends SchemaType.Map
-  ? {
-      [K in keyof T]: InferSchemaType<T[K], Subtract[Depth]>
-    }
-  : never
+const withT = <T>(value: Omit<T, typeof $type>) => value as T
 
-export class SchemaTypeProvider {
-  union<T extends SchemaType.Value[]>(...valueTypes: T): SchemaType.Union<T> {
-    return { type: 'union', valueTypes }
-  }
-  intersection<T extends SchemaType.Value[]>(
-    ...valueTypes: T
-  ): SchemaType.Intersection<T> {
-    return { type: 'intersection', valueTypes }
-  }
+export const $ = {
+  union<T extends SchemaType.Value[]>(...valueTypes: T) {
+    return withT<SchemaType.Union<T>>({
+      type: 'union',
+      valueTypes,
+    })
+  },
+  intersection<T extends SchemaType.Value[]>(...valueTypes: T) {
+    return withT<SchemaType.Intersection<T>>({
+      type: 'intersection',
+      valueTypes,
+    })
+  },
 
-  unknown: SchemaType.Unknown = { type: 'unknown' }
-  undefined: SchemaType.Undefined = { type: 'undefined' }
-  null: SchemaType.Null = { type: 'null' }
-  bool: SchemaType.Bool = { type: 'bool' }
+  unknown: withT<SchemaType.Unknown>({ type: 'unknown' }),
+  undefined: withT<SchemaType.Undefined>({ type: 'undefined' }),
+  null: withT<SchemaType.Null>({ type: 'null' }),
+  bool: withT<SchemaType.Bool>({ type: 'bool' }),
 
-  string: SchemaType.String = { type: 'string' }
-  literal<T extends SchemaType._LiteralType>(
-    literal: T,
-  ): SchemaType.Literal<T> {
-    return {
+  string: withT<SchemaType.String>({ type: 'string' }),
+  literal<L extends SchemaType._LiteralType>(literal: L) {
+    return withT<SchemaType.Literal<L>>({
       type: 'literal',
       literal,
-    }
-  }
+    })
+  },
 
-  int: SchemaType.Int = { type: 'int' }
-  float: SchemaType.Float = { type: 'float' }
-  timestamp: SchemaType.Timestamp = { type: 'timestamp' }
+  int: withT<SchemaType.Int>({ type: 'int' }),
+  float: withT<SchemaType.Float>({ type: 'float' }),
+  timestamp: withT<SchemaType.Timestamp>({ type: 'timestamp' }),
 
-  array<T extends SchemaType.Value>(valueType: T): SchemaType.Array<T> {
-    return {
+  array<T extends SchemaType.Value>(valueType: T) {
+    return withT<SchemaType.Array<T>>({
       type: 'array',
       valueType,
-    }
-  }
+    })
+  },
 
   optional<T extends SchemaType.Value>(valueType: T) {
     return this.union(valueType, this.undefined)
-  }
+  },
 }
-
-export const $ = new SchemaTypeProvider()
