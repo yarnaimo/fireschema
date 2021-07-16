@@ -21,11 +21,11 @@ test('exceeded', async () => {
   })
 
   rerender()
-  await sleep(500)
+  await sleep(250)
   rerender()
-  await sleep(500)
+  await sleep(250)
   rerender()
-  await sleep(500)
+  await sleep(250)
 
   expect(result.current.timestamps.current.length).toBeGreaterThan(1)
   expect(result.current.exceeded()).toBe(true)
