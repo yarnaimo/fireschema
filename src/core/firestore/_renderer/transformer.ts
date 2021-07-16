@@ -45,8 +45,6 @@ export const schemaToRule =
         ])
 
       default:
-        // eslint-disable-next-line no-case-declarations
-        const _: SchemaType.Map = t
         return P(
           Object.entries(t),
           R.map(([key, _t]) => {
