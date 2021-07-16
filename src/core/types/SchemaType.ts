@@ -13,6 +13,7 @@ export namespace SchemaType {
   }
   export type IntersectionJson<T extends JsonValue[]> = Intersection<T>
 
+  export type Unknown = { type: 'unknown' }
   export type Undefined = { type: 'undefined' }
   export type Null = { type: 'null' }
   export type Bool = { type: 'bool' }
@@ -32,6 +33,7 @@ export namespace SchemaType {
   export type JsonValue =
     | UnionJson<any[]>
     | IntersectionJson<any[]>
+    | Unknown
     | Undefined
     | Null
     | Bool
@@ -64,6 +66,8 @@ export type InferSchemaType<
   ? InferSchemaType<U[number], Subtract[Depth]>
   : T extends SchemaType.Intersection<infer U>
   ? UnionToIntersection<InferSchemaType<U[number], Subtract[Depth]>>
+  : T extends SchemaType.Unknown
+  ? unknown
   : T extends SchemaType.Undefined
   ? undefined
   : T extends SchemaType.Null
@@ -98,6 +102,7 @@ export class SchemaTypeProvider {
     return { type: 'intersection', valueTypes }
   }
 
+  unknown: SchemaType.Unknown = { type: 'unknown' }
   undefined: SchemaType.Undefined = { type: 'undefined' }
   null: SchemaType.Null = { type: 'null' }
   bool: SchemaType.Bool = { type: 'bool' }

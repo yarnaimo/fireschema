@@ -19,6 +19,8 @@ export const schemaToRule =
       case 'intersection':
         return P(t.valueTypes, R.map(schemaToRule(parent, key)), $and)
 
+      case 'unknown':
+        return 'true'
       case 'undefined':
         return $rule.notExists(key, parent)
       case 'null':
@@ -43,6 +45,8 @@ export const schemaToRule =
         ])
 
       default:
+        // eslint-disable-next-line no-case-declarations
+        const _: SchemaType.Map = t
         return P(
           Object.entries(t),
           R.map(([key, _t]) => {
