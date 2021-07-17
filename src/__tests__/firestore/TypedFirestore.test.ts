@@ -16,6 +16,8 @@ import {
   TypedQueryRef,
   TypedQuerySnap,
   withRefTransformer,
+  _createdAt,
+  _updatedAt,
 } from '../../core'
 import {
   useTypedDocument,
@@ -244,13 +246,18 @@ describe('class structure', () => {
 const usersRaw = app.collection('versions').doc('v1').collection('users')
 
 const createInitialUserAndPost = async () => {
-  await usersRaw.doc('user').set(userData as any)
+  const meta = {
+    [_createdAt]: firestore.FieldValue.serverTimestamp(),
+    [_updatedAt]: firestore.FieldValue.serverTimestamp(),
+  }
+
+  await usersRaw.doc('user').set({ ...userData, ...meta } as any)
 
   await usersRaw
     .doc('user')
     .collection('posts')
     .doc('post')
-    .set(postAData as any)
+    .set({ ...postAData, ...meta } as any)
 }
 
 const transformer = withRefTransformer
@@ -453,6 +460,86 @@ describe('read', () => {
   })
 })
 
+describe('write (test rules)', () => {
+  test('create user (empty array)', async () => {
+    await assertSucceeds(r.user.create({ ...userData, tags: [] }))
+  })
+
+  test('create user (fails due to invalid timestamp)', async () => {
+    const serverTs = () => firestore.FieldValue.serverTimestamp()
+    const localTs = () => firestore.Timestamp.fromDate(new Date())
+
+    for (const data of [
+      { ...userData, [_createdAt]: serverTs() },
+      { ...userData, [_updatedAt]: serverTs() },
+      { ...userData, [_createdAt]: localTs(), [_updatedAt]: serverTs() },
+      { ...userData, [_createdAt]: serverTs(), [_updatedAt]: localTs() },
+    ]) {
+      await assertFails(r.user.raw.set(data as any))
+    }
+
+    await assertSucceeds(
+      r.user.raw.set({
+        ...userData,
+        [_createdAt]: serverTs(),
+        [_updatedAt]: serverTs(),
+      } as any),
+    )
+
+    for (const data of [
+      { [_createdAt]: serverTs() },
+      { [_createdAt]: serverTs(), [_updatedAt]: serverTs() },
+      { [_updatedAt]: localTs() },
+    ]) {
+      await assertFails(r.user.raw.update(data as any))
+    }
+
+    await assertSucceeds(
+      r.user.raw.update({
+        [_updatedAt]: serverTs(),
+      } as any),
+    )
+  })
+
+  test('create user (fails due to wrong type)', async () => {
+    await assertFails(
+      r.user.create({
+        ...userData,
+        // @ts-expect-error: tags.id
+        tags: [{ id: '0', name: 'tag0' }],
+      }),
+    )
+
+    await assertFails(
+      r.user.create({
+        ...userData,
+        // @ts-expect-error: options.a
+        options: { a: 1, b: 'value' },
+      }),
+    )
+  })
+
+  test('create user (fails due to unauthed)', async () => {
+    await assertFails(ur.user.create(userData))
+  })
+
+  describe('write to non-existing doc', () => {
+    test('setMerge fails', async () => {
+      await assertFails(r.user.setMerge(userData))
+    })
+
+    test('update fails', async () => {
+      await assertFails(r.user.update(userData))
+    })
+  })
+
+  test('overwrite user fails', async () => {
+    await r.user.create(userData)
+    await assertSucceeds(r.user.update(userData))
+    await assertFails(r.user.create(userData))
+  })
+})
+
 describe('write', () => {
   test.each([
     async () => {
@@ -485,68 +572,9 @@ describe('write', () => {
       timestamp: expectAnyTimestamp(),
     })
   })
-
-  test('create user (empty array)', async () => {
-    await assertSucceeds(r.user.create({ ...userData, tags: [] }))
-  })
-
-  test('create user (fails due to invalid timestamp)', async () => {
-    await assertSucceeds(
-      r.user.raw.set({
-        ...userData,
-        _createdAt: firestore.FieldValue.serverTimestamp(),
-        _updatedAt: firestore.FieldValue.serverTimestamp(),
-      } as any),
-    )
-    await assertSucceeds(
-      r.user.raw.set({
-        ...userData,
-        _createdAt: firestore.FieldValue.serverTimestamp(),
-      } as any),
-    )
-    await assertFails(
-      r.user.raw.set({
-        ...userData,
-        _createdAt: firestore.FieldValue.serverTimestamp(),
-        _updatedAt: firestore.Timestamp.fromDate(new Date()),
-      } as any),
-    )
-  })
-
-  test('create user (fails due to wrong type)', async () => {
-    await assertFails(
-      r.user.create({
-        ...userData,
-        // @ts-expect-error: tags.id
-        tags: [{ id: '0', name: 'tag0' }],
-      }),
-    )
-
-    await assertFails(
-      r.user.create({
-        ...userData,
-        // @ts-expect-error: options.a
-        options: { a: 1, b: 'value' },
-      }),
-    )
-  })
-
-  test('create user (fails due to unauthed)', async () => {
-    await assertFails(ur.user.create(userData))
-  })
-
-  describe('write to non-existing doc', () => {
-    test('setMerge succeeds', async () => {
-      await expect(r.user.setMerge(userData)).resolves.toBeUndefined()
-    })
-
-    test('update fails', async () => {
-      await expect(r.user.update(userData)).rejects.toThrowError()
-    })
-  })
 })
 
-describe('write (with existing doc)', () => {
+describe('write (with initial docs)', () => {
   beforeEach(createInitialUserAndPost)
 
   const userUpdateData = {

@@ -5,23 +5,36 @@ import {
   _updatedAt,
 } from '../../constants'
 import { STypes } from '../../types'
-import { $$and, $or, $rule } from '../../utils'
+import { $$or, $and, $rule } from '../../utils'
 import { join } from '../../utils/_string'
 import { FirestoreModel } from '../model'
 import { renderCollectionGroups, renderCollections } from './collections'
 import { validator } from './format'
 import { renderFunctions } from './functions'
 
-const metaRules = $$and([
-  $or([
-    'request.method != "create"',
-    $or([
-      $rule.notExists(_createdAt, 'data'),
-      $rule.isServerTimestamp(`data.${_createdAt}`),
-    ]),
+/**
+ * - TypedDocumentRef.prototype.create() は内部で set() に渡すデータに _createdAt フィールドを自動で追加する
+ * - create() でもドキュメントが既に存在する場合は method が update になる
+ * - => id の衝突などで意図せず上書きされようとした場合、method は update で、_createdAt は書き込み前後で変化する
+ * - => method が update の場合に _createdAt が変化していないのをチェックすると防げる
+ *
+ * **Rules**
+ * - create
+ *   - data._createdAt is server timestamp
+ *   - data._updatedAt is server timestamp
+ * - update
+ *   - data._createdAt not changed
+ *   - data._updatedAt is server timestamp
+ */
+const metaRules = $$or([
+  $and([
+    'request.method == "create"',
+    $rule.isServerTimestamp(`data.${_createdAt}`),
+    $rule.isServerTimestamp(`data.${_updatedAt}`),
   ]),
-  $or([
-    $rule.notExists(_updatedAt, 'data'),
+  $and([
+    'request.method == "update"',
+    `data.${_createdAt} == resource.data.${_createdAt}`,
     $rule.isServerTimestamp(`data.${_updatedAt}`),
   ]),
 ])

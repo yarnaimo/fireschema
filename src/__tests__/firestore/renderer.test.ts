@@ -8,8 +8,8 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function __validator_meta__(data) {
       return (
-        (request.method != "create" || (!("_createdAt" in data) || data._createdAt == request.time))
-          && (!("_updatedAt" in data) || data._updatedAt == request.time)
+        (request.method == "create" && data._createdAt == request.time && data._updatedAt == request.time)
+          || (request.method == "update" && data._createdAt == resource.data._createdAt && data._updatedAt == request.time)
       );
     }
 
