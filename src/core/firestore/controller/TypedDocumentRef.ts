@@ -140,6 +140,12 @@ export class TypedDocumentRef<
     this.path = raw.path
   }
 
+  private wrapWriteResult(
+    writeResult: FTypes.WriteResult<FTypes.FirestoreApp>,
+  ) {
+    return writeResult as FTypes.WriteResult<F>
+  }
+
   parentCollection() {
     return new TypedCollectionRef<S, F, L>(
       this.options,
@@ -168,18 +174,28 @@ export class TypedDocumentRef<
   }
 
   async create(data: STypes.WriteData<S, F, L>) {
-    return this.raw.set(...this.dataHelper.create(data))
+    const args = this.dataHelper.create(data)
+
+    return this.wrapWriteResult(
+      'create' in this.raw
+        ? await this.raw.create(...args)
+        : await this.raw.set(...args),
+    )
   }
 
   async setMerge(data: Partial<STypes.WriteData<S, F, L>>) {
-    return this.raw.set(...this.dataHelper.setMerge(data))
+    return this.wrapWriteResult(
+      await this.raw.set(...this.dataHelper.setMerge(data)),
+    )
   }
 
   async update(data: Partial<STypes.WriteData<S, F, L>>) {
-    return this.raw.update(...this.dataHelper.update(data))
+    return this.wrapWriteResult(
+      await this.raw.update(...this.dataHelper.update(data)),
+    )
   }
 
   async delete() {
-    return this.raw.delete()
+    return this.wrapWriteResult(await this.raw.delete())
   }
 }

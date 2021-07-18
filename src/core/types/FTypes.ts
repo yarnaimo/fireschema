@@ -107,9 +107,14 @@ export declare namespace FTypes {
     _admin.WriteBatch
   >
 
-  export type SetResult<F extends FirestoreApp> = Env<
+  export type WriteResult<F extends FirestoreApp> = Env<
     F,
-    ReturnType<_web.DocumentReference['set']>,
-    ReturnType<_admin.DocumentReference['set']>
+    void,
+    _admin.WriteResult
+  >
+  export type WriteResultArray<F extends FirestoreApp> = Env<
+    F,
+    void,
+    _admin.WriteResult[]
   >
 }

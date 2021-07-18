@@ -1,11 +1,10 @@
-import { _web } from '../../../lib/firestore-types'
 import { FTypes, STypes } from '../../types'
 import {
   DocumentSnapDataOptions,
   TypedDocumentRef,
   TypedDocumentSnap,
 } from './TypedDocumentRef'
-import { DocDataHelper } from './_utils'
+import { docAsAdmin, docAsWeb, DocDataHelper } from './_utils'
 
 export class TypedTransaction<
   S extends STypes.RootOptions.All,
@@ -23,15 +22,11 @@ export class TypedTransaction<
     readonly raw: FTypes.Transaction<F>,
   ) {}
 
-  private get _raw() {
-    return this.raw as _web.Transaction
-  }
-  private _doc<U>(ref: FTypes.DocumentRef<U>) {
-    return ref as FTypes.DocumentRef<U, _web.Firestore>
-  }
-
   async get<L extends string>(typedDoc: TypedDocumentRef<S, F, L>) {
-    const snap = await this._raw.get(this._doc(typedDoc.raw))
+    const snap =
+      'create' in this.raw
+        ? await this.raw.get(docAsAdmin(typedDoc.raw))
+        : await this.raw.get(docAsWeb(typedDoc.raw))
 
     return new TypedDocumentSnap<S, F, L>(
       { ...this.options, loc: typedDoc.options.loc },
@@ -55,7 +50,13 @@ export class TypedTransaction<
     typedDoc: TypedDocumentRef<S, F, L>,
     data: STypes.WriteData<S, F, L>,
   ) {
-    this._raw.set(this._doc(typedDoc.raw), ...this.dataHelper.create(data))
+    const args = this.dataHelper.create(data)
+
+    if ('create' in this.raw) {
+      this.raw.create(docAsAdmin(typedDoc.raw), ...args)
+    } else {
+      this.raw.set(docAsWeb(typedDoc.raw), ...args)
+    }
     return this
   }
 
@@ -63,7 +64,13 @@ export class TypedTransaction<
     typedDoc: TypedDocumentRef<S, F, L>,
     data: Partial<STypes.WriteData<S, F, L>>,
   ) {
-    this._raw.set(this._doc(typedDoc.raw), ...this.dataHelper.setMerge(data))
+    const args = this.dataHelper.setMerge(data)
+
+    if ('create' in this.raw) {
+      this.raw.set(docAsAdmin(typedDoc.raw), ...args)
+    } else {
+      this.raw.set(docAsWeb(typedDoc.raw), ...args)
+    }
     return this
   }
 
@@ -71,12 +78,22 @@ export class TypedTransaction<
     typedDoc: TypedDocumentRef<S, F, L>,
     data: Partial<STypes.WriteData<S, F, L>>,
   ) {
-    this._raw.update(this._doc(typedDoc.raw), ...this.dataHelper.update(data))
+    const args = this.dataHelper.update(data)
+
+    if ('create' in this.raw) {
+      this.raw.update(docAsAdmin(typedDoc.raw), ...args)
+    } else {
+      this.raw.update(docAsWeb(typedDoc.raw), ...args)
+    }
     return this
   }
 
   delete<L extends string>(typedDoc: TypedDocumentRef<S, F, L>) {
-    this._raw.delete(this._doc(typedDoc.raw))
+    if ('create' in this.raw) {
+      this.raw.delete(docAsAdmin(typedDoc.raw))
+    } else {
+      this.raw.delete(docAsWeb(typedDoc.raw))
+    }
     return this
   }
 }

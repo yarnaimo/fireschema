@@ -1,3 +1,4 @@
+import { _admin, _web } from '../../../lib/firestore-types'
 import { _createdAt, _updatedAt } from '../../constants'
 import { FTypes, STypes } from '../../types'
 import { createConverter } from '../../utils/_firestore'
@@ -32,6 +33,13 @@ export const withDecoder =
 
     return convertedQuery
   }
+
+export const docAsWeb = <U>(ref: FTypes.DocumentRef<U>) => {
+  return ref as FTypes.DocumentRef<U, _web.Firestore>
+}
+export const docAsAdmin = <U>(ref: FTypes.DocumentRef<U>) => {
+  return ref as FTypes.DocumentRef<U, _admin.Firestore>
+}
 
 export class DocDataHelper<F extends FTypes.FirestoreApp> {
   mergeOptions = { merge: true }
