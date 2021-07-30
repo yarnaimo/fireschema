@@ -27,14 +27,18 @@ const importModuleFunction = [
 export const exportFunctions = async (baseDir: string) => {
   const subdirs = readdirSync(baseDir, {
     withFileTypes: true,
+  }).flatMap((subdir) => {
+    if (!subdir.isDirectory() || !dirPattern.test(subdir.name)) {
+      return []
+    }
+    const files = readdirSync(join(baseDir, subdir.name))
+      .filter((filename) => filePattern.test(filename))
+      .map((filename) => parse(filename).name)
+    if (!files.length) {
+      return []
+    }
+    return [{ dirname: subdir.name, files }]
   })
-    .filter((subdir) => subdir.isDirectory() && dirPattern.test(subdir.name))
-    .map((subdir) => {
-      const files = readdirSync(join(baseDir, subdir.name))
-        .filter((filename) => filePattern.test(filename))
-        .map((filename) => parse(filename).name)
-      return { dirname: subdir.name, files }
-    })
 
   const typeImports = subdirs.flatMap(({ dirname, files }) =>
     files.map(
