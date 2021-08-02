@@ -14,6 +14,7 @@
     "rules": "firestore.rules"
   },
   "functions": {
+    "runtime": "nodejs14",
     "source": ".",
     "ignore": [".git", "node_modules", "tmp"],
     "predeploy": "yarn build"

@@ -1,42 +1,9 @@
-#!/usr/bin/env node
+#!/bin/sh
+/*
+":" //# ; TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true exec /usr/bin/env node --loader ts-node/esm --experimental-specifier-resolution=node "$0" "$@"
+*/
 
-import { register } from 'ts-node'
-import { exportFunctions } from './export'
-import { generateRules } from './rules'
+import 'ts-node/esm'
+import { cli } from './cli'
 
-register({
-  project: process.env['TS_NODE_PROJECT'],
-  files: true,
-})
-
-const help = `Usage:
-fireschema rules <schema-path>          generate firestore.rules
-fireschema export <functions-dir-path>  create functions entrypoint file`
-
-const [, , command, ...args] = process.argv
-
-switch (command) {
-  case 'rules':
-    if (!args[0]) {
-      console.error('Schema path must be specified')
-      process.exit(1)
-    }
-    generateRules(args[0])
-    break
-
-  case 'export':
-    if (!args[0]) {
-      console.error('A target directory must be specified')
-      process.exit(1)
-    }
-    void exportFunctions(args[0])
-    break
-
-  case '--help':
-    console.log(help)
-    break
-
-  default:
-    console.log(help)
-    process.exit(1)
-}
+void cli()
