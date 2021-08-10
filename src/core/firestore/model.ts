@@ -1,6 +1,6 @@
 import { InferSchemaType, SchemaType, STypes } from '../types'
 
-type GetU<S extends SchemaType._DocData, D> = D extends STypes.Decoder<
+type GetU<S extends SchemaType._DocData, D> = D extends STypes.Model.Decoder<
   any,
   infer U
 >
@@ -21,12 +21,14 @@ export type InferDataModelSL<M extends DataModel<any, any, any>> = ReturnType<
 
 export class DataModel<
   S extends SchemaType._DocData,
-  D extends STypes.Decoder<InferSchemaType<S>, any> | undefined = undefined,
-  SL = {},
+  D extends
+    | STypes.Model.Decoder<InferSchemaType<S>, any>
+    | undefined = undefined,
+  SL extends STypes.Model.SelectorsConstraint = {},
 > {
   readonly schema: S
   readonly decoder: D
-  readonly selectors: STypes.SelectorsFunction<GetU<S, D>, SL>
+  readonly selectors: STypes.Model.Selectors<GetU<S, D>, SL>
 
   constructor({
     schema,
@@ -35,7 +37,7 @@ export class DataModel<
   }: {
     schema: S
     decoder?: D
-    selectors?: STypes.SelectorsFunction<GetU<S, D>, SL>
+    selectors?: STypes.Model.Selectors<GetU<S, D>, SL>
   }) {
     this.schema = schema
     this.decoder = decoder as D

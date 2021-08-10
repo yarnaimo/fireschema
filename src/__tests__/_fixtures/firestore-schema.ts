@@ -79,10 +79,14 @@ export const UserModel = new DataModel({
   schema: UserType,
   decoder: (data: IUser, snap: FTypes.QueryDocumentSnap<IUser>): IUserLocal =>
     decodeUser(data),
+
   selectors: (q, firestoreStatic) => ({
-    teen: () => q.where('age', '>=', 10).where('age', '<', 20),
-    _teen: () => q.where('age', '>=', 10).where('age', '<', 20 + Math.random()),
-    orderById: () => q.orderBy(firestoreStatic.FieldPath.documentId()),
+    teen: () => [q.where('age', '>=', 10), q.where('age', '<', 20)],
+    _teen: () => [
+      q.where('age', '>=', 10),
+      q.where('age', '<', 20 + Math.random()),
+    ],
+    orderById: () => [q.orderBy(firestoreStatic.documentId())],
   }),
 })
 // void (() => {

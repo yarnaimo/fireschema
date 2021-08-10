@@ -2,7 +2,7 @@ import { P } from 'lifts'
 import { R } from '../../../lib/fp'
 import { $model } from '../../constants'
 import { FTypes, STypes } from '../../types'
-import { JoinLoc, OmitLastSegment } from '../../types/_object'
+import { GetByLoc, JoinLoc, OmitLastSegment } from '../../types/_object'
 import { getCollectionOptions } from '../../utils/_firestore'
 import { getLastSegment, omitLastSegment } from '../../utils/_object'
 import {
@@ -10,7 +10,9 @@ import {
   TypedDocumentRef,
   TypedQueryDocumentSnap,
 } from './TypedDocumentRef'
-import { withDecoder, withSelectors } from './_utils'
+import { withDecoder } from './_query-cache'
+import { FirestoreStatic } from './_static'
+import { docUniv, getDocsUniv, GetSource, queryUniv } from './_universal'
 
 export class TypedQuerySnap<
   S extends STypes.RootOptions.All,
@@ -23,7 +25,7 @@ export class TypedQuerySnap<
   constructor(
     readonly options: {
       schemaOptions: S
-      firestoreStatic: FTypes.FirestoreStatic<F>
+      firestoreStatic: FirestoreStatic<F>
       loc: L
     },
     readonly raw: FTypes.QuerySnap<U, F>,
@@ -48,7 +50,7 @@ export class TypedQueryRef<
   constructor(
     readonly options: {
       schemaOptions: S
-      firestoreStatic: FTypes.FirestoreStatic<F>
+      firestoreStatic: FirestoreStatic<F>
       loc: L
     },
     origQuery: FTypes.Query<any, F>,
@@ -64,18 +66,28 @@ export class TypedQueryRef<
     const convertedQuery = P(
       origQuery,
       skipDecoder ? R.identity : withDecoder(collectionOptions[$model], name),
-      withSelectors(
-        collectionOptions[$model],
-        this.options.firestoreStatic,
-        selector,
-      ),
+
+      (query) => {
+        if (!selector) {
+          return query
+        }
+
+        return queryUniv(query, (q) => {
+          const selectorsConstraint = collectionOptions[$model].selectors(
+            q,
+            this.options.firestoreStatic,
+          ) as STypes.GetSL<GetByLoc<S, L>>
+
+          return selector(selectorsConstraint)
+        })
+      },
     ) as FTypes.Query<any, F>
 
     this.raw = convertedQuery
   }
 
-  async get(getOptions?: FTypes.GetOptions<F>) {
-    const snap = await this.raw.get(getOptions)
+  async get({ from }: { from?: GetSource } = {}) {
+    const snap = await getDocsUniv(this.raw, from)
 
     return new TypedQuerySnap<S, F, L, U>(
       this.options,
@@ -84,12 +96,12 @@ export class TypedQueryRef<
   }
 
   async getData<V = U>({
-    getOptions,
+    from,
     ...dataOptions
   }: {
-    getOptions?: FTypes.GetOptions<F>
+    from?: GetSource
   } & QueryDocumentSnapDataOptions<S, F, L, U, V> = {}): Promise<V[]> {
-    const typedSnap = await this.get(getOptions)
+    const typedSnap = await this.get({ from })
     return typedSnap.typedDocs.map<V>((snap) => snap.data(dataOptions))
   }
 }
@@ -108,7 +120,7 @@ export class TypedCollectionRef<
   constructor(
     readonly options: {
       schemaOptions: S
-      firestoreStatic: FTypes.FirestoreStatic<F>
+      firestoreStatic: FirestoreStatic<F>
       loc: L
     },
     origCollection: FTypes.CollectionRef<any, F>,
@@ -120,9 +132,7 @@ export class TypedCollectionRef<
   }
 
   doc(id?: string) {
-    const idArgs = id ? [id] : []
-    const docRaw = this.raw.doc(...idArgs) as FTypes.DocumentRef<any, F>
-
+    const docRaw = docUniv(this.raw, id) as FTypes.DocumentRef<any, F>
     return new TypedDocumentRef<S, F, L>(this.options, docRaw)
   }
 

@@ -54,7 +54,7 @@ export declare namespace FunTypes {
       FP extends ExtractFP<MC>,
     > = InferSchemaType<GetByFP<MC, FP>[typeof $output]>
 
-    export type CallResult<T, E = _fweb.HttpsError> =
+    export type CallResult<T, E = _fweb.FunctionsError> =
       | { data: T; error?: never }
       | { data?: never; error: E }
   }

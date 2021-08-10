@@ -1,3 +1,4 @@
+import { httpsCallable } from 'firebase/functions'
 import { _fweb } from '../../../lib/functions-types'
 import { is } from '../../../lib/type'
 import { FunTypes } from '../../types'
@@ -26,7 +27,7 @@ export class TypedCaller<M extends FunTypes.FunctionsModule> {
     options?: _fweb.HttpsCallableOptions,
   ): Promise<FunTypes.Callable.CallResult<FunTypes.Callable.OutputOf<MC, FP>>> {
     const name = ['callable', functionPath].join('-')
-    const callable = this.functionsApp.httpsCallable(name, options)
+    const callable = httpsCallable(this.functionsApp, name, options)
 
     try {
       const result = await callable(encode(data))
@@ -34,7 +35,7 @@ export class TypedCaller<M extends FunTypes.FunctionsModule> {
         data: result.data as FunTypes.Callable.OutputOf<MC, FP>,
       }
     } catch (error) {
-      return { error: error as _fweb.HttpsError }
+      return { error: error as _fweb.FunctionsError }
     }
   }
 }

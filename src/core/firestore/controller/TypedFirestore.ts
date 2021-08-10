@@ -1,3 +1,4 @@
+import type { Firestore } from 'firebase/firestore'
 import { $collectionGroups } from '../../constants'
 import { FTypes, STypes } from '../../types'
 import { Loc } from '../../types/_object'
@@ -8,15 +9,21 @@ import { TypedDocumentRef } from './TypedDocumentRef'
 import { TypedFDBase } from './TypedFDBase'
 import { TypedTransaction } from './TypedTransaction'
 import { TypedWriteBatch } from './TypedWriteBatch'
+import { FirestoreStatic, firestoreStaticWeb } from './_static'
+import {
+  collectionGroupUniv,
+  runTransactionUniv,
+  writeBatchUniv,
+} from './_universal'
 
-export class TypedFirestore<
+export class TypedFirestoreUniv<
   M extends FirestoreModel<STypes.RootOptions.All>,
   F extends FTypes.FirestoreApp,
   S extends InferFirestoreModelS<M> = InferFirestoreModelS<M>,
 > extends TypedFDBase<S, F, '', true> {
   constructor(
     readonly model: M,
-    readonly firestoreStatic: FTypes.FirestoreStatic<F>,
+    readonly firestoreStatic: FirestoreStatic<F>,
     readonly raw: F,
   ) {
     super(
@@ -30,7 +37,7 @@ export class TypedFirestore<
   }
 
   private origGroup(collectionName: string) {
-    return this.raw.collectionGroup(collectionName) as FTypes.Query<any, F>
+    return collectionGroupUniv(this.raw, collectionName) as FTypes.Query<any, F>
   }
 
   collectionGroup<L extends Loc<S>>(
@@ -76,7 +83,7 @@ export class TypedFirestore<
   async runTransaction<T>(
     fn: (tt: TypedTransaction<S, F>) => Promise<T>,
   ): Promise<T> {
-    return this.raw.runTransaction(async (_t: any) => {
+    return runTransactionUniv(this.raw, async (_t) => {
       const tt = new TypedTransaction<S, F>(
         this.options,
         _t as FTypes.Transaction<F>,
@@ -87,8 +94,17 @@ export class TypedFirestore<
 
   batch() {
     return new TypedWriteBatch<S, F>(
-      this.firestoreStatic,
-      this.raw.batch() as FTypes.WriteBatch<F>,
+      this.options.firestoreStatic,
+      writeBatchUniv(this.raw) as FTypes.WriteBatch<F>,
     )
+  }
+}
+
+export class TypedFirestoreWeb<
+  M extends FirestoreModel<STypes.RootOptions.All>,
+  S extends InferFirestoreModelS<M> = InferFirestoreModelS<M>,
+> extends TypedFirestoreUniv<M, Firestore, S> {
+  constructor(readonly model: M, readonly raw: Firestore) {
+    super(model, firestoreStaticWeb, raw)
   }
 }

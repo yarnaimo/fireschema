@@ -1,10 +1,11 @@
 import {
-  apps,
   clearFirestoreData,
+  initializeAdminApp,
   initializeTestApp,
   loadFirestoreRules,
 } from '@firebase/rules-unit-testing'
-import type firebase from 'firebase/app'
+import { App } from 'firebase-admin/app'
+import { deleteApp, FirebaseApp, getApps } from 'firebase/app'
 import { MapAsync } from 'lifts'
 import { renderSchema } from '../../core/firestore/_renderer/root'
 import { firestoreModel } from '../_fixtures/firestore-schema'
@@ -15,13 +16,16 @@ beforeAll(async () => {
   await loadFirestoreRules({ projectId, rules })
 })
 
-export const authedApp = (uid: string): firebase.app.App =>
+export const authedApp = (uid: string): FirebaseApp =>
   initializeTestApp({ projectId, auth: { uid } })
+
+export const authedAdminApp = (uid: string): App =>
+  initializeAdminApp({ projectId })
 
 afterEach(async () => {
   await clearFirestoreData({ projectId })
 })
 
 afterAll(async () => {
-  await MapAsync(apps(), (app) => app.delete())
+  await MapAsync(getApps(), deleteApp)
 })

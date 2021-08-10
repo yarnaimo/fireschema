@@ -1,20 +1,20 @@
-import firebase from 'firebase/app' // or firebase-admin
-import { TypedFirestore } from '..'
+import { initializeApp } from 'firebase/app' // or firebase-admin
+import { initializeFirestore } from 'firebase/firestore'
+import { TypedFirestoreWeb } from '../core'
 import { firestoreModel } from './1-1-schema'
 
-const app: firebase.app.App = firebase.initializeApp({
+const app = initializeApp({
   // ...
 })
-const firestoreApp = app.firestore()
-firestoreApp.settings({ ignoreUndefinedProperties: true })
+const firestoreApp = initializeFirestore(app, {
+  ignoreUndefinedProperties: true,
+})
 
 /**
  * Initialize TypedFirestore
  */
-export const typedFirestore: TypedFirestore<
-  typeof firestoreModel,
-  firebase.firestore.Firestore
-> = new TypedFirestore(firestoreModel, firebase.firestore, firestoreApp)
+export const typedFirestore: TypedFirestoreWeb<typeof firestoreModel> =
+  new TypedFirestoreWeb(firestoreModel, firestoreApp)
 
 /**
  * Reference collections/documents and get snapshot
@@ -81,7 +81,7 @@ const techPostsGroup = typedFirestore.collectionGroupQuery(
     name: 'test',
     displayName: 'Test',
     age: 20,
-    timestamp: typedFirestore.firestoreStatic.FieldValue.serverTimestamp(),
+    timestamp: typedFirestore.firestoreStatic.serverTimestamp(),
     options: { a: true },
   })
   await user.setMerge({

@@ -1,4 +1,5 @@
-import { _admin } from '../../../lib/firestore-types'
+import * as firestore from 'firebase-admin/firestore'
+import * as functions from 'firebase-functions'
 import { _fadmin } from '../../../lib/functions-types'
 import { messages } from '../../constants'
 import { FirestoreModel, InferFirestoreModelS } from '../../firestore'
@@ -11,17 +12,12 @@ export class TypedFunctions<
   M extends FirestoreModel<STypes.RootOptions.All>,
   S extends InferFirestoreModelS<M> = InferFirestoreModelS<M>,
 > {
-  constructor(
-    readonly model: M,
-    readonly firestoreStatic: typeof _admin,
-    readonly functions: typeof import('firebase-functions'),
-    readonly timezone: string,
-  ) {}
+  constructor(readonly model: M, readonly timezone: string) {}
 
   firestoreTrigger = new TypedFirestoreTrigger(
     this.model.schemaOptions as S,
-    this.firestoreStatic,
-    this.functions,
+    firestore,
+    functions,
   )
 
   callable<SI extends SchemaType._JsonData, SO extends SchemaType._JsonData>({
@@ -43,7 +39,7 @@ export class TypedFunctions<
       const valid = validateJsonSchema(input, data)
 
       if (!valid) {
-        throw new this.functions.https.HttpsError(
+        throw new functions.https.HttpsError(
           'invalid-argument',
           messages.validationFailed,
         )

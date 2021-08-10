@@ -1,5 +1,6 @@
 import { renderHook } from '@testing-library/react-hooks'
 import dayjs from 'dayjs'
+import { collection, getFirestore, query, where } from 'firebase/firestore'
 import { authedApp } from '../__tests__/_infrastructure/_app'
 import { sleep } from '../__tests__/_utils/common'
 import { useRefChangeLimitExceeded } from './utils'
@@ -11,13 +12,13 @@ const logTimestamps = (timestamps: dayjs.Dayjs[]) => {
   )
 }
 
-const app = authedApp('user').firestore()
-const posts = app.collection('posts')
+const app = getFirestore(authedApp('user'))
+const posts = collection(app, 'posts')
 
 test('exceeded', async () => {
   const { result, rerender, unmount } = renderHook(() => {
     const date = dayjs().toDate()
-    return useRefChangeLimitExceeded(posts.where('date', '==', date))
+    return useRefChangeLimitExceeded(query(posts, where('date', '==', date)))
   })
 
   rerender()
@@ -46,7 +47,7 @@ test('not exceeded', async () => {
   const date = dayjs().toDate()
 
   const { result, rerender, unmount } = renderHook(() => {
-    return useRefChangeLimitExceeded(posts.where('date', '==', date))
+    return useRefChangeLimitExceeded(query(posts, where('date', '==', date)))
   })
 
   rerender()

@@ -1,4 +1,3 @@
-export * from './query-utils'
 export * from './TypedCollectionRef'
 export * from './TypedDocumentRef'
 export * from './TypedFDBase'

@@ -2,6 +2,8 @@ import { FTypes, STypes } from '../../types'
 import { GetByLoc, JoinLoc } from '../../types/_object'
 import { joinLoc } from '../../utils/_object'
 import { TypedCollectionRef, TypedQueryRef } from './TypedCollectionRef'
+import { FirestoreStatic } from './_static'
+import { collectionUniv } from './_universal'
 
 export class TypedFDBase<
   S extends STypes.RootOptions.All,
@@ -14,14 +16,14 @@ export class TypedFDBase<
   protected constructor(
     readonly options: {
       schemaOptions: S
-      firestoreStatic: FTypes.FirestoreStatic<F>
+      firestoreStatic: FirestoreStatic<F>
       loc: L
     },
     readonly raw: IsRoot extends true ? F : FTypes.DocumentRef<U, F>,
   ) {}
 
   private origCollection(name: string) {
-    return this.raw.collection(name) as FTypes.CollectionRef<any, F>
+    return collectionUniv(this.raw, name) as FTypes.CollectionRef<any, F>
   }
 
   collection<N extends Extract<keyof _C, string>>(collectionName: N) {

@@ -43,7 +43,7 @@ test('call - invalid-argument', async () => {
   expect(result).toEqual({
     error: expect.objectContaining({
       message: messages.validationFailed,
-      code: 'invalid-argument',
+      code: 'functions-exp/invalid-argument',
     }),
   })
 })
@@ -57,7 +57,7 @@ test('call - out-of-range', async () => {
   expect(result).toEqual({
     error: expect.objectContaining({
       message: expect.any(String),
-      code: 'out-of-range',
+      code: 'functions-exp/out-of-range',
     }),
   })
 })
@@ -71,7 +71,7 @@ test('call - internal', async () => {
   expect(result).toEqual({
     error: expect.objectContaining({
       message: messages.unknown,
-      code: 'internal',
+      code: 'functions-exp/internal',
     }),
   })
 })

@@ -1,7 +1,7 @@
-import { firestore } from 'firebase-admin'
 import * as functions from 'firebase-functions'
 import { expectType } from 'tsd'
-import { $, FunTypes, messages, STypes, TypedFunctions } from '../..'
+import { $, FunTypes, messages, STypes } from '../..'
+import { TypedFunctions } from '../../admin'
 import { _admin } from '../../lib/firestore-types'
 import { _fadmin } from '../../lib/functions-types'
 import { Type } from '../../lib/type'
@@ -17,12 +17,7 @@ import {
 import { region } from './_config'
 
 const timezone = 'Asia/Tokyo'
-const typedFunctions = new TypedFunctions(
-  firestoreModel,
-  firestore,
-  functions,
-  timezone,
-)
+const typedFunctions = new TypedFunctions(firestoreModel, timezone)
 
 const builder = functions.region(region)
 

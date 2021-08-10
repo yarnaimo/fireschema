@@ -13,7 +13,7 @@ import { useQuerySnapData } from './useSnapData'
 import {
   HasGetOptions,
   HasSnapListenOptions,
-  useFirebaseErrorLogger,
+  useFirestoreErrorLogger,
   useRefChangeLimitExceeded,
 } from './utils'
 
@@ -43,10 +43,12 @@ export const useTypedQueryOnce = <
   }: HasGetOptions &
     QueryDocumentSnapDataOptions<S, _web.Firestore, L, U, V> = {},
 ): UseTypedQuery<S, _web.Firestore, L, U, V> => {
-  const [_snap, loading, error] = useCollectionOnce<U>(typedQuery?.raw, {
+  const { safeRef } = useRefChangeLimitExceeded(typedQuery?.raw)
+
+  const [_snap, loading, error] = useCollectionOnce<U>(safeRef(), {
     getOptions,
   })
-  useFirebaseErrorLogger(error)
+  useFirestoreErrorLogger(error)
   const { snap, data } = useQuerySnapData(typedQuery, _snap, dataOptions)
 
   return { snap, data, loading, error }
@@ -70,7 +72,7 @@ export const useTypedQuery = <
   const [_snap, loading, error] = useCollection<U>(safeRef(), {
     snapshotListenOptions,
   })
-  useFirebaseErrorLogger(error)
+  useFirestoreErrorLogger(error)
   const { snap, data } = useQuerySnapData(typedQuery, _snap, dataOptions)
 
   return { snap, data, loading, error }

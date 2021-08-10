@@ -1,18 +1,13 @@
-import { firestore } from 'firebase-admin'
 import * as functions from 'firebase-functions'
-import { $, TypedFunctions } from '..'
+import { $ } from '..'
+import { TypedFunctions } from '../admin'
 import { firestoreModel, UserType } from './1-1-schema'
 
 /**
  * Initialize TypedFunctions
  */
 const timezone = 'Asia/Tokyo'
-const typedFunctions = new TypedFunctions(
-  firestoreModel,
-  firestore,
-  functions,
-  timezone,
-)
+const typedFunctions = new TypedFunctions(firestoreModel, timezone)
 const builder = functions.region('asia-northeast1')
 
 /**

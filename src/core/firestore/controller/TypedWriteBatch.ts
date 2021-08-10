@@ -1,5 +1,6 @@
 import { FTypes, STypes } from '../../types'
 import { TypedDocumentRef } from './TypedDocumentRef'
+import { FirestoreStatic } from './_static'
 import { docAsAdmin, docAsWeb, DocDataHelper } from './_utils'
 
 export class TypedWriteBatch<
@@ -9,7 +10,7 @@ export class TypedWriteBatch<
   private readonly dataHelper = new DocDataHelper<F>(this.firestoreStatic)
 
   constructor(
-    readonly firestoreStatic: FTypes.FirestoreStatic<F>,
+    readonly firestoreStatic: FirestoreStatic<F>,
     readonly raw: FTypes.WriteBatch<F>,
   ) {}
 

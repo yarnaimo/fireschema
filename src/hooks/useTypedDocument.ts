@@ -10,7 +10,7 @@ import { useDocumentSnapData } from './useSnapData'
 import {
   HasGetOptions,
   HasSnapListenOptions,
-  useFirebaseErrorLogger,
+  useFirestoreErrorLogger,
   useRefChangeLimitExceeded,
 } from './utils'
 
@@ -39,10 +39,12 @@ export const useTypedDocumentOnce = <
     ...dataOptions
   }: HasGetOptions & DocumentSnapDataOptions<S, _web.Firestore, L, U, V> = {},
 ): UseTypedDocument<S, _web.Firestore, L, U, V> => {
-  const [_snap, loading, error] = useDocumentOnce<U>(typedDoc?.raw, {
+  const { safeRef } = useRefChangeLimitExceeded(typedDoc?.raw)
+
+  const [_snap, loading, error] = useDocumentOnce<U>(safeRef(), {
     getOptions,
   })
-  useFirebaseErrorLogger(error)
+  useFirestoreErrorLogger(error)
   const { snap, data } = useDocumentSnapData(typedDoc, _snap, dataOptions)
 
   return { snap, data, loading, error }
@@ -66,7 +68,7 @@ export const useTypedDocument = <
   const [_snap, loading, error] = useDocument<U>(safeRef(), {
     snapshotListenOptions,
   })
-  useFirebaseErrorLogger(error)
+  useFirestoreErrorLogger(error)
   const { snap, data } = useDocumentSnapData(typedDoc, _snap, dataOptions)
 
   return { snap, data, loading, error }

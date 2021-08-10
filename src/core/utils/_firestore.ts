@@ -13,7 +13,7 @@ export const getCollectionOptions = (
 ) => getByLoc(schemaOptions, loc) as STypes.CollectionOptions.Meta
 
 export const createConverter = (
-  decoder: STypes.Decoder<any, any> | undefined,
+  decoder: STypes.Model.Decoder<any, any> | undefined,
 ) => ({
   fromFirestore: (
     snap: FTypes.QueryDocumentSnap<any>,

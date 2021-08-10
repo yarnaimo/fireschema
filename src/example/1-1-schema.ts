@@ -48,7 +48,7 @@ const PostType = {
 const PostModel = new DataModel({
   schema: PostType,
   selectors: (q) => ({
-    byTag: (tag: string) => q.where('tags', 'array-contains', tag),
+    byTag: (tag: string) => [q.where('tags', 'array-contains', tag)],
   }),
 })
 

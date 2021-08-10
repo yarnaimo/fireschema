@@ -1,6 +1,15 @@
 import { FTypes, STypes } from '../../types'
 import { TypedCollectionRef } from './TypedCollectionRef'
 import { TypedFDBase } from './TypedFDBase'
+import { FirestoreStatic } from './_static'
+import {
+  deleteDocUniv,
+  existsUniv,
+  getDocUniv,
+  GetSource,
+  setDocUniv,
+  updateDocUniv,
+} from './_universal'
 import { DocDataHelper } from './_utils'
 
 export type DocumentSnapTransformer<
@@ -59,22 +68,24 @@ export class TypedDocumentSnap<
 > {
   readonly typedRef: TypedDocumentRef<S, F, L, U>
   readonly id: string
-  readonly exists: boolean
 
   constructor(
     readonly options: {
       schemaOptions: S
-      firestoreStatic: FTypes.FirestoreStatic<F>
+      firestoreStatic: FirestoreStatic<F>
       loc: L
     },
     readonly raw: FTypes.DocumentSnap<U, F>,
   ) {
     this.id = raw.id
-    this.exists = raw.exists
     this.typedRef = new TypedDocumentRef<S, F, L, U>(
       this.options,
       raw.ref as FTypes.DocumentRef<U, F>,
     )
+  }
+
+  exists(): this is TypedQueryDocumentSnap<S, F, L, U> {
+    return existsUniv(this.raw)
   }
 
   data<V = U>({
@@ -98,7 +109,7 @@ export class TypedQueryDocumentSnap<
   constructor(
     readonly options: {
       schemaOptions: S
-      firestoreStatic: FTypes.FirestoreStatic<F>
+      firestoreStatic: FirestoreStatic<F>
       loc: L
     },
     readonly raw: FTypes.QueryDocumentSnap<U, F>,
@@ -130,7 +141,7 @@ export class TypedDocumentRef<
   constructor(
     readonly options: {
       schemaOptions: S
-      firestoreStatic: FTypes.FirestoreStatic<F>
+      firestoreStatic: FirestoreStatic<F>
       loc: L
     },
     readonly raw: FTypes.DocumentRef<U, F>,
@@ -154,8 +165,8 @@ export class TypedDocumentRef<
     )
   }
 
-  async get(getOptions?: FTypes.GetOptions<F>) {
-    const snap = await this.raw.get(getOptions)
+  async get({ from }: { from?: GetSource } = {}) {
+    const snap = await getDocUniv(this.raw, from)
 
     return new TypedDocumentSnap<S, F, L, U>(
       this.options,
@@ -164,12 +175,12 @@ export class TypedDocumentRef<
   }
 
   async getData<V = U>({
-    getOptions,
+    from,
     ...dataOptions
   }: {
-    getOptions?: FTypes.GetOptions<F>
+    from?: GetSource
   } & DocumentSnapDataOptions<S, F, L, U, V> = {}): Promise<V | undefined> {
-    const typedSnap = await this.get(getOptions)
+    const typedSnap = await this.get({ from })
     return typedSnap.data(dataOptions)
   }
 
@@ -179,23 +190,23 @@ export class TypedDocumentRef<
     return this.wrapWriteResult(
       'create' in this.raw
         ? await this.raw.create(...args)
-        : await this.raw.set(...args),
+        : await setDocUniv(this.raw, ...args),
     )
   }
 
   async setMerge(data: Partial<STypes.WriteData<S, F, L>>) {
     return this.wrapWriteResult(
-      await this.raw.set(...this.dataHelper.setMerge(data)),
+      await setDocUniv(this.raw, ...this.dataHelper.setMerge(data)),
     )
   }
 
   async update(data: Partial<STypes.WriteData<S, F, L>>) {
     return this.wrapWriteResult(
-      await this.raw.update(...this.dataHelper.update(data)),
+      await updateDocUniv(this.raw, ...this.dataHelper.update(data)),
     )
   }
 
   async delete() {
-    return this.wrapWriteResult(await this.raw.delete())
+    return this.wrapWriteResult(await deleteDocUniv(this.raw))
   }
 }

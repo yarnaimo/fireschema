@@ -1,11 +1,17 @@
 import dayjs, { Dayjs } from 'dayjs'
-import firebase from 'firebase/app'
+import {
+  CollectionReference,
+  DocumentReference,
+  Query,
+  queryEqual,
+  refEqual,
+} from 'firebase/firestore'
 import { useEffect, useRef } from 'react'
-import { HasIsEqual } from 'react-firebase-hooks/firestore/dist/util'
 import { _web } from '../lib/firestore-types'
 
 export type HasGetOptions = {
-  getOptions?: _web.GetOptions
+  // TODO:
+  getOptions?: unknown
 }
 
 export type HasSnapListenOptions = {
@@ -33,12 +39,20 @@ type RefHook<T> = {
 //   return ref
 // }
 
-const isEqual = <T extends HasIsEqual<T>>(
-  v1: T | null | undefined,
-  v2: T | null | undefined,
+type RefOrQuery = DocumentReference | CollectionReference | Query
+
+const queryOrRefEqual = <T extends RefOrQuery>(left: T, right: T) => {
+  return left instanceof Query
+    ? queryEqual(left, right as any)
+    : refEqual(left, right as any)
+}
+
+const isEqual = <T extends RefOrQuery>(
+  left: T | null | undefined,
+  right: T | null | undefined,
 ): boolean => {
-  const bothNull: boolean = !v1 && !v2
-  const equal: boolean = !!v1 && !!v2 && v1.isEqual(v2)
+  const bothNull: boolean = !left && !right
+  const equal: boolean = !!left && !!right && queryOrRefEqual(left, right)
 
   return bothNull || equal
 }
@@ -50,12 +64,12 @@ const isEqual = <T extends HasIsEqual<T>>(
 //   return useComparatorRef(value, isEqual, onChange)
 // }
 
-export const useRefChangeLimitExceeded = <T extends HasIsEqual<any>>(
+export const useRefChangeLimitExceeded = <T extends RefOrQuery>(
   fref: T | null | undefined,
 ) => {
   const timestampsRef = useRef<Dayjs[]>([])
 
-  const frefRef = useRef<HasIsEqual<any> | null | undefined>(null)
+  const frefRef = useRef<RefOrQuery | null | undefined>(null)
   useEffect(() => {
     if (!isEqual(fref, frefRef.current)) {
       frefRef.current = fref
@@ -81,8 +95,8 @@ export const useRefChangeLimitExceeded = <T extends HasIsEqual<any>>(
   return { exceeded, safeRef, timestamps: timestampsRef }
 }
 
-export const useFirebaseErrorLogger = (
-  error: firebase.FirebaseError | undefined,
+export const useFirestoreErrorLogger = (
+  error: _web.FirestoreError | undefined,
 ) => {
   useEffect(() => {
     if (error) {

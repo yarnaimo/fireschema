@@ -1,3 +1,4 @@
+import { QueryConstraint } from 'firebase/firestore'
 import { Type } from '../../lib/type'
 import {
   $allow,
@@ -12,6 +13,8 @@ import {
   InferDataModelT,
   InferDataModelU,
 } from '../firestore'
+import { QueryBuilder } from '../firestore/controller/_query'
+import { FirestoreStatic } from '../firestore/controller/_static'
 import { FTypes } from './FTypes'
 import { GetByLoc } from './_object'
 
@@ -82,15 +85,10 @@ export declare namespace STypes {
     export type All = Meta & Children
   }
 
-  export type Decoder<T, U> = (
-    data: T,
-    snapshot: FTypes.QueryDocumentSnap<T>,
-  ) => U
-
   export namespace CollectionOptions {
     export type Meta = {
       [$docLabel]: string
-      [$model]: DataModel<any, any, any>
+      [$model]: DataModel<any, any, STypes.Model.SelectorsConstraint>
       // [$collectionGroup]?: boolean
       [$allow]: AllowOptions
     }
@@ -106,10 +104,21 @@ export declare namespace STypes {
       typeof allowOptions.write)]+?: ConditionExp
   }
 
-  export type SelectorsFunction<U, SL> = (
-    q: FTypes.Query<U>,
-    firestoreStatic: FTypes.FirestoreStatic<FTypes.FirestoreApp>,
-  ) => SL
+  export namespace Model {
+    export type Decoder<T, U> = (
+      data: T,
+      snapshot: FTypes.QueryDocumentSnap<T>,
+    ) => U
+
+    export type Selectors<U, SL extends SelectorsConstraint> = (
+      q: QueryBuilder,
+      firestoreStatic: FirestoreStatic<FTypes.FirestoreApp>,
+    ) => SL
+
+    export type SelectorsConstraint = {
+      [key: string]: (...args: any[]) => QueryConstraint[]
+    }
+  }
 
   export type Selector<
     S extends RootOptions.All,
@@ -119,9 +128,7 @@ export declare namespace STypes {
     // N extends Extract<keyof PC, string>,
     // PC,
     _C = GetByLoc<S, L>,
-  > = (
-    q: SelectorOptions<GetModelT<_C>, L, GetSL<_C>, F>,
-  ) => FTypes.Query<DocDataAt<S, F, L>, F>
+  > = (q: GetSL<_C>) => QueryConstraint[]
 
   export type SelectorOptions<
     T,

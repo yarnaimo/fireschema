@@ -1,13 +1,14 @@
-import firebase from 'firebase/app'
+import { initializeApp } from 'firebase/app'
+import { getFunctions } from 'firebase/functions'
 import React from 'react'
 import { TypedCaller } from '..'
 
 type FunctionsModule = typeof import('./2-1-typed-functions')
 
-const app: firebase.app.App = firebase.initializeApp({
+const app = initializeApp({
   // ...
 })
-const functionsApp = app.functions('asia-northeast1')
+const functionsApp = getFunctions(app, 'asia-northeast1')
 
 export const typedCaller = new TypedCaller<FunctionsModule>(functionsApp)
 

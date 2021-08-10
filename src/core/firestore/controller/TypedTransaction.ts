@@ -4,6 +4,7 @@ import {
   TypedDocumentRef,
   TypedDocumentSnap,
 } from './TypedDocumentRef'
+import { FirestoreStatic } from './_static'
 import { docAsAdmin, docAsWeb, DocDataHelper } from './_utils'
 
 export class TypedTransaction<
@@ -17,7 +18,7 @@ export class TypedTransaction<
   constructor(
     readonly options: {
       schemaOptions: S
-      firestoreStatic: FTypes.FirestoreStatic<F>
+      firestoreStatic: FirestoreStatic<F>
     },
     readonly raw: FTypes.Transaction<F>,
   ) {}

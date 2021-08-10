@@ -1,16 +1,20 @@
 import { PubSub } from '@google-cloud/pubsub'
+import { connectFunctionsEmulator, getFunctions } from 'firebase/functions'
 import { TypedCaller, TypedTopic } from '../..'
 import { authedApp } from './_app'
-import { emulatorOrigin, projectId } from './_config'
+import { emulatorConfig, localhost, projectId } from './_config'
 
 const app = authedApp('user')
-const functionsApp = app.functions('asia-northeast1')
+const functionsApp = getFunctions(app, 'asia-northeast1')
 
-functionsApp.useFunctionsEmulator(emulatorOrigin.functions)
+connectFunctionsEmulator(functionsApp, localhost, emulatorConfig.functions.port)
 
 type FunctionsModule = typeof import('./functions-server')
 
 export const typedCaller = new TypedCaller<FunctionsModule>(functionsApp)
 export const typedTopic = new TypedTopic<FunctionsModule>(
-  new PubSub({ apiEndpoint: emulatorOrigin.pubsub, projectId }),
+  new PubSub({
+    apiEndpoint: `http://${localhost}:${emulatorConfig.pubsub.port}`,
+    projectId,
+  }),
 )

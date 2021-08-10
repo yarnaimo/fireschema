@@ -109,7 +109,7 @@ const PostType = {
 const PostModel = new DataModel({
   schema: PostType,
   selectors: (q) => ({
-    byTag: (tag: string) => q.where('tags', 'array-contains', tag),
+    byTag: (tag: string) => [q.where('tags', 'array-contains', tag)],
   }),
 })
 
@@ -186,8 +186,8 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function __validator_meta__(data) {
       return (
-        (request.method != "create" || (!("_createdAt" in data) || data._createdAt == request.time))
-          && (!("_updatedAt" in data) || data._updatedAt == request.time)
+        (request.method == "create" && data._createdAt == request.time && data._updatedAt == request.time)
+          || (request.method == "update" && data._createdAt == resource.data._createdAt && data._updatedAt == request.time)
       );
     }
 
@@ -249,23 +249,23 @@ The Firestore interface of Fireschema supports both **Web SDK and Admin SDK**.
 <!-- The below code snippet is automatically added from ./src/example/1-3-typed-firestore.ts -->
 
 ```ts
-import firebase from 'firebase/app' // or firebase-admin
-import { TypedFirestore } from 'fireschema'
+import { initializeApp } from 'firebase/app' // or firebase-admin
+import { initializeFirestore } from 'firebase/firestore'
+import { TypedFirestoreWeb } from 'fireschema/core'
 import { firestoreModel } from './1-1-schema'
 
-const app: firebase.app.App = firebase.initializeApp({
+const app = initializeApp({
   // ...
 })
-const firestoreApp = app.firestore()
-firestoreApp.settings({ ignoreUndefinedProperties: true })
+const firestoreApp = initializeFirestore(app, {
+  ignoreUndefinedProperties: true,
+})
 
 /**
  * Initialize TypedFirestore
  */
-export const typedFirestore: TypedFirestore<
-  typeof firestoreModel,
-  firebase.firestore.Firestore
-> = new TypedFirestore(firestoreModel, firebase.firestore, firestoreApp)
+export const typedFirestore: TypedFirestoreWeb<typeof firestoreModel> =
+  new TypedFirestoreWeb(firestoreModel, firestoreApp)
 
 /**
  * Reference collections/documents and get snapshot
@@ -332,7 +332,7 @@ const techPostsGroup = typedFirestore.collectionGroupQuery(
     name: 'test',
     displayName: 'Test',
     age: 20,
-    timestamp: typedFirestore.firestoreStatic.FieldValue.serverTimestamp(),
+    timestamp: typedFirestore.firestoreStatic.serverTimestamp(),
     options: { a: true },
   })
   await user.setMerge({
@@ -418,21 +418,16 @@ export const UserComponent = ({ id }: { id: string }) => {
 <!-- The below code snippet is automatically added from ./src/example/2-1-typed-functions.ts -->
 
 ```ts
-import { firestore } from 'firebase-admin'
 import * as functions from 'firebase-functions'
-import { $, TypedFunctions } from 'fireschema'
+import { $ } from 'fireschema'
+import { TypedFunctions } from 'fireschema/admin'
 import { firestoreModel, UserType } from './1-1-schema'
 
 /**
  * Initialize TypedFunctions
  */
 const timezone = 'Asia/Tokyo'
-const typedFunctions = new TypedFunctions(
-  firestoreModel,
-  firestore,
-  functions,
-  timezone,
-)
+const typedFunctions = new TypedFunctions(firestoreModel, timezone)
 const builder = functions.region('asia-northeast1')
 
 /**
@@ -511,16 +506,17 @@ Automatically provide types to request/response data based on passed functions m
 <!-- The below code snippet is automatically added from ./src/example/2-2-callable-function.tsx -->
 
 ```tsx
-import firebase from 'firebase/app'
+import { initializeApp } from 'firebase/app'
+import { getFunctions } from 'firebase/functions'
 import React from 'react'
 import { TypedCaller } from 'fireschema'
 
 type FunctionsModule = typeof import('./2-1-typed-functions')
 
-const app: firebase.app.App = firebase.initializeApp({
+const app = initializeApp({
   // ...
 })
-const functionsApp = app.functions('asia-northeast1')
+const functionsApp = getFunctions(app, 'asia-northeast1')
 
 export const typedCaller = new TypedCaller<FunctionsModule>(functionsApp)
 

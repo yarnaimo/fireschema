@@ -1,8 +1,5 @@
-import { firestore } from '@firebase/rules-unit-testing'
+import { Timestamp as TimestampAdmin } from 'firebase-admin/firestore'
+import { Timestamp } from 'firebase/firestore'
 
-type Ref = { isEqual(a: any): boolean }
-
-export const expectEqualRef = (a: Ref, b: Ref, expected = true) =>
-  expect(a.isEqual(b)).toBe(expected)
-
-export const expectAnyTimestamp = () => expect.any(firestore.Timestamp)
+export const expectAnyTimestampWeb = () => expect.any(Timestamp)
+export const expectAnyTimestampAdmin = () => expect.any(TimestampAdmin)
