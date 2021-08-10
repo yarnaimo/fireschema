@@ -1,5 +1,6 @@
 {
   "private": true,
+  "type": "module",
   "main": "../dist/hooks/index.js",
-  "module": "../esm/hooks/index.js"
+  "module": "../esm/hooks/index.mjs"
 }
