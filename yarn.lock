@@ -2102,6 +2102,11 @@
     "@typescript-eslint/types" "4.27.0"
     eslint-visitor-keys "^2.0.0"
 
+"@yarnaimo/add-import-extension@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@yarnaimo/add-import-extension/-/add-import-extension-0.0.1.tgz#f4715e9ec570569149a867089e231bde14ee2791"
+  integrity sha512-38H5/60ukc6vGhBtsUDI7FFn6niaZZUHzARIpTqKWT9/bs+NhEIZK4tOcAlNSfztT+Rjy6DY30YILBCtYM60aQ==
+
 "@yarnaimo/eslint-config@^0.2.3":
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/@yarnaimo/eslint-config/-/eslint-config-0.2.3.tgz#b6bc26d6bc8baf9ce771834b39906f9749f8a0f0"

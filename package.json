@@ -4,46 +4,47 @@
   "repository": "github:yarnaimo/fireschema",
   "license": "MIT",
   "author": "yamaimo <yarnaimo@gmail.com>",
+  "type": "module",
   "exports": {
     ".": {
       "node": {
-        "import": "./esm/index.mjs",
-        "require": "./dist/index.js"
+        "import": "./esm/index.js",
+        "require": "./dist/index.cjs"
       },
-      "default": "./esm/index.mjs"
+      "default": "./esm/index.js"
     },
     "./admin": {
       "node": {
-        "import": "./esm/admin/index.mjs",
-        "require": "./dist/admin/index.js"
+        "import": "./esm/admin/index.js",
+        "require": "./dist/admin/index.cjs"
       },
-      "default": "./esm/admin/index.mjs"
+      "default": "./esm/admin/index.js"
     },
     "./hooks": {
       "node": {
-        "import": "./esm/hooks/index.mjs",
-        "require": "./dist/hooks/index.js"
+        "import": "./esm/hooks/index.js",
+        "require": "./dist/hooks/index.cjs"
       },
-      "default": "./esm/hooks/index.mjs"
+      "default": "./esm/hooks/index.js"
     }
   },
-  "main": "./dist/index.js",
-  "bin": "./esm/bin/main.mjs",
+  "main": "./dist/index.cjs",
+  "bin": "./esm/bin/main.js",
   "scripts": {
-    "build": "tsc -P tsconfig.cjs.json && cp src/lib/*.d.ts dist/lib/",
+    "build": "tsc -P tsconfig.cjs.json && cp src/lib/*.d.ts dist/lib/ && renamer --silent --force --find js --replace cjs 'dist/**'",
     "build:esm": "tsc && cp src/lib/*.d.ts esm/lib/ && ./scripts/after-build-esm.sh",
     "debug": "node --inspect -r ts-node/register",
     "docs": "md-magic && sed -i -e \"s/ from '\\.\\./ from 'fireschema/g\" README.md && prettier --write README.md",
-    "firestore:rules": "TS_NODE_PROJECT=tsconfig.cjs.json ./esm/bin/main.mjs rules src/example/1-1-schema.ts",
-    "functions:export": "TS_NODE_PROJECT=tsconfig.cjs.json ./esm/bin/main.mjs export src/__tests__/_functions",
+    "firestore:rules": "TS_NODE_PROJECT=tsconfig.cjs.json ./esm/bin/main.js rules src/example/1-1-schema.ts",
+    "functions:export": "TS_NODE_PROJECT=tsconfig.cjs.json ./esm/bin/main.js export src/__tests__/_functions",
     "lint": "eslint --ignore-path .gitignore '**/*.{js,jsx,ts,tsx}'",
     "prepare": "./scripts/append-emulator-proxyer.sh && ./scripts/firebase-testing-compat.sh",
     "serve": "yarn build && firebase emulators:start --only firestore,functions,pubsub",
     "test": "NODE_ENV=test jest --no-cache",
     "test:main": "firebase emulators:exec --only firestore 'yarn test --testPathIgnorePatterns /node_modules/ /dist/ /esm/ /functions/'",
-    "test:functions": "firebase emulators:exec --only firestore,functions,pubsub 'yarn test /functions/'",
+    "test:functions": "yarn build:esm && firebase emulators:exec --only firestore,functions,pubsub 'yarn test /functions/'",
     "test:all": "yarn test:main && yarn test:functions",
-    "ts-node": "ts-node -P tsconfig.cjs.json ",
+    "ts-node": "ts-node -P tsconfig.cjs.json",
     "ts-node:esm": "node --loader ts-node/esm --experimental-specifier-resolution=node",
     "version": "rm -rf dist esm && yarn build && yarn build:esm"
   },
@@ -72,6 +73,7 @@
     "@types/prettier": "^2.3.2",
     "@types/react": "^17.0.14",
     "@types/testing-library__react-hooks": "^4.0.0",
+    "@yarnaimo/add-import-extension": "^0.0.1",
     "@yarnaimo/eslint-config": "^0.2.3",
     "enhanced-resolve": "^5.8.2",
     "express": "^4.17.1",

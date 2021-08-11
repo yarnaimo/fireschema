@@ -1,6 +1,6 @@
 {
   "private": true,
   "type": "module",
-  "main": "../dist/admin/index.js",
-  "module": "../esm/admin/index.mjs"
+  "main": "../dist/admin/index.cjs",
+  "module": "../esm/admin/index.js"
 }
