@@ -7,7 +7,7 @@ import {
   TypedDocumentSnap,
   TypedQueryRef,
   TypedQuerySnap,
-} from '../core'
+} from '../core/index.js'
 import { _web } from '../lib/firestore-types'
 
 export const useDocumentSnapData = <

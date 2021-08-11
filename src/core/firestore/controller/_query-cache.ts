@@ -1,7 +1,7 @@
-import { FTypes } from '../../types'
-import { createConverter } from '../../utils/_firestore'
-import { DataModel } from '../model'
-import { queryEqualUniv } from './_universal'
+import { FTypes } from '../../types/index.js'
+import { createConverter } from '../../utils/_firestore.js'
+import { DataModel } from '../model.js'
+import { queryEqualUniv } from './_universal.js'
 
 type CachedQuery = {
   raw: FTypes.Query<any>

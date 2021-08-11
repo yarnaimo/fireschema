@@ -1,22 +1,22 @@
 import { QueryConstraint } from 'firebase/firestore'
-import { Type } from '../../lib/type'
+import { Type } from '../../lib/type.js'
 import {
   $allow,
   $collectionGroups,
   $docLabel,
   $functions,
   $model,
-} from '../constants'
+} from '../constants/index.js'
 import {
   DataModel,
   InferDataModelSL,
   InferDataModelT,
   InferDataModelU,
-} from '../firestore'
-import { QueryBuilder } from '../firestore/controller/_query'
-import { FirestoreStatic } from '../firestore/controller/_static'
-import { FTypes } from './FTypes'
-import { GetByLoc } from './_object'
+} from '../firestore/index.js'
+import { QueryBuilder } from '../firestore/controller/_query.js'
+import { FirestoreStatic } from '../firestore/controller/_static.js'
+import { FTypes } from './FTypes.js'
+import { GetByLoc } from './_object.js'
 
 export const allowOptions = {
   read: {

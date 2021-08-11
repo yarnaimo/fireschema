@@ -17,8 +17,8 @@ import {
   withRefTransformer,
   _createdAt,
   _updatedAt,
-} from '../../core'
-import { TypedFirestoreAdmin } from '../../core/firestore/controller/_TypedFirestoreAdmin'
+} from '../../core/index.js'
+import { TypedFirestoreAdmin } from '../../core/firestore/controller/_TypedFirestoreAdmin.js'
 import {
   collectionUniv,
   docFromRootUniv,
@@ -30,15 +30,15 @@ import {
   refEqualUniv,
   setDocUniv,
   updateDocUniv,
-} from '../../core/firestore/controller/_universal'
+} from '../../core/firestore/controller/_universal.js'
 import {
   useTypedDocument,
   useTypedDocumentOnce,
   useTypedQuery,
   useTypedQueryOnce,
-} from '../../hooks'
-import { R } from '../../lib/fp'
-import { createUserData, postAData } from '../_fixtures/data'
+} from '../../hooks/index.js'
+import { R } from '../../lib/fp.js'
+import { createUserData, postAData } from '../_fixtures/data.js'
 import {
   firestoreModel,
   IPostA,
@@ -47,13 +47,13 @@ import {
   IUserLocal,
   PostModel,
   UserModel,
-} from '../_fixtures/firestore-schema'
-import { authedAdminApp, authedApp } from '../_infrastructure/_app'
-import { sleep } from '../_utils/common'
+} from '../_fixtures/firestore-schema.js'
+import { authedAdminApp, authedApp } from '../_infrastructure/_app.js'
+import { sleep } from '../_utils/common.js'
 import {
   expectAnyTimestampAdmin,
   expectAnyTimestampWeb,
-} from '../_utils/firestore'
+} from '../_utils/firestore.js'
 
 type S = typeof firestoreModel.schemaOptions
 type F = FTypes.FirestoreApp

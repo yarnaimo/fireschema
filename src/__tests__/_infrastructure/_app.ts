@@ -7,9 +7,9 @@ import {
 import { App } from 'firebase-admin/app'
 import { deleteApp, FirebaseApp, getApps } from 'firebase/app'
 import { MapAsync } from 'lifts'
-import { renderSchema } from '../../core/firestore/_renderer/root'
-import { firestoreModel } from '../_fixtures/firestore-schema'
-import { projectId } from './_config'
+import { renderSchema } from '../../core/firestore/_renderer/root.js'
+import { firestoreModel } from '../_fixtures/firestore-schema.js'
+import { projectId } from './_config.js'
 
 const rules = renderSchema(firestoreModel)
 beforeAll(async () => {

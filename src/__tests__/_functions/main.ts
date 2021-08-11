@@ -7,7 +7,7 @@ const importModule = (functionNames: string[], modulePath: string) => {
     : undefined
 }
 
-import type * as __callable_test___ from './callable/test_'
+import type * as __callable_test___ from './callable/test_.js'
 
 export const callable = {
   ...importModule(['callable-test'], './callable/test_'),

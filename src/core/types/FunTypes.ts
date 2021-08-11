@@ -1,10 +1,10 @@
 import type express from 'express'
 import { _admin } from '../../lib/firestore-types'
 import { _fadmin, _fweb } from '../../lib/functions-types'
-import { $input, $output, $topicName } from '../constants'
-import { InferSchemaType } from './SchemaType'
-import { ExtractFP, ParseFP } from './_functions'
-import { GetDeep } from './_object'
+import { $input, $output, $topicName } from '../constants/index.js'
+import { InferSchemaType } from './SchemaType.js'
+import { ExtractFP, ParseFP } from './_functions.js'
+import { GetDeep } from './_object.js'
 
 export declare namespace FunTypes {
   // export type Jsonfy<T> = {

@@ -1,5 +1,5 @@
-import { is } from '../../../lib/type'
-import { SchemaType } from '../../types'
+import { is } from '../../../lib/type.js'
+import { SchemaType } from '../../types/index.js'
 
 export const validateJsonSchema = (
   t: SchemaType.JsonValue,

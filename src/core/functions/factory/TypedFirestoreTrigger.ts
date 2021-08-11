@@ -1,12 +1,12 @@
 import { _admin } from '../../../lib/firestore-types'
 import { _fadmin } from '../../../lib/functions-types'
-import { $model } from '../../constants'
-import { FunTypes, STypes } from '../../types'
-import { ParseDocumentPath } from '../../types/_firestore'
+import { $model } from '../../constants/index.js'
+import { FunTypes, STypes } from '../../types/index.js'
+import { ParseDocumentPath } from '../../types/_firestore.js'
 import {
   firestorePathToLoc,
   getCollectionOptions,
-} from '../../utils/_firestore'
+} from '../../utils/_firestore.js'
 
 type F = _admin.Firestore
 

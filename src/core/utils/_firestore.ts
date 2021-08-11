@@ -1,5 +1,5 @@
-import { FTypes, STypes } from '../types'
-import { getByLoc } from './_object'
+import { FTypes, STypes } from '../types/index.js'
+import { getByLoc } from './_object.js'
 
 export const firestorePathToLoc = (path: string) =>
   path

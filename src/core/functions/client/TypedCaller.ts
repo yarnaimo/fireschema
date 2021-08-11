@@ -1,8 +1,8 @@
 import { httpsCallable } from 'firebase/functions'
 import { _fweb } from '../../../lib/functions-types'
-import { is } from '../../../lib/type'
-import { FunTypes } from '../../types'
-import { ExtractFP } from '../../types/_functions'
+import { is } from '../../../lib/type.js'
+import { FunTypes } from '../../types/index.js'
+import { ExtractFP } from '../../types/_functions.js'
 
 const encode = (data: any): any => {
   return Object.fromEntries(

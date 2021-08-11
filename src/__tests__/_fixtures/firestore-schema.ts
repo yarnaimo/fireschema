@@ -10,9 +10,9 @@ import {
   DataModel,
   FTypes,
   InferSchemaType,
-} from '../..'
-import { FirestoreModel } from '../../core'
-import { Type } from '../../lib/type'
+} from '../../index.js'
+import { FirestoreModel } from '../../core/index.js'
+import { Type } from '../../lib/type.js'
 
 const VersionType = { unknown: $.unknown }
 expectType<{ unknown: unknown }>({} as InferSchemaType<typeof VersionType>)

@@ -1,11 +1,11 @@
-import { FTypes, STypes } from '../../types'
+import { FTypes, STypes } from '../../types/index.js'
 import {
   DocumentSnapDataOptions,
   TypedDocumentRef,
   TypedDocumentSnap,
-} from './TypedDocumentRef'
-import { FirestoreStatic } from './_static'
-import { docAsAdmin, docAsWeb, DocDataHelper } from './_utils'
+} from './TypedDocumentRef.js'
+import { FirestoreStatic } from './_static.js'
+import { docAsAdmin, docAsWeb, DocDataHelper } from './_utils.js'
 
 export class TypedTransaction<
   S extends STypes.RootOptions.All,

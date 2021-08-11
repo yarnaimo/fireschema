@@ -1,8 +1,8 @@
 import { PubSub } from '@google-cloud/pubsub'
 import { connectFunctionsEmulator, getFunctions } from 'firebase/functions'
-import { TypedCaller, TypedTopic } from '../..'
-import { authedApp } from './_app'
-import { emulatorConfig, localhost, projectId } from './_config'
+import { TypedCaller, TypedTopic } from '../../index.js'
+import { authedApp } from './_app.js'
+import { emulatorConfig, localhost, projectId } from './_config.js'
 
 const app = authedApp('user')
 const functionsApp = getFunctions(app, 'asia-northeast1')

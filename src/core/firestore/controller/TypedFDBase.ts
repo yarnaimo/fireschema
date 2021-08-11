@@ -1,9 +1,9 @@
-import { FTypes, STypes } from '../../types'
-import { GetByLoc, JoinLoc } from '../../types/_object'
-import { joinLoc } from '../../utils/_object'
-import { TypedCollectionRef, TypedQueryRef } from './TypedCollectionRef'
-import { FirestoreStatic } from './_static'
-import { collectionUniv } from './_universal'
+import { FTypes, STypes } from '../../types/index.js'
+import { GetByLoc, JoinLoc } from '../../types/_object.js'
+import { joinLoc } from '../../utils/_object.js'
+import { TypedCollectionRef, TypedQueryRef } from './TypedCollectionRef.js'
+import { FirestoreStatic } from './_static.js'
+import { collectionUniv } from './_universal.js'
 
 export class TypedFDBase<
   S extends STypes.RootOptions.All,

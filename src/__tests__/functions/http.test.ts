@@ -4,7 +4,7 @@ import {
   localhost,
   projectId,
   region,
-} from '../_infrastructure/_config'
+} from '../_infrastructure/_config.js'
 
 test('http', async () => {
   const resp = await got

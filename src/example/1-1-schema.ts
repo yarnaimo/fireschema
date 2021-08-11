@@ -10,7 +10,7 @@ import {
   DataModel,
   FirestoreModel,
   InferSchemaType,
-} from '..'
+} from '../index.js'
 
 // user
 export const UserType = {

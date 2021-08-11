@@ -1,18 +1,18 @@
 import { P } from 'lifts'
-import { R } from '../../../lib/fp'
-import { $model } from '../../constants'
-import { FTypes, STypes } from '../../types'
-import { GetByLoc, JoinLoc, OmitLastSegment } from '../../types/_object'
-import { getCollectionOptions } from '../../utils/_firestore'
-import { getLastSegment, omitLastSegment } from '../../utils/_object'
+import { R } from '../../../lib/fp.js'
+import { $model } from '../../constants/index.js'
+import { FTypes, STypes } from '../../types/index.js'
+import { GetByLoc, JoinLoc, OmitLastSegment } from '../../types/_object.js'
+import { getCollectionOptions } from '../../utils/_firestore.js'
+import { getLastSegment, omitLastSegment } from '../../utils/_object.js'
 import {
   QueryDocumentSnapDataOptions,
   TypedDocumentRef,
   TypedQueryDocumentSnap,
-} from './TypedDocumentRef'
-import { withDecoder } from './_query-cache'
-import { FirestoreStatic } from './_static'
-import { docUniv, getDocsUniv, GetSource, queryUniv } from './_universal'
+} from './TypedDocumentRef.js'
+import { withDecoder } from './_query-cache.js'
+import { FirestoreStatic } from './_static.js'
+import { docUniv, getDocsUniv, GetSource, queryUniv } from './_universal.js'
 
 export class TypedQuerySnap<
   S extends STypes.RootOptions.All,

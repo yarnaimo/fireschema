@@ -1,7 +1,7 @@
 import { _fadmin } from '../../lib/functions-types'
-import { $topicName } from '../constants'
-import { FunTypes } from '../types'
-import { Subtract } from './_object'
+import { $topicName } from '../constants/index.js'
+import { FunTypes } from '../types/index.js'
+import { Subtract } from './_object.js'
 
 export type ParseFP<P extends string> = P extends `${infer P1}-${infer P2}`
   ? [P1, ...ParseFP<P2>]

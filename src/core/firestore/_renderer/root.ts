@@ -3,14 +3,14 @@ import {
   $functions,
   _createdAt,
   _updatedAt,
-} from '../../constants'
-import { STypes } from '../../types'
-import { $$or, $and, $rule } from '../../utils'
-import { join } from '../../utils/_string'
-import { FirestoreModel } from '../model'
-import { renderCollectionGroups, renderCollections } from './collections'
-import { validator } from './format'
-import { renderFunctions } from './functions'
+} from '../../constants/index.js'
+import { STypes } from '../../types/index.js'
+import { $$or, $and, $rule } from '../../utils/index.js'
+import { join } from '../../utils/_string.js'
+import { FirestoreModel } from '../model.js'
+import { renderCollectionGroups, renderCollections } from './collections.js'
+import { validator } from './format.js'
+import { renderFunctions } from './functions.js'
 
 /**
  * - TypedDocumentRef.prototype.create() は内部で set() に渡すデータに _createdAt フィールドを自動で追加する

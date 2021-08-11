@@ -1,2 +1,2 @@
-export * from '../core/firestore/controller/_TypedFirestoreAdmin'
-export * from '../core/functions/factory/_TypedFunctions'
+export * from '../core/firestore/controller/_TypedFirestoreAdmin.js'
+export * from '../core/functions/factory/_TypedFunctions.js'

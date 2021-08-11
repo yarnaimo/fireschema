@@ -1,10 +1,10 @@
 import {
   FirestoreStatic,
   firestoreStaticWeb,
-} from '../../core/firestore/controller/_static'
-import { FTypes } from '../../core/types'
-import { Type } from '../../lib/type'
-import { IPostA, IUser } from './firestore-schema'
+} from '../../core/firestore/controller/_static.js'
+import { FTypes } from '../../core/types/index.js'
+import { Type } from '../../lib/type.js'
+import { IPostA, IUser } from './firestore-schema.js'
 
 export const createUserData = (
   firestoreStatic: FirestoreStatic<FTypes.FirestoreApp>,

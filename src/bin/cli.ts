@@ -1,6 +1,6 @@
 import getopts from 'getopts'
-import { exportFunctions } from './commands/export'
-import { generateRules } from './commands/rules'
+import { exportFunctions } from './commands/export.js'
+import { generateRules } from './commands/rules.js'
 
 const help = `Usage:
 fireschema rules <schema-path>          generate firestore.rules

@@ -1,4 +1,4 @@
-import { $or } from '.'
+import { $or } from './index.js'
 
 export const $rule = {
   notExists: (key: string | 0, parent: string | null) =>

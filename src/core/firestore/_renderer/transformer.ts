@@ -1,8 +1,8 @@
 import { P } from 'lifts'
-import { R } from '../../../lib/fp'
-import { is } from '../../../lib/type'
-import { SchemaType } from '../../types/SchemaType'
-import { $$and, $and, $or, $rule } from '../../utils'
+import { R } from '../../../lib/fp.js'
+import { is } from '../../../lib/type.js'
+import { SchemaType } from '../../types/SchemaType.js'
+import { $$and, $and, $or, $rule } from '../../utils/index.js'
 
 export const schemaToRule =
   (parent: string | null = null, key: string | 0 = 'data') =>

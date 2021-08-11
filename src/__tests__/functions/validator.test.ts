@@ -1,7 +1,7 @@
-import { $ } from '../../core'
-import { validateJsonSchema } from '../../core/functions/factory/_validator'
-import { userDataJson } from '../_fixtures/data'
-import { UserJsonType } from '../_fixtures/firestore-schema'
+import { $ } from '../../core/index.js'
+import { validateJsonSchema } from '../../core/functions/factory/_validator.js'
+import { userDataJson } from '../_fixtures/data.js'
+import { UserJsonType } from '../_fixtures/firestore-schema.js'
 
 describe('simple types', () => {
   test.each([

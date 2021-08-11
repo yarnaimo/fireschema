@@ -1,7 +1,7 @@
 import * as functions from 'firebase-functions'
-import { $ } from '..'
-import { TypedFunctions } from '../admin'
-import { firestoreModel, UserType } from './1-1-schema'
+import { $ } from '../index.js'
+import { TypedFunctions } from '../admin/index.js'
+import { firestoreModel, UserType } from './1-1-schema.js'
 
 /**
  * Initialize TypedFunctions

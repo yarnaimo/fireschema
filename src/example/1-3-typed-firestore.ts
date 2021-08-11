@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app' // or firebase-admin
 import { initializeFirestore } from 'firebase/firestore'
-import { TypedFirestoreWeb } from '../core'
-import { firestoreModel } from './1-1-schema'
+import { TypedFirestoreWeb } from '../core/index.js'
+import { firestoreModel } from './1-1-schema.js'
 
 const app = initializeApp({
   // ...

@@ -4,6 +4,6 @@
 */
 
 import 'ts-node/esm'
-import { cli } from './cli'
+import { cli } from './cli.js'
 
 void cli()

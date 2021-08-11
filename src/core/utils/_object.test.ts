@@ -7,7 +7,7 @@ import {
   joinLoc,
   omitLastSegment,
   parseLocString,
-} from './_object'
+} from './_object.js'
 
 const obj = {
   a: {

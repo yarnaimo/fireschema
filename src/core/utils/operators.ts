@@ -1,5 +1,5 @@
-import { R } from '../../lib/fp'
-import { STypes } from '../types'
+import { R } from '../../lib/fp.js'
+import { STypes } from '../types/index.js'
 
 const $join =
   (separator: string, newline = false) =>

@@ -8,7 +8,7 @@ import {
   Timestamp,
 } from 'firebase/firestore'
 import { _admin } from '../../../lib/firestore-types'
-import { FTypes } from '../../types'
+import { FTypes } from '../../types/index.js'
 
 export type FirestoreStatic<F extends FTypes.FirestoreApp> = FTypes.Env<
   F,

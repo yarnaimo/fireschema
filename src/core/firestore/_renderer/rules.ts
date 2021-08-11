@@ -1,12 +1,12 @@
 import { EntriesStrict, P } from 'lifts'
-import { R } from '../../../lib/fp'
-import { allowOptions, STypes } from '../../types'
-import { $and } from '../../utils'
-import { join, _ } from '../../utils/_string'
-import { DataModel } from '../model'
-import { addValidatorIndex, validator, validatorCall } from './format'
-import { renderFunctions } from './functions'
-import { schemaToRule } from './transformer'
+import { R } from '../../../lib/fp.js'
+import { allowOptions, STypes } from '../../types/index.js'
+import { $and } from '../../utils/index.js'
+import { join, _ } from '../../utils/_string.js'
+import { DataModel } from '../model.js'
+import { addValidatorIndex, validator, validatorCall } from './format.js'
+import { renderFunctions } from './functions.js'
+import { schemaToRule } from './transformer.js'
 
 export const renderRules = (
   $allow: STypes.AllowOptions,

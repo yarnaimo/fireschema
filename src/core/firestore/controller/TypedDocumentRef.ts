@@ -1,7 +1,7 @@
-import { FTypes, STypes } from '../../types'
-import { TypedCollectionRef } from './TypedCollectionRef'
-import { TypedFDBase } from './TypedFDBase'
-import { FirestoreStatic } from './_static'
+import { FTypes, STypes } from '../../types/index.js'
+import { TypedCollectionRef } from './TypedCollectionRef.js'
+import { TypedFDBase } from './TypedFDBase.js'
+import { FirestoreStatic } from './_static.js'
 import {
   deleteDocUniv,
   existsUniv,
@@ -9,8 +9,8 @@ import {
   GetSource,
   setDocUniv,
   updateDocUniv,
-} from './_universal'
-import { DocDataHelper } from './_utils'
+} from './_universal.js'
+import { DocDataHelper } from './_utils.js'
 
 export type DocumentSnapTransformer<
   S extends STypes.RootOptions.All,

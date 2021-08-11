@@ -1,12 +1,12 @@
 import { EntriesStrict, P } from 'lifts'
-import { R } from '../../lib/fp'
-import { is } from '../../lib/type'
+import { R } from '../../lib/fp.js'
+import { is } from '../../lib/type.js'
 import {
   GetDeepByKey,
   JoinLoc,
   OmitLastSegment,
   ParseLocString,
-} from '../types/_object'
+} from '../types/_object.js'
 
 export const getDeep = (object: object, paths: string[]) => {
   return paths.reduce(

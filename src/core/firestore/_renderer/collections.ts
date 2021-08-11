@@ -1,9 +1,9 @@
 import { EntriesStrict, P } from 'lifts'
-import { R } from '../../../lib/fp'
-import { $allow, $docLabel, $model } from '../../constants'
-import { STypes } from '../../types'
-import { join, _ } from '../../utils/_string'
-import { renderRules } from './rules'
+import { R } from '../../../lib/fp.js'
+import { $allow, $docLabel, $model } from '../../constants/index.js'
+import { STypes } from '../../types/index.js'
+import { join, _ } from '../../utils/_string.js'
+import { renderRules } from './rules.js'
 
 const renderFromArray =
   (pIndent: number) =>

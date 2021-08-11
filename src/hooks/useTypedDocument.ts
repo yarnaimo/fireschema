@@ -4,15 +4,15 @@ import {
   STypes,
   TypedDocumentRef,
   TypedDocumentSnap,
-} from '../core'
+} from '../core/index.js'
 import { _web } from '../lib/firestore-types'
-import { useDocumentSnapData } from './useSnapData'
+import { useDocumentSnapData } from './useSnapData.js'
 import {
   HasGetOptions,
   HasSnapListenOptions,
   useFirestoreErrorLogger,
   useRefChangeLimitExceeded,
-} from './utils'
+} from './utils.js'
 
 export type UseTypedDocument<
   S extends STypes.RootOptions.All,

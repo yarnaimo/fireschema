@@ -1,12 +1,17 @@
 import * as firestore from 'firebase-admin/firestore'
 import * as functions from 'firebase-functions'
 import { _fadmin } from '../../../lib/functions-types'
-import { messages } from '../../constants'
-import { FirestoreModel, InferFirestoreModelS } from '../../firestore'
-import { FunTypes, InferSchemaType, SchemaType, STypes } from '../../types'
-import { withType } from '../../utils/_type'
-import { TypedFirestoreTrigger } from './TypedFirestoreTrigger'
-import { validateJsonSchema } from './_validator'
+import { messages } from '../../constants/index.js'
+import { FirestoreModel, InferFirestoreModelS } from '../../firestore/index.js'
+import {
+  FunTypes,
+  InferSchemaType,
+  SchemaType,
+  STypes,
+} from '../../types/index.js'
+import { withType } from '../../utils/_type.js'
+import { TypedFirestoreTrigger } from './TypedFirestoreTrigger.js'
+import { validateJsonSchema } from './_validator.js'
 
 export class TypedFunctions<
   M extends FirestoreModel<STypes.RootOptions.All>,

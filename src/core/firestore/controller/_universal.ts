@@ -23,14 +23,14 @@ import {
   updateDoc,
   writeBatch,
 } from 'firebase/firestore'
-import { FTypes } from '../../types'
+import { FTypes } from '../../types/index.js'
 import {
   queryAdmin,
   QueryBuilder,
   queryBuilderAdmin,
   queryBuilderWeb,
   QueryConstraintAdmin,
-} from './_query'
+} from './_query.js'
 
 export const collectionUniv = (
   raw: FTypes.FirestoreApp | FTypes.DocumentRef<any>,

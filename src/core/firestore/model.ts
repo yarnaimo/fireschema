@@ -1,4 +1,4 @@
-import { InferSchemaType, SchemaType, STypes } from '../types'
+import { InferSchemaType, SchemaType, STypes } from '../types/index.js'
 
 type GetU<S extends SchemaType._DocData, D> = D extends STypes.Model.Decoder<
   any,

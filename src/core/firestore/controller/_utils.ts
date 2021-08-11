@@ -1,7 +1,7 @@
 import { _admin, _web } from '../../../lib/firestore-types'
-import { _createdAt, _updatedAt } from '../../constants'
-import { FTypes } from '../../types'
-import { FirestoreStatic } from './_static'
+import { _createdAt, _updatedAt } from '../../constants/index.js'
+import { FTypes } from '../../types/index.js'
+import { FirestoreStatic } from './_static.js'
 
 export const docAsWeb = <U>(ref: FTypes.DocumentRef<U>) => {
   return ref as FTypes.DocumentRef<U, _web.Firestore>

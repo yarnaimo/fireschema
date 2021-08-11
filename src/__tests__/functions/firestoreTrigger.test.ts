@@ -1,9 +1,9 @@
 import { firestore } from 'firebase-admin'
 import functionsTest from 'firebase-functions-test'
-import { firestoreStaticWeb } from '../../core/firestore/controller/_static'
-import { createUserData, postAData } from '../_fixtures/data'
-import { decodeUser } from '../_fixtures/firestore-schema'
-import { firestoreTrigger } from '../_infrastructure/functions-server'
+import { firestoreStaticWeb } from '../../core/firestore/controller/_static.js'
+import { createUserData, postAData } from '../_fixtures/data.js'
+import { decodeUser } from '../_fixtures/firestore-schema.js'
+import { firestoreTrigger } from '../_infrastructure/functions-server.js'
 
 const ftest = functionsTest()
 const userPath = 'versions/v1/users/user'

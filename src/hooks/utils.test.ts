@@ -1,9 +1,9 @@
 import { renderHook } from '@testing-library/react-hooks'
 import dayjs from 'dayjs'
 import { collection, getFirestore, query, where } from 'firebase/firestore'
-import { authedApp } from '../__tests__/_infrastructure/_app'
-import { sleep } from '../__tests__/_utils/common'
-import { useRefChangeLimitExceeded } from './utils'
+import { authedApp } from '../__tests__/_infrastructure/_app.js'
+import { sleep } from '../__tests__/_utils/common.js'
+import { useRefChangeLimitExceeded } from './utils.js'
 
 const logTimestamps = (timestamps: dayjs.Dayjs[]) => {
   console.log(

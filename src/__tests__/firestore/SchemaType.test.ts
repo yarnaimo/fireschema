@@ -1,5 +1,5 @@
-import { $ } from '../../core'
-import { schemaToRule } from '../../core/firestore/_renderer/transformer'
+import { $ } from '../../core/index.js'
+import { schemaToRule } from '../../core/firestore/_renderer/transformer.js'
 
 test.each([
   [$.union($.string, $.int), '(data is string || data is int)'],

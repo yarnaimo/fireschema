@@ -1,5 +1,5 @@
 import { UnionToIntersection } from 'type-fest'
-import { FTypes } from '.'
+import { FTypes } from './index.js'
 
 export const $type = Symbol('Fireschema - schema type')
 

@@ -1,4 +1,4 @@
-import { _ } from '../../utils/_string'
+import { _ } from '../../utils/_string.js'
 
 let validatorIndex = 0
 export const addValidatorIndex = () => {

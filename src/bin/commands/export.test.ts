@@ -1,4 +1,4 @@
-import { buildFunctionExportContent } from './export'
+import { buildFunctionExportContent } from './export.js'
 
 const baseDir = './src/__tests__/_functions'
 const outputPath = `${baseDir}/main.ts`

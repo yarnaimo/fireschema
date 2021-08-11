@@ -1,20 +1,20 @@
 import type { Firestore } from 'firebase/firestore'
-import { $collectionGroups } from '../../constants'
-import { FTypes, STypes } from '../../types'
-import { Loc } from '../../types/_object'
-import { firestorePathToLoc } from '../../utils/_firestore'
-import { FirestoreModel, InferFirestoreModelS } from '../model'
-import { TypedQueryRef } from './TypedCollectionRef'
-import { TypedDocumentRef } from './TypedDocumentRef'
-import { TypedFDBase } from './TypedFDBase'
-import { TypedTransaction } from './TypedTransaction'
-import { TypedWriteBatch } from './TypedWriteBatch'
-import { FirestoreStatic, firestoreStaticWeb } from './_static'
+import { $collectionGroups } from '../../constants/index.js'
+import { FTypes, STypes } from '../../types/index.js'
+import { Loc } from '../../types/_object.js'
+import { firestorePathToLoc } from '../../utils/_firestore.js'
+import { FirestoreModel, InferFirestoreModelS } from '../model.js'
+import { TypedQueryRef } from './TypedCollectionRef.js'
+import { TypedDocumentRef } from './TypedDocumentRef.js'
+import { TypedFDBase } from './TypedFDBase.js'
+import { TypedTransaction } from './TypedTransaction.js'
+import { TypedWriteBatch } from './TypedWriteBatch.js'
+import { FirestoreStatic, firestoreStaticWeb } from './_static.js'
 import {
   collectionGroupUniv,
   runTransactionUniv,
   writeBatchUniv,
-} from './_universal'
+} from './_universal.js'
 
 export class TypedFirestoreUniv<
   M extends FirestoreModel<STypes.RootOptions.All>,

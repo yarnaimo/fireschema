@@ -1,10 +1,10 @@
 import * as functions from 'firebase-functions'
 import { expectType } from 'tsd'
-import { $, FunTypes, messages, STypes } from '../..'
-import { TypedFunctions } from '../../admin'
+import { $, FunTypes, messages, STypes } from '../../index.js'
+import { TypedFunctions } from '../../admin/index.js'
 import { _admin } from '../../lib/firestore-types'
 import { _fadmin } from '../../lib/functions-types'
-import { Type } from '../../lib/type'
+import { Type } from '../../lib/type.js'
 import {
   firestoreModel,
   IPostA,
@@ -13,8 +13,8 @@ import {
   IUserJson,
   IUserLocal,
   UserJsonType,
-} from '../_fixtures/firestore-schema'
-import { region } from './_config'
+} from '../_fixtures/firestore-schema.js'
+import { region } from './_config.js'
 
 const timezone = 'Asia/Tokyo'
 const typedFunctions = new TypedFunctions(firestoreModel, timezone)

@@ -7,15 +7,15 @@ import {
   STypes,
   TypedQueryRef,
   TypedQuerySnap,
-} from '../core'
+} from '../core/index.js'
 import { _web } from '../lib/firestore-types'
-import { useQuerySnapData } from './useSnapData'
+import { useQuerySnapData } from './useSnapData.js'
 import {
   HasGetOptions,
   HasSnapListenOptions,
   useFirestoreErrorLogger,
   useRefChangeLimitExceeded,
-} from './utils'
+} from './utils.js'
 
 export type UseTypedQuery<
   S extends STypes.RootOptions.All,
