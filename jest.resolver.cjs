@@ -9,5 +9,16 @@ module.exports = function (request, options) {
   if (['fs', 'http', 'path'].includes(request)) {
     return options.defaultResolver(request, options)
   }
+
+  if (request.endsWith('.js') && !request.includes('/node_modules/')) {
+    for (const extension of ['.ts', '.tsx']) {
+      try {
+        return resolver(options.basedir, request.replace(/\.js$/, extension))
+      } catch {
+        continue
+      }
+    }
+  }
+
   return resolver(options.basedir, request)
 }

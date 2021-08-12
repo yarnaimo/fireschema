@@ -18,5 +18,5 @@ module.exports = {
       diagnostics: false,
     },
   },
-  resolver: './jest-exports-resolver.cjs',
+  resolver: './jest.resolver.cjs',
 }
