@@ -2,5 +2,6 @@
   "private": true,
   "type": "module",
   "main": "../dist/hooks/index.cjs",
-  "module": "../esm/hooks/index.js"
+  "module": "../esm/hooks/index.js",
+  "types": "../esm/hooks/index.d.ts"
 }

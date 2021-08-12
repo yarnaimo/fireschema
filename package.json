@@ -29,6 +29,7 @@
     }
   },
   "main": "./dist/index.cjs",
+  "types": "./esm/index.d.ts",
   "bin": "./esm/bin/main.js",
   "scripts": {
     "build": "tsc -P tsconfig.cjs.json && cp src/lib/*.d.ts dist/lib/ && renamer --silent --force --find js --replace cjs 'dist/**'",

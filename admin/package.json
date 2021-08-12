@@ -2,5 +2,6 @@
   "private": true,
   "type": "module",
   "main": "../dist/admin/index.cjs",
-  "module": "../esm/admin/index.js"
+  "module": "../esm/admin/index.js",
+  "types": "../esm/admin/index.d.ts"
 }
