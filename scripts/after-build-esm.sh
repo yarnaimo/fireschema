@@ -1,5 +1,4 @@
 #!/bin/sh
-yarn add-import-extension esm
 
 BIN_MAIN=esm/bin/main.js
 chmod +x $BIN_MAIN

@@ -73,7 +73,6 @@
     "@types/prettier": "^2.3.2",
     "@types/react": "^17.0.14",
     "@types/testing-library__react-hooks": "^4.0.0",
-    "@yarnaimo/add-import-extension": "^0.0.1",
     "@yarnaimo/eslint-config": "^0.2.3",
     "enhanced-resolve": "^5.8.2",
     "express": "^4.17.1",
