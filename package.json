@@ -40,7 +40,7 @@
     "lint": "eslint --ignore-path .gitignore '**/*.{js,jsx,ts,tsx}'",
     "prepare": "./scripts/append-emulator-proxyer.sh && ./scripts/firebase-testing-compat.sh",
     "serve": "yarn build && firebase emulators:start --only firestore,functions,pubsub",
-    "test": "NODE_ENV=test jest --no-cache",
+    "test": "NODE_ENV=test jest --coverage false",
     "test:main": "firebase emulators:exec --only firestore 'yarn test --testPathIgnorePatterns /node_modules/ /dist/ /esm/ /functions/'",
     "test:functions": "yarn build:esm && firebase emulators:exec --only firestore,functions,pubsub 'yarn test /functions/'",
     "test:all": "yarn test:main && yarn test:functions",
