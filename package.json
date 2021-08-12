@@ -46,7 +46,7 @@
     "test:functions": "yarn build:esm && firebase emulators:exec --only firestore,functions,pubsub 'yarn test /functions/'",
     "test:all": "yarn test:main && yarn test:functions",
     "ts-node": "ts-node -P tsconfig.cjs.json",
-    "ts-node:esm": "node --loader ts-node/esm --experimental-specifier-resolution=node",
+    "ts-node:esm": "node --loader ts-node/esm --experimental-repl-await",
     "version": "rm -rf dist esm && yarn build && yarn build:esm"
   },
   "resolutions": {
