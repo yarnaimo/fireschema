@@ -4,7 +4,11 @@ import { is } from '../../../lib/type.js'
 import { SchemaType } from '../../types/SchemaType.js'
 import { $$and, $and, $or, $rule } from '../../utils/index.js'
 
-export const schemaToRule =
+export const schemaToRuleWithMeta = (t: SchemaType.Value): string => {
+  return $and([`__validator_meta__(data)`, _schemaToRule()(t)])
+}
+
+export const _schemaToRule =
   (parent: string | null = null, key: string | 0 = 'data') =>
   (t: SchemaType.Value): string => {
     const name = is.null_(parent)
@@ -15,9 +19,9 @@ export const schemaToRule =
 
     switch (t.type) {
       case 'union':
-        return P(t.valueTypes, R.map(schemaToRule(parent, key)), $or)
+        return P(t.valueTypes, R.map(_schemaToRule(parent, key)), $or)
       case 'intersection':
-        return P(t.valueTypes, R.map(schemaToRule(parent, key)), $and)
+        return P(t.valueTypes, R.map(_schemaToRule(parent, key)), $and)
 
       case 'unknown':
         return 'true'
@@ -41,20 +45,15 @@ export const schemaToRule =
       case 'array':
         return $or([
           $rule.isEmptyArray(name),
-          schemaToRule(name, 0)(t.valueType),
+          _schemaToRule(name, 0)(t.valueType),
         ])
 
       default:
         return P(
           Object.entries(t),
           R.map(([key, _t]) => {
-            return schemaToRule(name, key)(_t)
+            return _schemaToRule(name, key)(_t)
           }),
-          (rules) => {
-            return name === 'data'
-              ? [`__validator_meta__(data)`, ...rules]
-              : rules
-          },
           name === 'data' ? $$and : $and,
         )
     }

@@ -1,5 +1,19 @@
-import { $ } from '../../core/index.js'
-import { schemaToRule } from '../../core/firestore/_renderer/transformer.js'
+import { expectType } from 'tsd'
+import { _schemaToRule } from '../../core/firestore/_renderer/transformer.js'
+import { $, InferSchemaType } from '../../core/index.js'
+
+const nestedIntersection = $.intersection(
+  $.union({ a: $.string }, { a: $.int }),
+  { b: $.bool },
+)
+
+test('types', () => {
+  type Result = InferSchemaType<typeof nestedIntersection>
+  type Expected = ({ a: string } | { a: number }) & { b: boolean }
+
+  expectType<Expected>({} as Result)
+  expectType<Result>({} as Expected)
+})
 
 test.each([
   [$.union($.string, $.int), '(data is string || data is int)'],
@@ -18,19 +32,21 @@ test.each([
   [
     { a: $.string, b: $.optional($.int) },
     `(
-__validator_meta__(data)
-  && data.a is string
+data.a is string
   && (data.b is int || !("b" in data))
 )`,
   ],
   [
     { a: $.string, b: $.undefined },
     `(
-__validator_meta__(data)
-  && data.a is string
+data.a is string
   && !("b" in data)
 )`,
   ],
+  [
+    nestedIntersection,
+    `((data.a is string || data.a is int) && data.b is bool)`,
+  ],
 ])('%p', (t, expected) => {
-  expect(schemaToRule()(t)).toBe(expected)
+  expect(_schemaToRule()(t)).toBe(expected)
 })

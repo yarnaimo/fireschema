@@ -1,4 +1,3 @@
-import { UnionToIntersection } from 'type-fest'
 import { FTypes } from './index.js'
 
 export const $type = Symbol('Fireschema - schema type')
@@ -10,6 +9,12 @@ export type InferSchemaType<T, Depth extends number = 7> = [Depth] extends [
   : T extends { [$type]: infer U }
   ? U
   : { [K in keyof T]: InferSchemaType<T[K]> }
+
+export type InferSchemaTypeToIntersect<T> = T extends undefined
+  ? {}
+  : T extends SchemaType.Value
+  ? InferSchemaType<T>
+  : {}
 
 export namespace SchemaType {
   export type _LiteralType = string | number | boolean
@@ -23,7 +28,16 @@ export namespace SchemaType {
   export type Intersection<T extends Value[]> = {
     type: 'intersection'
     valueTypes: T
-    [$type]: UnionToIntersection<InferSchemaType<T[number]>>
+    [$type]: InferSchemaTypeToIntersect<T[0]> &
+      InferSchemaTypeToIntersect<T[1]> &
+      InferSchemaTypeToIntersect<T[2]> &
+      InferSchemaTypeToIntersect<T[3]> &
+      InferSchemaTypeToIntersect<T[4]> &
+      InferSchemaTypeToIntersect<T[5]> &
+      InferSchemaTypeToIntersect<T[6]> &
+      InferSchemaTypeToIntersect<T[7]> &
+      InferSchemaTypeToIntersect<T[8]> &
+      InferSchemaTypeToIntersect<T[9]>
   }
   export type IntersectionJson<T extends JsonValue[]> = Intersection<T>
 

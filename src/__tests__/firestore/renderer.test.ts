@@ -28,15 +28,14 @@ service cloud.firestore {
     match /versions/{version} {
       match /users/{uid} {
         function __validator_0__(data) {
-          return (
-            __validator_meta__(data)
-              && data.name is string
+          return (__validator_meta__(data) && (
+            data.name is string
               && (data.displayName is string || data.displayName == null)
               && data.age is int
               && (data.tags.size() == 0 || (data.tags[0].id is int && data.tags[0].name is string))
               && data.timestamp is timestamp
               && ((data.options.a is bool && data.options.b is string) || !("options" in data))
-          );
+          ));
         }
 
         allow read: if true;
@@ -45,15 +44,13 @@ service cloud.firestore {
 
         match /posts/{postId} {
           function __validator_1__(data) {
-            return ((
-              __validator_meta__(data)
-                && data.type == "a"
+            return (__validator_meta__(data) && ((
+              data.type == "a"
                 && data.text is string
             ) || (
-              __validator_meta__(data)
-                && data.type == "b"
+              data.type == "b"
                 && (data.texts.size() == 0 || data.texts[0] is string)
-            ));
+            )));
           }
 
           allow read: if true;
@@ -63,11 +60,10 @@ service cloud.firestore {
 
         match /privatePosts/{postId} {
           function __validator_2__(data) {
-            return (
-              __validator_meta__(data)
-                && data.type == "a"
+            return (__validator_meta__(data) && (
+              data.type == "a"
                 && data.text is string
-            );
+            ));
           }
 
           allow read: if (isAdmin() || isUserScope(uid));
