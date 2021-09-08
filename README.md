@@ -251,8 +251,8 @@ The Firestore interface of Fireschema supports both **Web SDK and Admin SDK**.
 ```ts
 import { initializeApp } from 'firebase/app' // or firebase-admin
 import { initializeFirestore } from 'firebase/firestore'
-import { TypedFirestoreWeb } from 'fireschema/core'
-import { firestoreModel } from './1-1-schema'
+import { TypedFirestoreWeb } from 'fireschema'
+import { firestoreModel } from './1-1-schema.js'
 
 const app = initializeApp({
   // ...
@@ -369,7 +369,7 @@ const techPostsGroup = typedFirestore.collectionGroupQuery(
 ```tsx
 import React from 'react'
 import { useTypedDocument, useTypedQuery } from 'fireschema/hooks'
-import { typedFirestore } from './1-3-typed-firestore'
+import { typedFirestore } from './1-3-typed-firestore.js'
 
 /**
  * Get realtime updates of collection/query
@@ -421,7 +421,7 @@ export const UserComponent = ({ id }: { id: string }) => {
 import * as functions from 'firebase-functions'
 import { $ } from 'fireschema'
 import { TypedFunctions } from 'fireschema/admin'
-import { firestoreModel, UserType } from './1-1-schema'
+import { firestoreModel, UserType } from './1-1-schema.js'
 
 /**
  * Initialize TypedFunctions
@@ -511,7 +511,7 @@ import { getFunctions } from 'firebase/functions'
 import React from 'react'
 import { TypedCaller } from 'fireschema'
 
-type FunctionsModule = typeof import('./2-1-typed-functions')
+type FunctionsModule = typeof import('./2-1-typed-functions.js')
 
 const app = initializeApp({
   // ...

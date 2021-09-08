@@ -1,9 +1,9 @@
 import { initializeApp } from 'firebase/app'
 import { getFunctions } from 'firebase/functions'
 import React from 'react'
-import { TypedCaller } from '..'
+import { TypedCaller } from '../index.js'
 
-type FunctionsModule = typeof import('./2-1-typed-functions')
+type FunctionsModule = typeof import('./2-1-typed-functions.js')
 
 const app = initializeApp({
   // ...
