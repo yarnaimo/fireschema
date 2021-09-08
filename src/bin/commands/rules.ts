@@ -15,7 +15,9 @@ export const generateRules = async (path: string) => {
     : '../../../src/core/firestore/_renderer/root'
   const rendererModule = await import(rendererPath)
 
-  const rendered = rendererModule.renderSchema(schemaModule.default)
+  const rendered = rendererModule.renderSchema(
+    schemaModule.default.default || schemaModule.default,
+  )
 
   writeFileSync(rulesPath, rendered)
   console.log('🎉 Generated firestore.rules')
