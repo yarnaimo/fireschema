@@ -1,18 +1,23 @@
-import { writeFileSync } from 'fs'
+import { readFileSync, writeFileSync } from 'fs'
 import { relative, resolve } from 'path'
 
 const rulesPath = 'firestore.rules'
 
 const relativePath = relative(process.cwd(), __dirname)
-const isInsideNodeModules = relativePath.startsWith('node_modules/')
+const isDev = !relativePath.startsWith('node_modules/')
 
 export const generateRules = async (path: string) => {
+  const packageJson = JSON.parse(readFileSync('package.json', 'utf8'))
+  const isEsm = (packageJson.type === 'module') as boolean
+
   const schemaPath = resolve(path)
   const schemaModule = await import(schemaPath)
 
-  const rendererPath = isInsideNodeModules
-    ? '../../../esm/core/firestore/_renderer/root'
-    : '../../../src/core/firestore/_renderer/root'
+  const rendererPath = isDev
+    ? '../../../src/core/firestore/_renderer/root.js'
+    : isEsm
+    ? '../../../esm/core/firestore/_renderer/root.js'
+    : '../../../dist/core/firestore/_renderer/root.cjs'
   const rendererModule = await import(rendererPath)
 
   const rendered = rendererModule.renderSchema(
