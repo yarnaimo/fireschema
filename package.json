@@ -32,7 +32,7 @@
   "types": "./esm/index.d.ts",
   "bin": "./esm/bin/main.js",
   "scripts": {
-    "build": "tsc -P tsconfig.cjs.json && cp src/lib/*.d.ts dist/lib/ && renamer --silent --force --find js --replace cjs 'dist/**'",
+    "build": "tsc -P tsconfig.cjs.json && cp src/lib/*.d.ts dist/lib/ && renamer --silent --force --find js --replace cjs 'dist/**' && ./scripts/after-build-cjs.sh",
     "build:esm": "tsc && cp src/lib/*.d.ts esm/lib/ && ./scripts/after-build-esm.sh",
     "debug": "node --inspect -r ts-node/register",
     "docs": "./scripts/update-docs.sh",
