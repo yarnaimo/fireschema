@@ -7,16 +7,16 @@ import {
   $functions,
   $model,
 } from '../constants/index.js'
+import { QueryBuilder } from '../firestore/controller/_query.js'
+import { FirestoreStatic } from '../firestore/controller/_static.js'
 import {
   DataModel,
   InferDataModelSL,
   InferDataModelT,
   InferDataModelU,
 } from '../firestore/index.js'
-import { QueryBuilder } from '../firestore/controller/_query.js'
-import { FirestoreStatic } from '../firestore/controller/_static.js'
 import { FTypes } from './FTypes.js'
-import { GetByLoc } from './_object.js'
+import { GetByLoc, Loc } from './_object.js'
 
 export const allowOptions = {
   read: {
@@ -110,8 +110,8 @@ export declare namespace STypes {
       snapshot: FTypes.QueryDocumentSnap<T>,
     ) => U
 
-    export type Selectors<U, SL extends SelectorsConstraint> = (
-      q: QueryBuilder,
+    export type Selectors<T, SL extends SelectorsConstraint> = (
+      q: QueryBuilder<FieldPath<T>>,
       firestoreStatic: FirestoreStatic<FTypes.FirestoreApp>,
     ) => SL
 
@@ -119,6 +119,8 @@ export declare namespace STypes {
       [key: string]: (...args: any[]) => QueryConstraint[]
     }
   }
+
+  export type FieldPath<T> = Loc<T> | keyof DocumentMeta
 
   export type Selector<
     S extends RootOptions.All,

@@ -30,18 +30,24 @@ export type Subtract = [
   ...0[]
 ]
 
+export type IsPlainObject<T> = {
+  [K in keyof T]: T[K] extends (...args: any[]) => any ? false : true
+}[keyof T]
+
 export type Loc<T, Depth extends number = 5> = [Depth] extends [never]
   ? never
   : T extends object
-  ? {
-      [K in keyof T & string]-?:
-        | K
-        | (Loc<T[K], Subtract[Depth]> extends infer P
-            ? P extends string
-              ? JoinLoc<K, P>
-              : never
-            : never)
-    }[keyof T & string]
+  ? IsPlainObject<T> extends true
+    ? {
+        [K in keyof T & string]-?:
+          | K
+          | (Loc<T[K], Subtract[Depth]> extends infer P
+              ? P extends string
+                ? JoinLoc<K, P>
+                : never
+              : never)
+      }[keyof T & string]
+    : never
   : never
 
 export type JoinLoc<T extends string, U extends string> = T extends ''

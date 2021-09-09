@@ -28,7 +28,7 @@ export class DataModel<
 > {
   readonly schema: S
   readonly decoder: D
-  readonly selectors: STypes.Model.Selectors<GetU<S, D>, SL>
+  readonly selectors: STypes.Model.Selectors<InferSchemaType<S>, SL>
 
   constructor({
     schema,
@@ -37,7 +37,7 @@ export class DataModel<
   }: {
     schema: S
     decoder?: D
-    selectors?: STypes.Model.Selectors<GetU<S, D>, SL>
+    selectors?: STypes.Model.Selectors<InferSchemaType<S>, SL>
   }) {
     this.schema = schema
     this.decoder = decoder as D

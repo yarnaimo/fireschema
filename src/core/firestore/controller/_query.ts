@@ -4,12 +4,15 @@ import {
   limit,
   limitToLast,
   orderBy,
+  QueryConstraint,
   startAfter,
   startAt,
   where,
+  WhereFilterOp,
 } from 'firebase/firestore'
+import { Merge } from 'type-fest'
 
-export type QueryBuilder = typeof queryBuilderWeb
+export type QueryBuilder<K> = Merge<typeof queryBuilderWeb, { where: Where<K> }>
 
 export const queryBuilderWeb = {
   endAt,
@@ -21,6 +24,12 @@ export const queryBuilderWeb = {
   startAt,
   where,
 }
+
+export type Where<K> = (
+  fieldPath: K,
+  opStr: WhereFilterOp,
+  value: unknown,
+) => QueryConstraint
 
 export type QueryConstraintAdmin = ReturnType<typeof queryBuilderAdmin[string]>
 

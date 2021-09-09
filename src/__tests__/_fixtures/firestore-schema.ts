@@ -1,4 +1,5 @@
 import { expectType } from 'tsd'
+import { FirestoreModel } from '../../core/index.js'
 import {
   $,
   $allow,
@@ -11,7 +12,6 @@ import {
   FTypes,
   InferSchemaType,
 } from '../../index.js'
-import { FirestoreModel } from '../../core/index.js'
 import { Type } from '../../lib/type.js'
 
 const VersionType = { unknown: $.unknown }
@@ -81,6 +81,10 @@ export const UserModel = new DataModel({
     decodeUser(data),
 
   selectors: (q, firestoreStatic) => ({
+    _: () => [
+      // @ts-expect-error wrong field path
+      q.where('age_', '>=', 10),
+    ],
     teen: () => [q.where('age', '>=', 10), q.where('age', '<', 20)],
     _teen: () => [
       q.where('age', '>=', 10),

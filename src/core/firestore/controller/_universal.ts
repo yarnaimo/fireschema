@@ -128,7 +128,7 @@ export const getDocsUniv = (raw: FTypes.Query<any>, from: GetSource) => {
 
 export const queryUniv = (
   raw: FTypes.Query<any>,
-  fn: (q: QueryBuilder) => (QueryConstraint | QueryConstraintAdmin)[],
+  fn: (q: QueryBuilder<string>) => (QueryConstraint | QueryConstraintAdmin)[],
 ) => {
   const constraints = fn(queryBuilderUniv(raw))
 
@@ -142,7 +142,7 @@ export const queryUniv = (
 export const queryBuilderUniv = (raw: FTypes.Query<any>) => {
   return raw instanceof Query
     ? queryBuilderWeb
-    : (queryBuilderAdmin as unknown as QueryBuilder)
+    : (queryBuilderAdmin as unknown as QueryBuilder<string>)
 }
 
 export const refEqualUniv = <
