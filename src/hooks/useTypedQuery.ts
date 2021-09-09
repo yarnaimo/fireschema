@@ -48,7 +48,8 @@ export const useTypedQueryOnce = <
   const [_snap, loading, error] = useCollectionOnce<U>(safeRef(), {
     getOptions,
   })
-  useFirestoreErrorLogger(error)
+  // FIXME: remove as any
+  useFirestoreErrorLogger(error as any)
   const { snap, data } = useQuerySnapData(typedQuery, _snap, dataOptions)
 
   return { snap, data, loading, error }
@@ -72,7 +73,8 @@ export const useTypedQuery = <
   const [_snap, loading, error] = useCollection<U>(safeRef(), {
     snapshotListenOptions,
   })
-  useFirestoreErrorLogger(error)
+  // FIXME: remove as any
+  useFirestoreErrorLogger(error as any)
   const { snap, data } = useQuerySnapData(typedQuery, _snap, dataOptions)
 
   return { snap, data, loading, error }

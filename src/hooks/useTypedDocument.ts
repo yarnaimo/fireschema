@@ -44,7 +44,8 @@ export const useTypedDocumentOnce = <
   const [_snap, loading, error] = useDocumentOnce<U>(safeRef(), {
     getOptions,
   })
-  useFirestoreErrorLogger(error)
+  // FIXME: remove as any
+  useFirestoreErrorLogger(error as any)
   const { snap, data } = useDocumentSnapData(typedDoc, _snap, dataOptions)
 
   return { snap, data, loading, error }
@@ -68,7 +69,8 @@ export const useTypedDocument = <
   const [_snap, loading, error] = useDocument<U>(safeRef(), {
     snapshotListenOptions,
   })
-  useFirestoreErrorLogger(error)
+  // FIXME: remove as any
+  useFirestoreErrorLogger(error as any)
   const { snap, data } = useDocumentSnapData(typedDoc, _snap, dataOptions)
 
   return { snap, data, loading, error }

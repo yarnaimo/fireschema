@@ -1,9 +1,19 @@
-import { assertFails, assertSucceeds } from '@firebase/rules-unit-testing'
 import { renderHook } from '@testing-library/react-hooks'
 import { typeExtends } from '@yarnaimo/type-extends'
-import { getFirestore as getFirestoreAdmin } from 'firebase-admin/firestore'
-import { Firestore } from 'firebase/firestore'
 import { expectType } from 'tsd'
+import { TypedFirestoreAdmin } from '../../core/firestore/controller/_TypedFirestoreAdmin.js'
+import {
+  collectionUniv,
+  docFromRootUniv,
+  docUniv,
+  existsUniv,
+  getDocUniv,
+  queryEqualUniv,
+  queryUniv,
+  refEqualUniv,
+  setDocUniv,
+  updateDocUniv,
+} from '../../core/firestore/controller/_universal.js'
 import {
   FTypes,
   STypes,
@@ -18,19 +28,6 @@ import {
   _createdAt,
   _updatedAt,
 } from '../../core/index.js'
-import { TypedFirestoreAdmin } from '../../core/firestore/controller/_TypedFirestoreAdmin.js'
-import {
-  collectionUniv,
-  docFromRootUniv,
-  docUniv,
-  existsUniv,
-  getDocUniv,
-  queryEqualUniv,
-  queryUniv,
-  refEqualUniv,
-  setDocUniv,
-  updateDocUniv,
-} from '../../core/firestore/controller/_universal.js'
 import {
   useTypedDocument,
   useTypedDocumentOnce,
@@ -48,7 +45,11 @@ import {
   PostModel,
   UserModel,
 } from '../_fixtures/firestore-schema.js'
-import { authedAdminApp, authedApp } from '../_infrastructure/_app.js'
+import {
+  assertFails,
+  getTestAppAdmin,
+  getTestAppWeb,
+} from '../_infrastructure/_app.js'
 import { sleep } from '../_utils/common.js'
 import {
   expectAnyTimestampAdmin,
@@ -147,12 +148,12 @@ for (const env of ['web', 'admin'] as const) {
 
   const app =
     env === 'web'
-      ? ((authedApp('user') as any).firestore() as Firestore)
-      : getFirestoreAdmin(authedAdminApp('user'))
+      ? getTestAppWeb('user').firestore()
+      : getTestAppAdmin().firestore()
   const appUnauthed =
     env === 'web'
-      ? ((authedApp('unauthed') as any).firestore() as Firestore)
-      : getFirestoreAdmin(authedAdminApp('unauthed'))
+      ? getTestAppWeb('unauthed').firestore()
+      : getTestAppAdmin().firestore()
 
   const r = _tcollections(app, env)
   const ur = _tcollections(appUnauthed, env)
@@ -523,7 +524,7 @@ for (const env of ['web', 'admin'] as const) {
   env === 'web' &&
     describe($env('write (test rules)'), () => {
       test('create user (empty array)', async () => {
-        await assertSucceeds(r.user.create({ ...userData, tags: [] }))
+        await r.user.create({ ...userData, tags: [] })
       })
 
       test('create user (fails due to invalid timestamp)', async () => {
@@ -536,34 +537,30 @@ for (const env of ['web', 'admin'] as const) {
           { ...userData, [_createdAt]: localTs(), [_updatedAt]: serverTs() },
           { ...userData, [_createdAt]: serverTs(), [_updatedAt]: localTs() },
         ]) {
-          await assertFails(setDocUniv(r.user.raw, data as any))
+          await assertFails(() => setDocUniv(r.user.raw, data as any))
         }
 
-        await assertSucceeds(
-          setDocUniv(r.user.raw, {
-            ...userData,
-            [_createdAt]: serverTs(),
-            [_updatedAt]: serverTs(),
-          } as any),
-        )
+        await setDocUniv(r.user.raw, {
+          ...userData,
+          [_createdAt]: serverTs(),
+          [_updatedAt]: serverTs(),
+        } as any)
 
         for (const data of [
           { [_createdAt]: serverTs() },
           { [_createdAt]: serverTs(), [_updatedAt]: serverTs() },
           { [_updatedAt]: localTs() },
         ]) {
-          await assertFails(updateDocUniv(r.user.raw, data as any))
+          await assertFails(() => updateDocUniv(r.user.raw, data as any))
         }
 
-        await assertSucceeds(
-          updateDocUniv(r.user.raw, {
-            [_updatedAt]: serverTs(),
-          } as any),
-        )
+        await updateDocUniv(r.user.raw, {
+          [_updatedAt]: serverTs(),
+        } as any)
       })
 
       test('create user (fails due to wrong type)', async () => {
-        await assertFails(
+        await assertFails(() =>
           r.user.create({
             ...userData,
             // @ts-expect-error: tags.id
@@ -571,7 +568,7 @@ for (const env of ['web', 'admin'] as const) {
           }),
         )
 
-        await assertFails(
+        await assertFails(() =>
           r.user.create({
             ...userData,
             // @ts-expect-error: options.a
@@ -581,23 +578,23 @@ for (const env of ['web', 'admin'] as const) {
       })
 
       test('create user (fails due to unauthed)', async () => {
-        await assertFails(ur.user.create(userData))
+        await assertFails(() => ur.user.create(userData))
       })
 
       describe('write to non-existing doc', () => {
         test('setMerge fails', async () => {
-          await assertFails(r.user.setMerge(userData))
+          await assertFails(() => r.user.setMerge(userData))
         })
 
         test('update fails', async () => {
-          await assertFails(r.user.update(userData))
+          await assertFails(() => r.user.update(userData))
         })
       })
 
       test('overwrite user fails', async () => {
         await r.user.create(userData)
-        await assertSucceeds(r.user.update(userData))
-        await assertFails(r.user.create(userData))
+        await r.user.update(userData)
+        await assertFails(() => r.user.create(userData))
       })
     })
 
