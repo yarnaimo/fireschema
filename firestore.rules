@@ -23,14 +23,13 @@ service cloud.firestore {
 
     match /users/{uid} {
       function __validator_0__(data) {
-        return (
-          __validator_meta__(data)
-            && data.name is string
+        return (__validator_meta__(data) && (
+          data.name is string
             && (data.displayName is string || data.displayName == null)
             && data.age is int
             && data.timestamp is timestamp
             && (data.options.a is bool || !("options" in data))
-        );
+        ));
       }
 
       allow read: if true;
@@ -38,11 +37,10 @@ service cloud.firestore {
 
       match /posts/{postId} {
         function __validator_1__(data) {
-          return (
-            __validator_meta__(data)
-              && (data.tags.size() == 0 || (data.tags[0].id is int && data.tags[0].name is string))
+          return (__validator_meta__(data) && (
+            (data.tags.size() == 0 || (data.tags[0].id is int && data.tags[0].name is string))
               && data.text is string
-          );
+          ));
         }
 
         allow read: if true;
