@@ -1,7 +1,7 @@
 import type { Firestore } from 'firebase/firestore'
 import { $collectionGroups } from '../../constants/index.js'
 import { FTypes, STypes } from '../../types/index.js'
-import { Loc } from '../../types/_object.js'
+import { KeysWithoutDocLabel, SchemaLoc } from '../../types/_object.js'
 import { firestorePathToLoc } from '../../utils/_firestore.js'
 import { FirestoreModel, InferFirestoreModelS } from '../model.js'
 import { TypedQueryRef } from './TypedCollectionRef.js'
@@ -40,8 +40,8 @@ export class TypedFirestoreUniv<
     return collectionGroupUniv(this.raw, collectionName) as FTypes.Query<any, F>
   }
 
-  collectionGroup<L extends Loc<S>>(
-    collectionName: Extract<keyof S[typeof $collectionGroups], string>,
+  collectionGroup<L extends SchemaLoc<S>>(
+    collectionName: KeysWithoutDocLabel<S[typeof $collectionGroups]>,
     loc: L,
   ) {
     return new TypedQueryRef<S, F, L>(
@@ -50,8 +50,8 @@ export class TypedFirestoreUniv<
     )
   }
 
-  collectionGroupQuery<L extends Loc<S>>(
-    collectionName: Extract<keyof S[typeof $collectionGroups], string>,
+  collectionGroupQuery<L extends SchemaLoc<S>>(
+    collectionName: KeysWithoutDocLabel<S[typeof $collectionGroups]>,
     loc: L,
     selector: STypes.Selector<S, F, L>,
   ) {

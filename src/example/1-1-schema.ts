@@ -3,7 +3,6 @@ import {
   $,
   $allow,
   $collectionGroups,
-  $docLabel,
   $functions,
   $model,
   $or,
@@ -66,8 +65,7 @@ export const firestoreModel = new FirestoreModel({
   },
 
   [$collectionGroups]: {
-    posts: {
-      [$docLabel]: 'postId',
+    'posts/{postId}': {
       [$model]: PostModel,
       [$allow]: {
         read: true,
@@ -75,9 +73,7 @@ export const firestoreModel = new FirestoreModel({
     },
   },
 
-  // /users/{uid}
-  users: {
-    [$docLabel]: 'uid', // {uid}
+  'users/{uid}': {
     [$model]: UserModel, // collectionSchema
     [$allow]: {
       // access control
@@ -85,9 +81,7 @@ export const firestoreModel = new FirestoreModel({
       write: $or(['matchesUser(uid)', 'isAdmin()']), // only users matching {uid} or admins
     },
 
-    // /users/{uid}/posts/{postId}
-    posts: {
-      [$docLabel]: 'postId',
+    'posts/{postId}': {
       [$model]: PostModel,
       [$allow]: {
         read: true,

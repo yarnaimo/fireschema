@@ -3,7 +3,6 @@ import { Type } from '../../lib/type.js'
 import {
   $allow,
   $collectionGroups,
-  $docLabel,
   $functions,
   $model,
 } from '../constants/index.js'
@@ -16,7 +15,7 @@ import {
   InferDataModelU,
 } from '../firestore/index.js'
 import { FTypes } from './FTypes.js'
-import { GetByLoc, Loc } from './_object.js'
+import { GetSchemaOptionsByLoc, PlainLoc } from './_object.js'
 
 export const allowOptions = {
   read: {
@@ -52,13 +51,23 @@ export declare namespace STypes {
     S extends RootOptions.All,
     F extends FTypes.FirestoreApp,
     L extends string,
-  > = DocData<F, GetModelU<GetByLoc<S, L>>, L, GetModelT<GetByLoc<S, L>>>
+  > = DocData<
+    F,
+    GetModelU<GetSchemaOptionsByLoc<S, L>>,
+    L,
+    GetModelT<GetSchemaOptionsByLoc<S, L>>
+  >
 
   export type FTDocDataAt<
     S extends RootOptions.All,
     F extends FTypes.FirestoreApp,
     L extends string,
-  > = DocData<F, GetModelT<GetByLoc<S, L>>, L, GetModelT<GetByLoc<S, L>>>
+  > = DocData<
+    F,
+    GetModelT<GetSchemaOptionsByLoc<S, L>>,
+    L,
+    GetModelT<GetSchemaOptionsByLoc<S, L>>
+  >
 
   export type DocData<
     F extends FTypes.FirestoreApp,
@@ -87,7 +96,6 @@ export declare namespace STypes {
 
   export namespace CollectionOptions {
     export type Meta = {
-      [$docLabel]: string
       [$model]: DataModel<any, any, STypes.Model.SelectorsConstraint>
       // [$collectionGroup]?: boolean
       [$allow]: AllowOptions
@@ -120,7 +128,7 @@ export declare namespace STypes {
     }
   }
 
-  export type FieldPath<T> = Loc<T> | keyof DocumentMeta
+  export type FieldPath<T> = PlainLoc<T> | keyof DocumentMeta
 
   export type Selector<
     S extends RootOptions.All,
@@ -129,7 +137,7 @@ export declare namespace STypes {
     // P extends Utils.Parent,
     // N extends Extract<keyof PC, string>,
     // PC,
-    _C = GetByLoc<S, L>,
+    _C = GetSchemaOptionsByLoc<S, L>,
   > = (q: GetSL<_C>) => QueryConstraint[]
 
   export type SelectorOptions<

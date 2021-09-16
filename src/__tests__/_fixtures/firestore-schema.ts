@@ -4,7 +4,6 @@ import {
   $,
   $allow,
   $collectionGroups,
-  $docLabel,
   $functions,
   $model,
   $or,
@@ -121,8 +120,7 @@ export const firestoreModel = new FirestoreModel({
   },
 
   [$collectionGroups]: {
-    users: {
-      [$docLabel]: 'uid',
+    'users/{uid}': {
       [$model]: UserModel,
       [$allow]: {
         read: true,
@@ -130,13 +128,11 @@ export const firestoreModel = new FirestoreModel({
     },
   },
 
-  versions: {
-    [$docLabel]: 'version',
+  'versions/{version}': {
     [$model]: VersionModel,
     [$allow]: {},
 
-    users: {
-      [$docLabel]: 'uid',
+    'users/{uid}': {
       [$model]: UserModel,
       [$allow]: {
         read: true,
@@ -144,8 +140,7 @@ export const firestoreModel = new FirestoreModel({
         delete: isUserScope('uid'),
       },
 
-      posts: {
-        [$docLabel]: 'postId',
+      'posts/{postId}': {
         [$model]: PostModel,
         [$allow]: {
           read: true,
@@ -154,8 +149,7 @@ export const firestoreModel = new FirestoreModel({
         },
       },
 
-      privatePosts: {
-        [$docLabel]: 'postId',
+      'privatePosts/{postId}': {
         [$model]: PostAModel,
         [$allow]: {
           read: $or(['isAdmin()', 'isUserScope(uid)']),

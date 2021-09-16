@@ -2,9 +2,16 @@ import { P } from 'lifts'
 import { R } from '../../../lib/fp.js'
 import { $model } from '../../constants/index.js'
 import { FTypes, STypes } from '../../types/index.js'
-import { GetByLoc, JoinLoc, OmitLastSegment } from '../../types/_object.js'
-import { getCollectionOptions } from '../../utils/_firestore.js'
-import { getLastSegment, omitLastSegment } from '../../utils/_object.js'
+import {
+  GetSchemaOptionsByLoc,
+  JoinLoc,
+  OmitLastSegment,
+} from '../../types/_object.js'
+import {
+  getLastSegment,
+  getSchemaOptionsByLoc,
+  omitLastSegment,
+} from '../../utils/_object.js'
 import {
   QueryDocumentSnapDataOptions,
   TypedDocumentRef,
@@ -58,7 +65,7 @@ export class TypedQueryRef<
     skipDecoder?: boolean,
   ) {
     const name = getLastSegment(options.loc)
-    const collectionOptions = getCollectionOptions(
+    const collectionOptions = getSchemaOptionsByLoc(
       options.schemaOptions,
       options.loc,
     )
@@ -76,7 +83,7 @@ export class TypedQueryRef<
           const selectorsConstraint = collectionOptions[$model].selectors(
             q,
             this.options.firestoreStatic,
-          ) as STypes.GetSL<GetByLoc<S, L>>
+          ) as STypes.GetSL<GetSchemaOptionsByLoc<S, L>>
 
           return selector(selectorsConstraint)
         })

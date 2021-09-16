@@ -1,5 +1,9 @@
 import { FTypes, STypes } from '../../types/index.js'
-import { GetByLoc, JoinLoc } from '../../types/_object.js'
+import {
+  GetSchemaOptionsByLoc,
+  JoinLoc,
+  KeysWithoutDocLabel,
+} from '../../types/_object.js'
 import { joinLoc } from '../../utils/_object.js'
 import { TypedCollectionRef, TypedQueryRef } from './TypedCollectionRef.js'
 import { FirestoreStatic } from './_static.js'
@@ -11,7 +15,7 @@ export class TypedFDBase<
   L extends string,
   IsRoot extends boolean,
   U = STypes.DocDataAt<S, F, L>,
-  _C = GetByLoc<S, L>,
+  _C = GetSchemaOptionsByLoc<S, L>,
 > {
   protected constructor(
     readonly options: {
@@ -26,7 +30,7 @@ export class TypedFDBase<
     return collectionUniv(this.raw, name) as FTypes.CollectionRef<any, F>
   }
 
-  collection<N extends Extract<keyof _C, string>>(collectionName: N) {
+  collection<N extends KeysWithoutDocLabel<_C>>(collectionName: N) {
     const loc = joinLoc(this.options.loc, collectionName)
 
     return new TypedCollectionRef<S, F, JoinLoc<L, N>>(
@@ -35,7 +39,7 @@ export class TypedFDBase<
     )
   }
 
-  collectionQuery<N extends Extract<keyof _C, string>>(
+  collectionQuery<N extends KeysWithoutDocLabel<_C>>(
     collectionName: N,
     selector: STypes.Selector<S, F, JoinLoc<L, N>>,
   ) {

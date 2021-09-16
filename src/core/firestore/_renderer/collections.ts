@@ -1,6 +1,6 @@
 import { EntriesStrict, P } from 'lifts'
 import { R } from '../../../lib/fp.js'
-import { $allow, $docLabel, $model } from '../../constants/index.js'
+import { $allow, $model } from '../../constants/index.js'
 import { STypes } from '../../types/index.js'
 import { join, _ } from '../../utils/_string.js'
 import { renderRules } from './rules.js'
@@ -19,20 +19,15 @@ const renderFromArray =
       array,
       R.map(
         ([
-          collectionPath,
-          {
-            [$model]: model,
-            [$docLabel]: docLabel,
-            [$allow]: allow,
-            ...collections
-          },
+          collectionNameWithDocLabel,
+          { [$model]: model, [$allow]: allow, ...collections },
         ]) => {
           const body = join('\n\n')([
             renderRules(allow, model, indent),
             renderCollections(collections, indent),
           ])
           return join('\n')([
-            `${_(indent)}match /${collectionPath}/{${docLabel}} {`,
+            `${_(indent)}match /${collectionNameWithDocLabel} {`,
             body,
             `${_(indent)}}`,
           ])

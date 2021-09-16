@@ -1,8 +1,6 @@
 import { expectType } from 'tsd'
 import {
-  getByLoc,
   getDeep,
-  getDeepByKey,
   getLastSegment,
   joinLoc,
   omitLastSegment,
@@ -29,43 +27,43 @@ test('getDeep', () => {
   expect(result).toEqual(obj.d.b.c)
 })
 
-test('getDeepByKey', () => {
-  const expected = [
-    {
-      c: {
-        key: 'value',
-      },
-    },
-    {
-      c: {
-        b: { key: 'value' },
-      },
-    },
-    { key: 'value' },
-  ]
+// test('getDeepByKey', () => {
+//   const expected = [
+//     {
+//       c: {
+//         key: 'value',
+//       },
+//     },
+//     {
+//       c: {
+//         b: { key: 'value' },
+//       },
+//     },
+//     { key: 'value' },
+//   ]
 
-  type Expected = (
-    | {
-        c: {
-          key: string
-        }
-      }
-    | {
-        c: {
-          b: { key: string }
-        }
-      }
-    | { key: string }
-  )[]
+//   type Expected = (
+//     | {
+//         c: {
+//           key: string
+//         }
+//       }
+//     | {
+//         c: {
+//           b: { key: string }
+//         }
+//       }
+//     | { key: string }
+//   )[]
 
-  const result = getDeepByKey(obj, 'b')
+//   const result = getDeepByKey(obj, 'b')
 
-  expectType<Expected>(result)
-  // @ts-expect-error: error
-  expectType<Expected[number]>(result)
+//   expectType<Expected>(result)
+//   // @ts-expect-error: error
+//   expectType<Expected[number]>(result)
 
-  expect(result).toEqual(expected)
-})
+//   expect(result).toEqual(expected)
+// })
 
 test('parseLocString', () => {
   const result = parseLocString('a.b.c')
@@ -94,10 +92,10 @@ test('parseLocString (empty)', () => {
   expect(result).toEqual([])
 })
 
-test('getByLoc', () => {
-  const result = getByLoc(obj, 'd.b.c')
-  expect(result).toEqual(obj.d.b.c)
-})
+// test('getSchemaOptionsByLoc', () => {
+//   const result = getSchemaOptionsByLoc(obj, 'd.b.c')
+//   expect(result).toEqual(obj.d.b.c)
+// })
 
 test('joinLoc', () => {
   const result = joinLoc('a.b', 'c')
