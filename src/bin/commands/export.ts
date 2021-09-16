@@ -6,7 +6,8 @@ const dirPattern = /^(?!_).+$/
 const filePattern = /^(?!_).+(?<!\.(test|spec))\.(js|ts)$/
 
 const functionName = (dirname: string, name: string) => `'${dirname}-${name}'`
-const mpath = (dirname: string, name: string) => `'./${dirname}/${name}'`
+const mpath = (dirname: string, name: string, esm: boolean) =>
+  `'./${dirname}/${name}${esm ? '.js' : ''}'`
 const vname = (dirname: string, name: string) => `__${dirname}_${name}__`
 
 const importModuleFunction = (esm: boolean) => [
@@ -43,6 +44,7 @@ export const buildFunctionExportContent = async (
         `import type * as ${vname(dirname, filename)} from ${mpath(
           dirname,
           filename,
+          esm,
         )}`,
     ),
   )
@@ -74,6 +76,7 @@ export const buildFunctionExportContent = async (
           const importCall = `importModule([${functionNamesArg}], ${mpath(
             dirname,
             filename,
+            esm,
           )})`
           return esm ? `  ...(await ${importCall}),` : `  ...${importCall},`
         }),
