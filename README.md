@@ -64,11 +64,11 @@ import {
   $,
   $allow,
   $collectionGroups,
-  $docLabel,
   $functions,
   $model,
   $or,
   DataModel,
+  docPath,
   FirestoreModel,
   InferSchemaType,
 } from 'fireschema'
@@ -116,19 +116,18 @@ const PostModel = new DataModel({
 export const firestoreModel = new FirestoreModel({
   [$functions]: {
     // whether /admins/<uid> exists
-    ['isAdmin()']: `
-      return exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    'isAdmin()': `
+      return exists(${docPath('admins/$(request.auth.uid)')});
     `,
 
     // whether uid matches
-    ['matchesUser(uid)']: `
+    'requestUserIs(uid)': `
       return request.auth.uid == uid;
     `,
   },
 
   [$collectionGroups]: {
-    posts: {
-      [$docLabel]: 'postId',
+    'posts/{postId}': {
       [$model]: PostModel,
       [$allow]: {
         read: true,
@@ -136,23 +135,19 @@ export const firestoreModel = new FirestoreModel({
     },
   },
 
-  // /users/{uid}
-  users: {
-    [$docLabel]: 'uid', // {uid}
+  'users/{uid}': {
     [$model]: UserModel, // collectionSchema
     [$allow]: {
       // access control
       read: true, // all user
-      write: $or(['matchesUser(uid)', 'isAdmin()']), // only users matching {uid} or admins
+      write: $or(['requestUserIs(uid)', 'isAdmin()']), // only users matching {uid} or admins
     },
 
-    // /users/{uid}/posts/{postId}
-    posts: {
-      [$docLabel]: 'postId',
+    'posts/{postId}': {
       [$model]: PostModel,
       [$allow]: {
         read: true,
-        write: 'matchesUser(uid)',
+        write: 'requestUserIs(uid)',
       },
     },
   },
@@ -191,11 +186,15 @@ service cloud.firestore {
       );
     }
 
+    function __validator_keys__(data, keys) {
+      return data.keys().removeAll(['_createdAt', '_updatedAt']).hasOnly(keys);
+    }
+
     function isAdmin() {
       return exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
-    function matchesUser(uid) {
+    function requestUserIs(uid) {
       return request.auth.uid == uid;
     }
 
@@ -205,30 +204,30 @@ service cloud.firestore {
 
     match /users/{uid} {
       function __validator_0__(data) {
-        return (
-          __validator_meta__(data)
+        return (__validator_meta__(data) && (
+          __validator_keys__(data, ['name', 'displayName', 'age', 'timestamp', 'options'])
             && data.name is string
             && (data.displayName is string || data.displayName == null)
             && data.age is int
             && data.timestamp is timestamp
             && (data.options.a is bool || !("options" in data))
-        );
+        ));
       }
 
       allow read: if true;
-      allow write: if ((matchesUser(uid) || isAdmin()) && __validator_0__(request.resource.data));
+      allow write: if ((requestUserIs(uid) || isAdmin()) && __validator_0__(request.resource.data));
 
       match /posts/{postId} {
         function __validator_1__(data) {
-          return (
-            __validator_meta__(data)
+          return (__validator_meta__(data) && (
+            __validator_keys__(data, ['tags', 'text'])
               && (data.tags.size() == 0 || (data.tags[0].id is int && data.tags[0].name is string))
               && data.text is string
-          );
+          ));
         }
 
         allow read: if true;
-        allow write: if (matchesUser(uid) && __validator_1__(request.resource.data));
+        allow write: if (requestUserIs(uid) && __validator_1__(request.resource.data));
       }
     }
   }

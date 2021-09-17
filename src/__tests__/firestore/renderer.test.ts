@@ -17,11 +17,15 @@ service cloud.firestore {
       return data.keys().removeAll(['_createdAt', '_updatedAt']).hasOnly(keys);
     }
 
-    function isAdmin() {
-      return getCurrentAuthUser().data.isAdmin == true;
+    function getCurrentAuthUserDoc() {
+      return get(/databases/$(database)/documents/authUsers/$(request.auth.uid));
     }
 
-    function isUserScope(uid) {
+    function isAdmin() {
+      return getCurrentAuthUserDoc().data.isAdmin == true;
+    }
+
+    function requestUserIs(uid) {
       return request.auth.uid == uid;
     }
 
@@ -44,8 +48,8 @@ service cloud.firestore {
         }
 
         allow read: if true;
-        allow write: if (isUserScope(uid) && __validator_0__(request.resource.data));
-        allow delete: if isUserScope(uid);
+        allow write: if (requestUserIs(uid) && __validator_0__(request.resource.data));
+        allow delete: if requestUserIs(uid);
 
         match /posts/{postId} {
           function __validator_1__(data) {
@@ -61,8 +65,8 @@ service cloud.firestore {
           }
 
           allow read: if true;
-          allow write: if (isUserScope(uid) && __validator_1__(request.resource.data));
-          allow delete: if isUserScope(uid);
+          allow write: if (requestUserIs(uid) && __validator_1__(request.resource.data));
+          allow delete: if requestUserIs(uid);
         }
 
         match /privatePosts/{postId} {
@@ -74,8 +78,8 @@ service cloud.firestore {
             ));
           }
 
-          allow read: if (isAdmin() || isUserScope(uid));
-          allow write: if (isUserScope(uid) && __validator_2__(request.resource.data));
+          allow read: if (isAdmin() || requestUserIs(uid));
+          allow write: if (requestUserIs(uid) && __validator_2__(request.resource.data));
         }
       }
     }

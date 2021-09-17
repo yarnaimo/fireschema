@@ -1,5 +1,5 @@
 import { expectType } from 'tsd'
-import { FirestoreModel } from '../../core/index.js'
+import { docPath, FirestoreModel } from '../../core/index.js'
 import {
   $,
   $allow,
@@ -102,19 +102,15 @@ export const UserModel = new DataModel({
 export const PostModel = new DataModel({ schema: PostType })
 export const PostAModel = new DataModel({ schema: PostAType })
 
-const getCurrentAuthUser = () => `getCurrentAuthUser()`
-const isAdmin = () => `isAdmin()`
-const isUserScope = (arg: string) => `isUserScope(${arg})`
-
 export const firestoreModel = new FirestoreModel({
   [$functions]: {
-    // [getCurrentAuthUser()]: `
-    //   return get(/databases/$(database)/documents/authUsers/$(request.auth.uid));
-    // `,
-    [isAdmin()]: `
-      return ${getCurrentAuthUser()}.data.isAdmin == true;
+    'getCurrentAuthUserDoc()': `
+      return get(${docPath('authUsers/$(request.auth.uid)')});
     `,
-    [isUserScope('uid')]: `
+    'isAdmin()': `
+      return getCurrentAuthUserDoc().data.isAdmin == true;
+    `,
+    'requestUserIs(uid)': `
       return request.auth.uid == uid;
     `,
   },
@@ -136,24 +132,24 @@ export const firestoreModel = new FirestoreModel({
       [$model]: UserModel,
       [$allow]: {
         read: true,
-        write: $or([isUserScope('uid')]),
-        delete: isUserScope('uid'),
+        write: $or(['requestUserIs(uid)']),
+        delete: 'requestUserIs(uid)',
       },
 
       'posts/{postId}': {
         [$model]: PostModel,
         [$allow]: {
           read: true,
-          write: $or([isUserScope('uid')]),
-          delete: isUserScope('uid'),
+          write: $or(['requestUserIs(uid)']),
+          delete: 'requestUserIs(uid)',
         },
       },
 
       'privatePosts/{postId}': {
         [$model]: PostAModel,
         [$allow]: {
-          read: $or(['isAdmin()', 'isUserScope(uid)']),
-          write: $or(['isUserScope(uid)']),
+          read: $or(['isAdmin()', 'requestUserIs(uid)']),
+          write: $or(['requestUserIs(uid)']),
         },
       },
     },

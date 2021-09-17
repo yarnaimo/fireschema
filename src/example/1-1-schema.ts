@@ -7,6 +7,7 @@ import {
   $model,
   $or,
   DataModel,
+  docPath,
   FirestoreModel,
   InferSchemaType,
 } from '../index.js'
@@ -54,12 +55,12 @@ const PostModel = new DataModel({
 export const firestoreModel = new FirestoreModel({
   [$functions]: {
     // whether /admins/<uid> exists
-    ['isAdmin()']: `
-      return exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    'isAdmin()': `
+      return exists(${docPath('admins/$(request.auth.uid)')});
     `,
 
     // whether uid matches
-    ['matchesUser(uid)']: `
+    'requestUserIs(uid)': `
       return request.auth.uid == uid;
     `,
   },
@@ -78,14 +79,14 @@ export const firestoreModel = new FirestoreModel({
     [$allow]: {
       // access control
       read: true, // all user
-      write: $or(['matchesUser(uid)', 'isAdmin()']), // only users matching {uid} or admins
+      write: $or(['requestUserIs(uid)', 'isAdmin()']), // only users matching {uid} or admins
     },
 
     'posts/{postId}': {
       [$model]: PostModel,
       [$allow]: {
         read: true,
-        write: 'matchesUser(uid)',
+        write: 'requestUserIs(uid)',
       },
     },
   },

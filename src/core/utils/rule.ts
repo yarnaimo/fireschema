@@ -1,5 +1,8 @@
 import { $or } from './index.js'
 
+export const docPath = (path: string) =>
+  `/databases/$(database)/documents/${path}`
+
 export const $rule = {
   notExists: (key: string | 0, parent: string | null) =>
     `!("${key}" in ${parent})`,
