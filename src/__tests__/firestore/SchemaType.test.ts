@@ -32,20 +32,31 @@ test.each([
   [
     { a: $.string, b: $.optional($.int) },
     `(
-data.a is string
+__validator_keys__(data, ['a', 'b'])
+  && data.a is string
   && (data.b is int || !("b" in data))
 )`,
   ],
   [
     { a: $.string, b: $.undefined },
     `(
-data.a is string
+__validator_keys__(data, ['a', 'b'])
+  && data.a is string
   && !("b" in data)
 )`,
   ],
   [
     nestedIntersection,
-    `((data.a is string || data.a is int) && data.b is bool)`,
+    `(((
+__validator_keys__(data, ['a'])
+  && data.a is string
+) || (
+__validator_keys__(data, ['a'])
+  && data.a is int
+)) && (
+__validator_keys__(data, ['b'])
+  && data.b is bool
+))`,
   ],
 ])('%p', (t, expected) => {
   expect(_schemaToRule()(t)).toBe(expected)

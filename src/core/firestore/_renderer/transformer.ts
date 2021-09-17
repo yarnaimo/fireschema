@@ -54,6 +54,15 @@ export const _schemaToRule =
           R.map(([key, _t]) => {
             return _schemaToRule(name, key)(_t)
           }),
+          (rules) => {
+            if (name !== 'data') {
+              return rules
+            }
+            const keysArray = `[${Object.keys(t)
+              .map((k) => `'${k}'`)
+              .join(', ')}]`
+            return [`__validator_keys__(data, ${keysArray})`, ...rules]
+          },
           name === 'data' ? $$and : $and,
         )
     }

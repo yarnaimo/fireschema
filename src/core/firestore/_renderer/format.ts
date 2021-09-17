@@ -21,7 +21,7 @@ const format = (rulesString: string, indent: number) => {
 export const validatorCall = (arg: string, label?: string) =>
   `__validator_${label || validatorIndex}__(${arg})`
 
-export const validator = (
+export const validatorDef = (
   arg: string,
   rulesString: string,
   indent: number,

@@ -13,6 +13,10 @@ service cloud.firestore {
       );
     }
 
+    function __validator_keys__(data, keys) {
+      return data.keys().removeAll(['_createdAt', '_updatedAt']).hasOnly(keys);
+    }
+
     function isAdmin() {
       return getCurrentAuthUser().data.isAdmin == true;
     }
@@ -29,7 +33,8 @@ service cloud.firestore {
       match /users/{uid} {
         function __validator_0__(data) {
           return (__validator_meta__(data) && (
-            data.name is string
+            __validator_keys__(data, ['name', 'displayName', 'age', 'tags', 'timestamp', 'options'])
+              && data.name is string
               && (data.displayName is string || data.displayName == null)
               && data.age is int
               && (data.tags.size() == 0 || (data.tags[0].id is int && data.tags[0].name is string))
@@ -45,10 +50,12 @@ service cloud.firestore {
         match /posts/{postId} {
           function __validator_1__(data) {
             return (__validator_meta__(data) && ((
-              data.type == "a"
+              __validator_keys__(data, ['type', 'text'])
+                && data.type == "a"
                 && data.text is string
             ) || (
-              data.type == "b"
+              __validator_keys__(data, ['type', 'texts'])
+                && data.type == "b"
                 && (data.texts.size() == 0 || data.texts[0] is string)
             )));
           }
@@ -61,7 +68,8 @@ service cloud.firestore {
         match /privatePosts/{postId} {
           function __validator_2__(data) {
             return (__validator_meta__(data) && (
-              data.type == "a"
+              __validator_keys__(data, ['type', 'text'])
+                && data.type == "a"
                 && data.text is string
             ));
           }

@@ -9,7 +9,7 @@ import { $$or, $and, $rule } from '../../utils/index.js'
 import { join } from '../../utils/_string.js'
 import { FirestoreModel } from '../model.js'
 import { renderCollectionGroups, renderCollections } from './collections.js'
-import { validator } from './format.js'
+import { validatorDef } from './format.js'
 import { renderFunctions } from './functions.js'
 
 /**
@@ -39,6 +39,8 @@ const metaRules = $$or([
   ]),
 ])
 
+const keysRules = `data.keys().removeAll(['${_createdAt}', '${_updatedAt}']).hasOnly(keys)`
+
 export const renderRoot = (
   $functions: STypes.FunctionsOptions,
   collectionGroups: STypes.CollectionOptions.Children,
@@ -47,7 +49,8 @@ export const renderRoot = (
   const body = join('\n\n')([
     renderFunctions(
       {
-        ...validator('data', metaRules, 4, 'meta'),
+        ...validatorDef('data', metaRules, 4, 'meta'),
+        ...validatorDef('data, keys', keysRules, 4, 'keys'),
         ...$functions,
       },
       2,

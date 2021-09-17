@@ -559,7 +559,7 @@ for (const env of ['web', 'admin'] as const) {
         } as any)
       })
 
-      test('create user (fails due to wrong type)', async () => {
+      test('create user (fails due to invalid data)', async () => {
         await assertFails(() =>
           r.user.create({
             ...userData,
@@ -573,6 +573,14 @@ for (const env of ['web', 'admin'] as const) {
             ...userData,
             // @ts-expect-error: options.a
             options: { a: 1, b: 'value' },
+          }),
+        )
+
+        await assertFails(() =>
+          r.user.create({
+            ...userData,
+            // @ts-expect-error: excess property
+            excessProperty: 'text',
           }),
         )
       })

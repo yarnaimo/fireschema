@@ -4,7 +4,7 @@ import { allowOptions, STypes } from '../../types/index.js'
 import { $and } from '../../utils/index.js'
 import { join, _ } from '../../utils/_string.js'
 import { DataModel } from '../model.js'
-import { addValidatorIndex, validator, validatorCall } from './format.js'
+import { addValidatorIndex, validatorCall, validatorDef } from './format.js'
 import { renderFunctions } from './functions.js'
 import { schemaToRuleWithMeta } from './transformer.js'
 
@@ -16,7 +16,7 @@ export const renderRules = (
   const indent = pIndent + 2
 
   const functions = renderFunctions(
-    validator('data', schemaToRuleWithMeta(model.schema), indent),
+    validatorDef('data', schemaToRuleWithMeta(model.schema), indent),
     pIndent,
   )
 
