@@ -1,11 +1,5 @@
 import { QueryConstraint } from 'firebase/firestore'
 import { Type } from '../../lib/type.js'
-import {
-  $allow,
-  $collectionGroups,
-  $functions,
-  $model,
-} from '../constants/index.js'
 import { QueryBuilder } from '../firestore/controller/_query.js'
 import { FirestoreStatic } from '../firestore/controller/_static.js'
 import {
@@ -39,13 +33,13 @@ export declare namespace STypes {
   export type InferCollectionT<C extends FTypes.CollectionRef<unknown>> =
     C extends FTypes.CollectionRef<infer T> ? T : never
 
-  export type GetModelU<_C> = InferDataModelU<EnsureOptions<_C>[typeof $model]>
+  export type GetModelU<_C> = InferDataModelU<EnsureOptions<_C>['model']>
 
-  export type GetModelT<_C> = InferDataModelT<EnsureOptions<_C>[typeof $model]>
+  export type GetModelT<_C> = InferDataModelT<EnsureOptions<_C>['model']>
 
   export type EnsureOptions<_C> = _C extends CollectionOptions.Meta ? _C : never
 
-  export type GetSL<_C> = InferDataModelSL<EnsureOptions<_C>[typeof $model]>
+  export type GetSL<_C> = InferDataModelSL<EnsureOptions<_C>['model']>
 
   export type DocDataAt<
     S extends RootOptions.All,
@@ -84,11 +78,11 @@ export declare namespace STypes {
 
   export namespace RootOptions {
     export type Meta = {
-      [$functions]: FunctionsOptions
-      [$collectionGroups]: CollectionOptions.Children
+      functions: FunctionsOptions
+      collectionGroups: CollectionOptions.Children
     }
     export type Children = {
-      [K in string]: CollectionOptions.All
+      [K in `${string}/{${string}}`]: CollectionOptions.All
     }
 
     export type All = Meta & Children
@@ -96,12 +90,12 @@ export declare namespace STypes {
 
   export namespace CollectionOptions {
     export type Meta = {
-      [$model]: DataModel<any, any, STypes.Model.SelectorsConstraint>
+      model: DataModel<any, any, STypes.Model.SelectorsConstraint>
       // [$collectionGroup]?: boolean
-      [$allow]: AllowOptions
+      allow: AllowOptions
     }
     export type Children = {
-      [K in string]: Meta & Children
+      [K in `${string}/{${string}}`]: Meta & Children
     }
 
     export type All = Meta & Children

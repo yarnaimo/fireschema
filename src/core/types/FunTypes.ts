@@ -2,7 +2,6 @@ import type express from 'express'
 import { z } from 'zod'
 import { _admin } from '../../lib/firestore-types'
 import { _fadmin, _fweb } from '../../lib/functions-types'
-import { $input, $output, $topicName } from '../constants/index.js'
 import { ExtractFP, ParseFP } from './_functions.js'
 import { GetDeep } from './_object.js'
 
@@ -31,7 +30,7 @@ export declare namespace FunTypes {
   }
 
   export namespace Callable {
-    export type Meta<I, O> = { [$input]: I; [$output]: O }
+    export type Meta<I, O> = { input: I; output: O }
     export type EnsureMeta<_C> = _C extends Meta<any, any> ? _C : never
 
     export type Handler<I, O> = (
@@ -47,12 +46,12 @@ export declare namespace FunTypes {
     export type InputOf<
       MC extends NestedFunctions | undefined,
       FP extends ExtractFP<MC>,
-    > = z.infer<GetByFP<MC, FP>[typeof $input]>
+    > = z.infer<GetByFP<MC, FP>['input']>
 
     export type OutputOf<
       MC extends NestedFunctions | undefined,
       FP extends ExtractFP<MC>,
-    > = z.infer<GetByFP<MC, FP>[typeof $output]>
+    > = z.infer<GetByFP<MC, FP>['output']>
 
     export type CallResult<T, E = _fweb.FunctionsError> =
       | { data: T; error?: never }
@@ -67,7 +66,7 @@ export declare namespace FunTypes {
   }
 
   export namespace Topic {
-    export type Meta<N, I> = { [$topicName]: N; [$input]: I }
+    export type Meta<N, I> = { topicName: N; input: I }
     export type EnsureMeta<_C> = _C extends Meta<any, any> ? _C : never
 
     export type Handler<I> = (

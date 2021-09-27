@@ -1,5 +1,4 @@
 import { _fadmin } from '../../lib/functions-types'
-import { $topicName } from '../constants/index.js'
 import { FunTypes } from '../types/index.js'
 import { Subtract } from './_object.js'
 
@@ -43,7 +42,7 @@ export type ExtractTopicNames<
   ? never
   : {
       [K in keyof S & string]: S[K] extends FunTypes.Topic.Meta<any, any>
-        ? S[K][typeof $topicName]
+        ? S[K]['topicName']
         : // : S[K] extends FunTypes.NestedFunctions
           // ? ExtractTopicNames<S[K], Prev[D]>
           never

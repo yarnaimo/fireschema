@@ -1,5 +1,0 @@
-export const $functions = Symbol('Fireschema - functions')
-export const $model = Symbol('Fireschema - model')
-export const $collectionGroups = Symbol('Fireschema - collectionGroups')
-export const $docLabel = Symbol('Fireschema - docLabel')
-export const $allow = Symbol('Fireschema - allow')

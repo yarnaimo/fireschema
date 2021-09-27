@@ -1,6 +1,5 @@
 import { P } from 'lifts'
 import { R } from '../../../lib/fp.js'
-import { $model } from '../../constants/index.js'
 import { FTypes, STypes } from '../../types/index.js'
 import {
   GetSchemaOptionsByLoc,
@@ -72,7 +71,7 @@ export class TypedQueryRef<
 
     const convertedQuery = P(
       origQuery,
-      skipDecoder ? R.identity : withDecoder(collectionOptions[$model], name),
+      skipDecoder ? R.identity : withDecoder(collectionOptions.model, name),
 
       (query) => {
         if (!selector) {
@@ -80,7 +79,7 @@ export class TypedQueryRef<
         }
 
         return queryUniv(query, (q) => {
-          const selectorsConstraint = collectionOptions[$model].selectors(
+          const selectorsConstraint = collectionOptions.model.selectors(
             q,
             this.options.firestoreStatic,
           ) as STypes.GetSL<GetSchemaOptionsByLoc<S, L>>

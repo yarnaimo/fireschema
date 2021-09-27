@@ -1,6 +1,5 @@
 import { _admin } from '../../../lib/firestore-types'
 import { _fadmin } from '../../../lib/functions-types'
-import { $model } from '../../constants/index.js'
 import { FunTypes, STypes } from '../../types/index.js'
 import { ParseDocumentPath } from '../../types/_firestore.js'
 import { firestorePathToLoc } from '../../utils/_firestore.js'
@@ -18,7 +17,7 @@ export class TypedFirestoreTrigger<S extends STypes.RootOptions.All> {
   private buildDecoder(path: string) {
     const loc = firestorePathToLoc(path)
     const collectionOptions = getSchemaOptionsByLoc(this.firestoreSchema, loc)
-    const { decoder } = collectionOptions[$model]
+    const { decoder } = collectionOptions.model
 
     return (snap: _admin.QueryDocumentSnapshot<any>) => {
       const data = snap.data()

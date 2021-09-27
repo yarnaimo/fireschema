@@ -1,10 +1,6 @@
 import { Merge } from 'type-fest'
 import { z } from 'zod'
 import {
-  $allow,
-  $collectionGroups,
-  $functions,
-  $model,
   $or,
   DataModel,
   docPath,
@@ -51,7 +47,7 @@ const PostModel = new DataModel({
 })
 
 export const firestoreModel = new FirestoreModel({
-  [$functions]: {
+  functions: {
     'isAdmin()': `
       return exists(${docPath('admins/$(request.auth.uid)')});
     `,
@@ -61,25 +57,25 @@ export const firestoreModel = new FirestoreModel({
     `,
   },
 
-  [$collectionGroups]: {
+  collectionGroups: {
     'posts/{postId}': {
-      [$model]: PostModel,
-      [$allow]: {
+      model: PostModel,
+      allow: {
         read: true,
       },
     },
   },
 
   'users/{uid}': {
-    [$model]: UserModel,
-    [$allow]: {
+    model: UserModel,
+    allow: {
       read: true, // open access
       write: $or(['requestUserIs(uid)', 'isAdmin()']), // only users matching {uid} or admins
     },
 
     'posts/{postId}': {
-      [$model]: PostModel,
-      [$allow]: {
+      model: PostModel,
+      allow: {
         read: true,
         write: 'requestUserIs(uid)',
       },

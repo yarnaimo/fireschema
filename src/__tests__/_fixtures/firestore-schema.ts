@@ -1,15 +1,7 @@
 import { expectType } from 'tsd'
 import { z } from 'zod'
 import { docPath, FirestoreModel, timestampType } from '../../core/index.js'
-import {
-  $allow,
-  $collectionGroups,
-  $functions,
-  $model,
-  $or,
-  DataModel,
-  FTypes,
-} from '../../index.js'
+import { $or, DataModel, FTypes } from '../../index.js'
 import { Type } from '../../lib/type.js'
 
 const VersionType = z.object({})
@@ -100,7 +92,7 @@ export const PostModel = new DataModel({ schema: PostType })
 export const PostAModel = new DataModel({ schema: PostAType })
 
 export const firestoreModel = new FirestoreModel({
-  [$functions]: {
+  functions: {
     'getCurrentAuthUserDoc()': `
       return get(${docPath('authUsers/$(request.auth.uid)')});
     `,
@@ -112,30 +104,30 @@ export const firestoreModel = new FirestoreModel({
     `,
   },
 
-  [$collectionGroups]: {
+  collectionGroups: {
     'users/{uid}': {
-      [$model]: UserModel,
-      [$allow]: {
+      model: UserModel,
+      allow: {
         read: true,
       },
     },
   },
 
   'versions/{version}': {
-    [$model]: VersionModel,
-    [$allow]: {},
+    model: VersionModel,
+    allow: {},
 
     'users/{uid}': {
-      [$model]: UserModel,
-      [$allow]: {
+      model: UserModel,
+      allow: {
         read: true,
         write: $or(['requestUserIs(uid)']),
         delete: 'requestUserIs(uid)',
       },
 
       'posts/{postId}': {
-        [$model]: PostModel,
-        [$allow]: {
+        model: PostModel,
+        allow: {
           read: true,
           write: $or(['requestUserIs(uid)']),
           delete: 'requestUserIs(uid)',
@@ -143,8 +135,8 @@ export const firestoreModel = new FirestoreModel({
       },
 
       'privatePosts/{postId}': {
-        [$model]: PostAModel,
-        [$allow]: {
+        model: PostAModel,
+        allow: {
           read: $or(['isAdmin()', 'requestUserIs(uid)']),
           write: $or(['requestUserIs(uid)']),
         },

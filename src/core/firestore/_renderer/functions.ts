@@ -4,13 +4,13 @@ import { STypes } from '../../types/index.js'
 import { _ } from '../../utils/_string.js'
 
 export const renderFunctions = (
-  $functions: STypes.FunctionsOptions,
+  functions: STypes.FunctionsOptions,
   pIndent: number,
 ) => {
   const indent = pIndent + 2
 
   return P(
-    $functions,
+    functions,
     EntriesStrict,
     R.map(([key, value]) =>
       [
