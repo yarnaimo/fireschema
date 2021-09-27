@@ -44,7 +44,7 @@ service cloud.firestore {
         function __validator_1__(data) {
           return (__validator_meta__(data) && (
             __validator_keys__(data, ['tags', 'text'])
-              && (data.tags.size() == 0 || (data.tags[0].id is int && data.tags[0].name is string))
+              && data.tags is list
               && data.text is string
           ));
         }

@@ -1,7 +1,7 @@
 import { expectType } from 'tsd'
-import { docPath, FirestoreModel } from '../../core/index.js'
+import { z } from 'zod'
+import { docPath, FirestoreModel, timestampType } from '../../core/index.js'
 import {
-  $,
   $allow,
   $collectionGroups,
   $functions,
@@ -13,42 +13,40 @@ import {
 } from '../../index.js'
 import { Type } from '../../lib/type.js'
 
-const VersionType = { unknown: $.unknown }
-expectType<{ unknown: unknown }>({} as InferSchemaType<typeof VersionType>)
-expectType<InferSchemaType<typeof VersionType>>({} as { unknown: unknown })
+const VersionType = z.object({})
 
-const UserType = {
-  name: $.string,
-  displayName: $.union($.string, $.null),
-  age: $.int,
-  tags: $.array({ id: $.int, name: $.string }),
-  timestamp: $.timestamp,
-  options: $.optional({ a: $.bool, b: $.string }),
-}
+export const UserType = z.object({
+  name: z.string(),
+  displayName: z.union([z.string(), z.null()]),
+  age: z.number().int(),
+  tags: z.object({ id: z.number().int(), name: z.string() }).array(),
+  timestamp: timestampType(),
+  options: z.object({ a: z.boolean(), b: z.string() }).optional(),
+})
 export type IUser = {
   name: string
   displayName: string | null
   age: number
   tags: { id: number; name: string }[]
   timestamp: FTypes.Timestamp
-  options: { a: boolean; b: string } | undefined
+  options?: { a: boolean; b: string } | undefined
 }
 type InferredUser = InferSchemaType<typeof UserType>
 
 expectType<IUser>({} as InferredUser)
 export type IUserLocal = Type.Merge<IUser, { timestamp: string }>
 export type IUserJson = Type.Merge<IUser, { timestamp: string }>
-export const UserJsonType = { ...UserType, timestamp: $.string }
+export const UserJsonType = UserType.extend({ timestamp: z.string() })
 
-const PostAType = {
-  type: $.literal('a'),
-  text: $.string,
-}
-const PostBType = {
-  type: $.literal('b'),
-  texts: $.array($.string),
-}
-const PostType = $.union(PostAType, PostBType)
+const PostAType = z.object({
+  type: z.literal('a'),
+  text: z.string(),
+})
+const PostBType = z.object({
+  type: z.literal('b'),
+  texts: z.string().array(),
+})
+const PostType = z.union([PostAType, PostBType])
 export type IPostA = {
   type: 'a'
   text: string

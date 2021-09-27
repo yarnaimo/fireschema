@@ -41,7 +41,7 @@ service cloud.firestore {
               && data.name is string
               && (data.displayName is string || data.displayName == null)
               && data.age is int
-              && (data.tags.size() == 0 || (data.tags[0].id is int && data.tags[0].name is string))
+              && data.tags is list
               && data.timestamp is timestamp
               && ((data.options.a is bool && data.options.b is string) || !("options" in data))
           ));
@@ -60,7 +60,7 @@ service cloud.firestore {
             ) || (
               __validator_keys__(data, ['type', 'texts'])
                 && data.type == "b"
-                && (data.texts.size() == 0 || data.texts[0] is string)
+                && data.texts is list
             )));
           }
 

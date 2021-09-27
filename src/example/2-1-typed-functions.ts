@@ -1,5 +1,5 @@
 import * as functions from 'firebase-functions'
-import { $ } from '../index.js'
+import { z } from 'zod'
 import { TypedFunctions } from '../admin/index.js'
 import { firestoreModel, UserType } from './1-1-schema.js'
 
@@ -13,12 +13,12 @@ const builder = functions.region('asia-northeast1')
 /**
  * functions/index.ts file
  */
-export const UserJsonType = { ...UserType, timestamp: $.string }
+export const UserJsonType = UserType.extend({ timestamp: z.string() })
 export const callable = {
   createUser: typedFunctions.callable({
     schema: {
       input: UserJsonType, // schema of request data (automatically validate on request)
-      output: { result: $.bool }, // schema of response data
+      output: z.object({ result: z.boolean() }), // schema of response data
     },
     builder,
     handler: async (data, context) => {
@@ -55,7 +55,7 @@ export const http = {
 
 export const topic = {
   publishMessage: typedFunctions.topic('publish_message', {
-    schema: { text: $.string },
+    schema: z.object({ text: z.string() }),
     builder,
     handler: async (data) => {
       data // { text: string }

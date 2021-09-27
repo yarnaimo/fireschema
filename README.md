@@ -38,12 +38,33 @@ yarn add -D typescript ts-node
 
 <br />
 
-## Example - Firestore
+## Usage - Firestore
 
-#### Data structure of examples
+### Schema Transformation
 
-- `users/{uid}` - `User`
-- `users/{uid}/posts/{postId}` - `Post`
+| Zod Schema                           | Security Rules Output                                                  |
+| ------------------------------------ | ---------------------------------------------------------------------- |
+| `z.any()`                            | `true`                                                                 |
+| `z.unknown()`                        | `true`                                                                 |
+| `z.undefined()`                      | `!("key" in data)`                                                     |
+| `z.null()`                           | `data.key == null`                                                     |
+| `z.boolean()`                        | `data.key is bool`                                                     |
+| `z.literal('a')`                     | `data.key == "a"`                                                      |
+| `z.string()`                         | `data.key is string`                                                   |
+| `z.string().min(5)`                  | `(data.key is string && data.key.size >= 5)`                           |
+| `z.string().min(5).max(20)`          | `(data.key is string && data.key.size >= 5 && data.key.size <= 20)`    |
+| `z.string().regex(/@example\.com$/)` | `(data.key is string && data.key.matches("@example\\.com$"))`          |
+| `z.number()`                         | `data.key is number`                                                   |
+| `z.number().int()`                   | `data.key is int`                                                      |
+| `z.number().min(5)`                  | `(data.key is int && data.key >= 5)`                                   |
+| `z.number().max(20)`                 | `(data.key is int && data.key <= 20)`                                  |
+| `timestampType()`                    | `data.key is timestamp`                                                |
+| `z.tuple([z.string(), z.number()])`  | `(data.key is list && data.key[0] is string && data.key[1] is number)` |
+| `z.string().array()`                 | `data.key is list`                                                     |
+| `z.string().array().min(5)`          | `(data.key is list && data.key.size() >= 5)`                           |
+| `z.string().array().max(20)`         | `(data.key is list && data.key.size() <= 20)`                          |
+| `z.string().optional()`              | `(data.key is string \|\| !("key" in data))`                           |
+| `z.union([z.string(), z.null()])`    | `(data.key is string \|\| data.key == null)`                           |
 
 <br>
 
@@ -51,17 +72,13 @@ yarn add -D typescript ts-node
 
 The schema definition must be default exported.
 
-```txt
-SchemaType  ->  DataModel  ->  FirestoreModel
-```
-
 <!-- AUTO-GENERATED-CONTENT:START (CODE:src=./src/example/1-1-schema.ts) -->
 <!-- The below code snippet is automatically added from ./src/example/1-1-schema.ts -->
 
 ```ts
 import { Merge } from 'type-fest'
+import { z } from 'zod'
 import {
-  $,
   $allow,
   $collectionGroups,
   $functions,
@@ -71,23 +88,23 @@ import {
   docPath,
   FirestoreModel,
   InferSchemaType,
+  timestampType,
 } from 'fireschema'
 
-// user
-export const UserType = {
-  name: $.string,
-  displayName: $.union($.string, $.null),
-  age: $.int,
-  timestamp: $.timestamp,
-  options: $.optional({ a: $.bool }),
-}
+export const UserType = z.object({
+  name: z.string(),
+  displayName: z.union([z.string(), z.null()]),
+  age: z.number().int(),
+  timestamp: timestampType(),
+  options: z.object({ a: z.boolean() }).optional(),
+})
 type User = InferSchemaType<typeof UserType>
 /* => {
   name: string
   displayName: string | null
   age: number
   timestamp: FTypes.Timestamp
-  options: { a: boolean } | undefined
+  options?: { a: boolean } | undefined
 } */
 
 type UserDecoded = Merge<User, { timestamp: Date }>
@@ -100,11 +117,10 @@ const UserModel = new DataModel({
   }),
 })
 
-// post
-const PostType = {
-  tags: $.array({ id: $.int, name: $.string }),
-  text: $.string,
-}
+const PostType = z.object({
+  tags: z.object({ id: z.number().int(), name: z.string() }).array(),
+  text: z.string(),
+})
 
 const PostModel = new DataModel({
   schema: PostType,
@@ -115,12 +131,10 @@ const PostModel = new DataModel({
 
 export const firestoreModel = new FirestoreModel({
   [$functions]: {
-    // whether /admins/<uid> exists
     'isAdmin()': `
       return exists(${docPath('admins/$(request.auth.uid)')});
     `,
 
-    // whether uid matches
     'requestUserIs(uid)': `
       return request.auth.uid == uid;
     `,
@@ -136,10 +150,9 @@ export const firestoreModel = new FirestoreModel({
   },
 
   'users/{uid}': {
-    [$model]: UserModel, // collectionSchema
+    [$model]: UserModel,
     [$allow]: {
-      // access control
-      read: true, // all user
+      read: true, // open access
       write: $or(['requestUserIs(uid)', 'isAdmin()']), // only users matching {uid} or admins
     },
 
@@ -221,7 +234,7 @@ service cloud.firestore {
         function __validator_1__(data) {
           return (__validator_meta__(data) && (
             __validator_keys__(data, ['tags', 'text'])
-              && (data.tags.size() == 0 || (data.tags[0].id is int && data.tags[0].name is string))
+              && data.tags is list
               && data.text is string
           ));
         }
@@ -409,7 +422,7 @@ export const UserComponent = ({ id }: { id: string }) => {
 
 <br>
 
-## Example - Cloud Functions
+## Usage - Cloud Functions
 
 ### 1. Create functions
 
@@ -418,7 +431,7 @@ export const UserComponent = ({ id }: { id: string }) => {
 
 ```ts
 import * as functions from 'firebase-functions'
-import { $ } from 'fireschema'
+import { z } from 'zod'
 import { TypedFunctions } from 'fireschema/admin'
 import { firestoreModel, UserType } from './1-1-schema.js'
 
@@ -432,12 +445,12 @@ const builder = functions.region('asia-northeast1')
 /**
  * functions/index.ts file
  */
-export const UserJsonType = { ...UserType, timestamp: $.string }
+export const UserJsonType = UserType.extend({ timestamp: z.string() })
 export const callable = {
   createUser: typedFunctions.callable({
     schema: {
       input: UserJsonType, // schema of request data (automatically validate on request)
-      output: { result: $.bool }, // schema of response data
+      output: z.object({ result: z.boolean() }), // schema of response data
     },
     builder,
     handler: async (data, context) => {
@@ -474,7 +487,7 @@ export const http = {
 
 export const topic = {
   publishMessage: typedFunctions.topic('publish_message', {
-    schema: { text: $.string },
+    schema: z.object({ text: z.string() }),
     builder,
     handler: async (data) => {
       data // { text: string }

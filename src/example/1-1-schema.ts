@@ -1,6 +1,6 @@
 import { Merge } from 'type-fest'
+import { z } from 'zod'
 import {
-  $,
   $allow,
   $collectionGroups,
   $functions,
@@ -10,23 +10,23 @@ import {
   docPath,
   FirestoreModel,
   InferSchemaType,
+  timestampType,
 } from '../index.js'
 
-// user
-export const UserType = {
-  name: $.string,
-  displayName: $.union($.string, $.null),
-  age: $.int,
-  timestamp: $.timestamp,
-  options: $.optional({ a: $.bool }),
-}
+export const UserType = z.object({
+  name: z.string(),
+  displayName: z.union([z.string(), z.null()]),
+  age: z.number().int(),
+  timestamp: timestampType(),
+  options: z.object({ a: z.boolean() }).optional(),
+})
 type User = InferSchemaType<typeof UserType>
 /* => {
   name: string
   displayName: string | null
   age: number
   timestamp: FTypes.Timestamp
-  options: { a: boolean } | undefined
+  options?: { a: boolean } | undefined
 } */
 
 type UserDecoded = Merge<User, { timestamp: Date }>
@@ -39,11 +39,10 @@ const UserModel = new DataModel({
   }),
 })
 
-// post
-const PostType = {
-  tags: $.array({ id: $.int, name: $.string }),
-  text: $.string,
-}
+const PostType = z.object({
+  tags: z.object({ id: z.number().int(), name: z.string() }).array(),
+  text: z.string(),
+})
 
 const PostModel = new DataModel({
   schema: PostType,
@@ -54,12 +53,10 @@ const PostModel = new DataModel({
 
 export const firestoreModel = new FirestoreModel({
   [$functions]: {
-    // whether /admins/<uid> exists
     'isAdmin()': `
       return exists(${docPath('admins/$(request.auth.uid)')});
     `,
 
-    // whether uid matches
     'requestUserIs(uid)': `
       return request.auth.uid == uid;
     `,
@@ -75,10 +72,9 @@ export const firestoreModel = new FirestoreModel({
   },
 
   'users/{uid}': {
-    [$model]: UserModel, // collectionSchema
+    [$model]: UserModel,
     [$allow]: {
-      // access control
-      read: true, // all user
+      read: true, // open access
       write: $or(['requestUserIs(uid)', 'isAdmin()']), // only users matching {uid} or admins
     },
 

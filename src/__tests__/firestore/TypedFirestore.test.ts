@@ -563,8 +563,8 @@ for (const env of ['web', 'admin'] as const) {
         await assertFails(() =>
           r.user.create({
             ...userData,
-            // @ts-expect-error: tags.id
-            tags: [{ id: '0', name: 'tag0' }],
+            // @ts-expect-error: number
+            age: '20',
           }),
         )
 

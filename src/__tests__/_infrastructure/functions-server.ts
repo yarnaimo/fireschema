@@ -1,7 +1,8 @@
 import * as functions from 'firebase-functions'
 import { expectType } from 'tsd'
-import { $, FunTypes, messages, STypes } from '../../index.js'
+import { z } from 'zod'
 import { TypedFunctions } from '../../admin/index.js'
+import { FunTypes, messages, STypes } from '../../index.js'
 import { _admin } from '../../lib/firestore-types'
 import { _fadmin } from '../../lib/functions-types'
 import { Type } from '../../lib/type.js'
@@ -40,7 +41,7 @@ const wrap = async <T, U>(
 
 const createUserSchema = {
   input: UserJsonType,
-  output: { result: $.int },
+  output: z.object({ result: z.number().int() }),
 }
 const createUserHandler: FunTypes.Callable.Handler<
   IUserJson,
@@ -62,8 +63,8 @@ const createUserHandler: FunTypes.Callable.Handler<
 }
 
 const toUpperCaseSchema = {
-  input: { text: $.string },
-  output: { result: $.string },
+  input: z.object({ text: z.string() }),
+  output: z.object({ result: z.string() }),
 }
 const toUpperCaseHandler: FunTypes.Callable.Handler<
   { text: string },
@@ -124,7 +125,7 @@ export const http = {
 
 export const topic = {
   publishMessage: typedFunctions.topic('publish_message', {
-    schema: { text: $.string },
+    schema: z.object({ text: z.string() }),
     builder,
     handler: async (data) => {
       expectType<{ text: string }>(data)

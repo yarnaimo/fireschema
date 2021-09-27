@@ -11,7 +11,6 @@ import {
 } from '../../types/index.js'
 import { withType } from '../../utils/_type.js'
 import { TypedFirestoreTrigger } from './TypedFirestoreTrigger.js'
-import { validateJsonSchema } from './_validator.js'
 
 export class TypedFunctions<
   M extends FirestoreModel<STypes.RootOptions.All>,
@@ -41,9 +40,9 @@ export class TypedFunctions<
       data: unknown,
       context: _fadmin.https.CallableContext,
     ) => {
-      const valid = validateJsonSchema(input, data)
+      const parseResult = input.safeParse(data)
 
-      if (!valid) {
+      if (!parseResult.success) {
         throw new functions.https.HttpsError(
           'invalid-argument',
           messages.validationFailed,

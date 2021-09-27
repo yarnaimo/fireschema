@@ -5,7 +5,7 @@ import {
   _updatedAt,
 } from '../../constants/index.js'
 import { STypes } from '../../types/index.js'
-import { $$or, $and, $rule } from '../../utils/index.js'
+import { $$or, $and } from '../../utils/index.js'
 import { join } from '../../utils/_string.js'
 import { FirestoreModel } from '../model.js'
 import { renderCollectionGroups, renderCollections } from './collections.js'
@@ -29,13 +29,13 @@ import { renderFunctions } from './functions.js'
 const metaRules = $$or([
   $and([
     'request.method == "create"',
-    $rule.isServerTimestamp(`data.${_createdAt}`),
-    $rule.isServerTimestamp(`data.${_updatedAt}`),
+    `data.${_createdAt} == request.time`,
+    `data.${_updatedAt} == request.time`,
   ]),
   $and([
     'request.method == "update"',
     `data.${_createdAt} == resource.data.${_createdAt}`,
-    $rule.isServerTimestamp(`data.${_updatedAt}`),
+    `data.${_updatedAt} == request.time`,
   ]),
 ])
 

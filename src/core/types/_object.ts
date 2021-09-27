@@ -31,7 +31,7 @@ export type Subtract = [
 ]
 
 export type IsPlainObject<T> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => any ? false : true
+  [K in keyof T]-?: T[K] extends (...args: any[]) => any ? false : true
 }[keyof T]
 
 export type PlainLoc<T, Depth extends number = 5> = [Depth] extends [never]
