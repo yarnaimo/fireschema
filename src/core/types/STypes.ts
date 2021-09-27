@@ -90,6 +90,7 @@ export declare namespace STypes {
 
   export namespace CollectionOptions {
     export type Meta = {
+      functions?: FunctionsOptions
       model: DataModel<any, any, STypes.Model.SelectorsConstraint>
       // [$collectionGroup]?: boolean
       allow: AllowOptions

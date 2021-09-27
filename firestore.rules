@@ -41,16 +41,21 @@ service cloud.firestore {
       allow write: if ((requestUserIs(uid) || isAdmin()) && __validator_0__(request.resource.data));
 
       match /posts/{postId} {
+        function authorUidMatches() {
+          return request.resource.data.authorUid == uid;
+        }
+
         function __validator_1__(data) {
           return (__validator_meta__(data) && (
-            __validator_keys__(data, ['tags', 'text'])
-              && data.tags is list
+            __validator_keys__(data, ['authorUid', 'text', 'tags'])
+              && data.authorUid is string
               && data.text is string
+              && data.tags is list
           ));
         }
 
         allow read: if true;
-        allow write: if (requestUserIs(uid) && __validator_1__(request.resource.data));
+        allow write: if ((requestUserIs(uid) && authorUidMatches()) && __validator_1__(request.resource.data));
       }
     }
   }

@@ -52,6 +52,10 @@ service cloud.firestore {
         allow delete: if requestUserIs(uid);
 
         match /posts/{postId} {
+          function test() {
+            return true;
+          }
+
           function __validator_1__(data) {
             return (__validator_meta__(data) && ((
               __validator_keys__(data, ['type', 'text'])

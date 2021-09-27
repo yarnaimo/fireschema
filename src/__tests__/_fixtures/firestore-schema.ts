@@ -126,6 +126,12 @@ export const firestoreModel = new FirestoreModel({
       },
 
       'posts/{postId}': {
+        functions: {
+          'test()': `
+            return true;
+          `,
+        },
+
         model: PostModel,
         allow: {
           read: true,

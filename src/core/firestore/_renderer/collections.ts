@@ -2,6 +2,7 @@ import { EntriesStrict, P } from 'lifts'
 import { R } from '../../../lib/fp.js'
 import { STypes } from '../../types/index.js'
 import { join, _ } from '../../utils/_string.js'
+import { renderFunctions } from './functions.js'
 import { renderRules } from './rules.js'
 
 const renderFromArray =
@@ -17,8 +18,12 @@ const renderFromArray =
     return P(
       array,
       R.map(
-        ([collectionNameWithDocLabel, { model, allow, ...collections }]) => {
+        ([
+          collectionNameWithDocLabel,
+          { functions, model, allow, ...collections },
+        ]) => {
           const body = join('\n\n')([
+            functions ? renderFunctions(functions, indent) : null,
             renderRules(allow, model, indent),
             renderCollections(collections, indent),
           ])

@@ -79,6 +79,7 @@ The schema definition must be default exported.
 import { Merge } from 'type-fest'
 import { z } from 'zod'
 import {
+  $and,
   $or,
   DataModel,
   docPath,
@@ -93,6 +94,7 @@ export const UserType = z.object({
   timestamp: timestampType(),
   options: z.object({ a: z.boolean() }).optional(),
 })
+
 type User = z.infer<typeof UserType>
 /* => {
   name: string
@@ -113,8 +115,9 @@ const UserModel = new DataModel({
 })
 
 const PostType = z.object({
-  tags: z.object({ id: z.number().int(), name: z.string() }).array(),
+  authorUid: z.string(),
   text: z.string(),
+  tags: z.object({ id: z.number().int(), name: z.string() }).array(),
 })
 
 const PostModel = new DataModel({
@@ -148,14 +151,20 @@ export const firestoreModel = new FirestoreModel({
     model: UserModel,
     allow: {
       read: true, // open access
-      write: $or(['requestUserIs(uid)', 'isAdmin()']), // only users matching {uid} or admins
+      write: $or(['requestUserIs(uid)', 'isAdmin()']),
     },
 
     'posts/{postId}': {
+      functions: {
+        'authorUidMatches()': `
+          return request.resource.data.authorUid == uid;
+        `,
+      },
+
       model: PostModel,
       allow: {
         read: true,
-        write: 'requestUserIs(uid)',
+        write: $and(['requestUserIs(uid)', 'authorUidMatches()']),
       },
     },
   },
@@ -226,16 +235,21 @@ service cloud.firestore {
       allow write: if ((requestUserIs(uid) || isAdmin()) && __validator_0__(request.resource.data));
 
       match /posts/{postId} {
+        function authorUidMatches() {
+          return request.resource.data.authorUid == uid;
+        }
+
         function __validator_1__(data) {
           return (__validator_meta__(data) && (
-            __validator_keys__(data, ['tags', 'text'])
-              && data.tags is list
+            __validator_keys__(data, ['authorUid', 'text', 'tags'])
+              && data.authorUid is string
               && data.text is string
+              && data.tags is list
           ));
         }
 
         allow read: if true;
-        allow write: if (requestUserIs(uid) && __validator_1__(request.resource.data));
+        allow write: if ((requestUserIs(uid) && authorUidMatches()) && __validator_1__(request.resource.data));
       }
     }
   }

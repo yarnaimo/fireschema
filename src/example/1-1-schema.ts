@@ -1,6 +1,7 @@
 import { Merge } from 'type-fest'
 import { z } from 'zod'
 import {
+  $and,
   $or,
   DataModel,
   docPath,
@@ -15,6 +16,7 @@ export const UserType = z.object({
   timestamp: timestampType(),
   options: z.object({ a: z.boolean() }).optional(),
 })
+
 type User = z.infer<typeof UserType>
 /* => {
   name: string
@@ -35,8 +37,9 @@ const UserModel = new DataModel({
 })
 
 const PostType = z.object({
-  tags: z.object({ id: z.number().int(), name: z.string() }).array(),
+  authorUid: z.string(),
   text: z.string(),
+  tags: z.object({ id: z.number().int(), name: z.string() }).array(),
 })
 
 const PostModel = new DataModel({
@@ -70,14 +73,20 @@ export const firestoreModel = new FirestoreModel({
     model: UserModel,
     allow: {
       read: true, // open access
-      write: $or(['requestUserIs(uid)', 'isAdmin()']), // only users matching {uid} or admins
+      write: $or(['requestUserIs(uid)', 'isAdmin()']),
     },
 
     'posts/{postId}': {
+      functions: {
+        'authorUidMatches()': `
+          return request.resource.data.authorUid == uid;
+        `,
+      },
+
       model: PostModel,
       allow: {
         read: true,
-        write: 'requestUserIs(uid)',
+        write: $and(['requestUserIs(uid)', 'authorUidMatches()']),
       },
     },
   },
