@@ -3,18 +3,12 @@ import {
   OK,
   ParseContext,
   ParseReturnType,
-  z,
   ZodIntersection,
   ZodObject,
   ZodType,
-  ZodTypeAny,
   ZodUnion,
 } from 'zod'
 import { FTypes } from './index.js'
-
-export const $type = Symbol('Fireschema - schema type')
-
-export type InferSchemaType<T extends ZodTypeAny> = z.infer<T>
 
 export namespace SchemaType {
   export type _DocData =

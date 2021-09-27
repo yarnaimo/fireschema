@@ -1,14 +1,10 @@
 import * as firestore from 'firebase-admin/firestore'
 import * as functions from 'firebase-functions'
+import { z } from 'zod'
 import { _fadmin } from '../../../lib/functions-types'
 import { messages } from '../../constants/index.js'
 import { FirestoreModel, InferFirestoreModelS } from '../../firestore/index.js'
-import {
-  FunTypes,
-  InferSchemaType,
-  SchemaType,
-  STypes,
-} from '../../types/index.js'
+import { FunTypes, SchemaType, STypes } from '../../types/index.js'
 import { withType } from '../../utils/_type.js'
 import { TypedFirestoreTrigger } from './TypedFirestoreTrigger.js'
 
@@ -34,7 +30,7 @@ export class TypedFunctions<
       output: SO
     }
     builder: _fadmin.FunctionBuilder
-    handler: FunTypes.Callable.Handler<InferSchemaType<SI>, InferSchemaType<SO>>
+    handler: FunTypes.Callable.Handler<z.infer<SI>, z.infer<SO>>
   }) {
     const wrapped = async (
       data: unknown,
@@ -76,14 +72,14 @@ export class TypedFunctions<
     }: {
       schema: S
       builder: _fadmin.FunctionBuilder
-      handler: FunTypes.Topic.Handler<InferSchemaType<S>>
+      handler: FunTypes.Topic.Handler<z.infer<S>>
     },
   ) {
     const wrapped = async (
       message: _fadmin.pubsub.Message,
       context: _fadmin.EventContext,
     ) => {
-      const input = message.json as InferSchemaType<S>
+      const input = message.json as z.infer<S>
       await handler(input, message, context)
     }
 

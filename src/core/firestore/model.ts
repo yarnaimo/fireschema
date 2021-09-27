@@ -1,14 +1,16 @@
-import { InferSchemaType, SchemaType, STypes } from '../types/index.js'
+import { z } from 'zod'
+import { SchemaType, STypes } from '../types/index.js'
 
 type GetU<S extends SchemaType._DocData, D> = D extends STypes.Model.Decoder<
   any,
   infer U
 >
   ? U
-  : InferSchemaType<S>
+  : z.infer<S>
 
-export type InferDataModelT<M extends DataModel<any, any, any>> =
-  InferSchemaType<M['schema']>
+export type InferDataModelT<M extends DataModel<any, any, any>> = z.infer<
+  M['schema']
+>
 
 export type InferDataModelU<M extends DataModel<any, any, any>> = GetU<
   M['schema'],
@@ -21,14 +23,12 @@ export type InferDataModelSL<M extends DataModel<any, any, any>> = ReturnType<
 
 export class DataModel<
   S extends SchemaType._DocData,
-  D extends
-    | STypes.Model.Decoder<InferSchemaType<S>, any>
-    | undefined = undefined,
+  D extends STypes.Model.Decoder<z.infer<S>, any> | undefined = undefined,
   SL extends STypes.Model.SelectorsConstraint = {},
 > {
   readonly schema: S
   readonly decoder: D
-  readonly selectors: STypes.Model.Selectors<InferSchemaType<S>, SL>
+  readonly selectors: STypes.Model.Selectors<z.infer<S>, SL>
 
   constructor({
     schema,
@@ -37,7 +37,7 @@ export class DataModel<
   }: {
     schema: S
     decoder?: D
-    selectors?: STypes.Model.Selectors<InferSchemaType<S>, SL>
+    selectors?: STypes.Model.Selectors<z.infer<S>, SL>
   }) {
     this.schema = schema
     this.decoder = decoder as D

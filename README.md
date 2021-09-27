@@ -87,7 +87,6 @@ import {
   DataModel,
   docPath,
   FirestoreModel,
-  InferSchemaType,
   timestampType,
 } from 'fireschema'
 
@@ -98,7 +97,7 @@ export const UserType = z.object({
   timestamp: timestampType(),
   options: z.object({ a: z.boolean() }).optional(),
 })
-type User = InferSchemaType<typeof UserType>
+type User = z.infer<typeof UserType>
 /* => {
   name: string
   displayName: string | null

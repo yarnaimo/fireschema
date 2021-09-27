@@ -9,7 +9,6 @@ import {
   $or,
   DataModel,
   FTypes,
-  InferSchemaType,
 } from '../../index.js'
 import { Type } from '../../lib/type.js'
 
@@ -31,7 +30,7 @@ export type IUser = {
   timestamp: FTypes.Timestamp
   options?: { a: boolean; b: string } | undefined
 }
-type InferredUser = InferSchemaType<typeof UserType>
+type InferredUser = z.infer<typeof UserType>
 
 expectType<IUser>({} as InferredUser)
 export type IUserLocal = Type.Merge<IUser, { timestamp: string }>
@@ -56,7 +55,7 @@ export type IPostB = {
   texts: string[]
 }
 export type IPost = IPostA | IPostB
-expectType<IPost>({} as InferSchemaType<typeof PostType>)
+expectType<IPost>({} as z.infer<typeof PostType>)
 
 const VersionModel = new DataModel({ schema: VersionType })
 // void (() => {

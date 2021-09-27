@@ -1,8 +1,8 @@
 import type express from 'express'
+import { z } from 'zod'
 import { _admin } from '../../lib/firestore-types'
 import { _fadmin, _fweb } from '../../lib/functions-types'
 import { $input, $output, $topicName } from '../constants/index.js'
-import { InferSchemaType } from './SchemaType.js'
 import { ExtractFP, ParseFP } from './_functions.js'
 import { GetDeep } from './_object.js'
 
@@ -47,12 +47,12 @@ export declare namespace FunTypes {
     export type InputOf<
       MC extends NestedFunctions | undefined,
       FP extends ExtractFP<MC>,
-    > = InferSchemaType<GetByFP<MC, FP>[typeof $input]>
+    > = z.infer<GetByFP<MC, FP>[typeof $input]>
 
     export type OutputOf<
       MC extends NestedFunctions | undefined,
       FP extends ExtractFP<MC>,
-    > = InferSchemaType<GetByFP<MC, FP>[typeof $output]>
+    > = z.infer<GetByFP<MC, FP>[typeof $output]>
 
     export type CallResult<T, E = _fweb.FunctionsError> =
       | { data: T; error?: never }
