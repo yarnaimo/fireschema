@@ -48,7 +48,7 @@ export class TypedFirestoreTrigger<S extends STypes.RootOptions.All> {
   }): _fadmin.CloudFunction<_admin.QueryDocumentSnapshot> {
     const decode = this.buildDecoder(path)
 
-    return builder.firestore.document(path).onCreate((snap, context) => {
+    return builder.firestore.document(path).onCreate(async (snap, context) => {
       const decodedData = decode(snap)
       return handler(decodedData, snap as any, context)
     })
@@ -68,7 +68,7 @@ export class TypedFirestoreTrigger<S extends STypes.RootOptions.All> {
   }): _fadmin.CloudFunction<_admin.QueryDocumentSnapshot> {
     const decode = this.buildDecoder(path)
 
-    return builder.firestore.document(path).onDelete((snap, context) => {
+    return builder.firestore.document(path).onDelete(async (snap, context) => {
       const decodedData = decode(snap)
       return handler(decodedData, snap as any, context)
     })
@@ -88,13 +88,15 @@ export class TypedFirestoreTrigger<S extends STypes.RootOptions.All> {
   }): _fadmin.CloudFunction<_fadmin.Change<_admin.QueryDocumentSnapshot>> {
     const decode = this.buildDecoder(path)
 
-    return builder.firestore.document(path).onUpdate((change, context) => {
-      const decodedData = new this.functions.Change(
-        decode(change.before),
-        decode(change.after),
-      )
-      return handler(decodedData, change as any, context)
-    })
+    return builder.firestore
+      .document(path)
+      .onUpdate(async (change, context) => {
+        const decodedData = new this.functions.Change(
+          decode(change.before),
+          decode(change.after),
+        )
+        return handler(decodedData, change as any, context)
+      })
   }
 
   onWrite<DP extends string, L extends string = ParseDocumentPath<DP>>({
@@ -111,7 +113,7 @@ export class TypedFirestoreTrigger<S extends STypes.RootOptions.All> {
   }): _fadmin.CloudFunction<_fadmin.Change<_admin.DocumentSnapshot>> {
     const decode = this.buildSnapDecoder(path)
 
-    return builder.firestore.document(path).onWrite((change, context) => {
+    return builder.firestore.document(path).onWrite(async (change, context) => {
       const decodedData = new this.functions.Change(
         decode(change.before),
         decode(change.after),

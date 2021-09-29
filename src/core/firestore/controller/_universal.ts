@@ -52,7 +52,7 @@ export const collectionGroupUniv = (
     : raw.collectionGroup(collectionName)
 }
 
-export const runTransactionUniv = <T>(
+export const runTransactionUniv = async <T>(
   raw: FTypes.FirestoreApp,
   fn: (transaction: FTypes.Transaction<FTypes.FirestoreApp>) => Promise<T>,
 ) => {
@@ -84,19 +84,25 @@ export const existsUniv = (raw: FTypes.DocumentSnap<any>): boolean => {
   return raw instanceof DocumentSnapshot ? raw.exists() : raw.exists
 }
 
-export const setDocUniv = (raw: FTypes.DocumentRef<any>, ...args: any[]) => {
+export const setDocUniv = async (
+  raw: FTypes.DocumentRef<any>,
+  ...args: any[]
+) => {
   return raw instanceof DocumentReference
     ? setDoc(raw, ...(args as [any]))
     : raw.set(...(args as [any]))
 }
 
-export const updateDocUniv = (raw: FTypes.DocumentRef<any>, data: any) => {
+export const updateDocUniv = async (
+  raw: FTypes.DocumentRef<any>,
+  data: any,
+) => {
   return raw instanceof DocumentReference
     ? updateDoc(raw, data)
     : raw.update(data)
 }
 
-export const deleteDocUniv = (raw: FTypes.DocumentRef<any>) => {
+export const deleteDocUniv = async (raw: FTypes.DocumentRef<any>) => {
   return raw instanceof DocumentReference ? deleteDoc(raw) : raw.delete()
 }
 
@@ -118,11 +124,14 @@ const getDocsWeb = (from: GetSource) => {
     : getDocs
 }
 
-export const getDocUniv = (raw: FTypes.DocumentRef<any>, from: GetSource) => {
+export const getDocUniv = async (
+  raw: FTypes.DocumentRef<any>,
+  from: GetSource,
+) => {
   return raw instanceof DocumentReference ? getDocWeb(from)(raw) : raw.get()
 }
 
-export const getDocsUniv = (raw: FTypes.Query<any>, from: GetSource) => {
+export const getDocsUniv = async (raw: FTypes.Query<any>, from: GetSource) => {
   return raw instanceof Query ? getDocsWeb(from)(raw) : raw.get()
 }
 

@@ -328,11 +328,14 @@ for (const env of ['web', 'admin'] as const) {
 
     test.each([
       {
-        get: () => r.typedFirestore.runTransaction((tt) => tt.get(r.user)),
+        get: async () =>
+          r.typedFirestore.runTransaction(async (tt) => tt.get(r.user)),
         getData: typeExtends<
           TypedDocumentRef<S, F, 'versions.users'>['getData']
-        >()((options) =>
-          r.typedFirestore.runTransaction((tt) => tt.getData(r.user, options)),
+        >()(async (options) =>
+          r.typedFirestore.runTransaction(async (tt) =>
+            tt.getData(r.user, options),
+          ),
         ),
       },
       r.user,
@@ -369,11 +372,14 @@ for (const env of ['web', 'admin'] as const) {
 
     test.each([
       {
-        get: () => r.typedFirestore.runTransaction((tt) => tt.get(r.post)),
+        get: async () =>
+          r.typedFirestore.runTransaction(async (tt) => tt.get(r.post)),
         getData: typeExtends<
           TypedDocumentRef<S, F, 'versions.users.posts'>['getData']
-        >()((options) =>
-          r.typedFirestore.runTransaction((tt) => tt.getData(r.post, options)),
+        >()(async (options) =>
+          r.typedFirestore.runTransaction(async (tt) =>
+            tt.getData(r.post, options),
+          ),
         ),
       },
       r.post,
@@ -537,7 +543,7 @@ for (const env of ['web', 'admin'] as const) {
           { ...userData, [_createdAt]: localTs(), [_updatedAt]: serverTs() },
           { ...userData, [_createdAt]: serverTs(), [_updatedAt]: localTs() },
         ]) {
-          await assertFails(() => setDocUniv(r.user.raw, data as any))
+          await assertFails(async () => setDocUniv(r.user.raw, data as any))
         }
 
         await setDocUniv(r.user.raw, {
@@ -551,7 +557,7 @@ for (const env of ['web', 'admin'] as const) {
           { [_createdAt]: serverTs(), [_updatedAt]: serverTs() },
           { [_updatedAt]: localTs() },
         ]) {
-          await assertFails(() => updateDocUniv(r.user.raw, data as any))
+          await assertFails(async () => updateDocUniv(r.user.raw, data as any))
         }
 
         await updateDocUniv(r.user.raw, {
@@ -560,7 +566,7 @@ for (const env of ['web', 'admin'] as const) {
       })
 
       test('create user (fails due to invalid data)', async () => {
-        await assertFails(() =>
+        await assertFails(async () =>
           r.user.create({
             ...userData,
             // @ts-expect-error: number
@@ -568,7 +574,7 @@ for (const env of ['web', 'admin'] as const) {
           }),
         )
 
-        await assertFails(() =>
+        await assertFails(async () =>
           r.user.create({
             ...userData,
             // @ts-expect-error: options.a
@@ -576,7 +582,7 @@ for (const env of ['web', 'admin'] as const) {
           }),
         )
 
-        await assertFails(() =>
+        await assertFails(async () =>
           r.user.create({
             ...userData,
             // @ts-expect-error: excess property
@@ -586,23 +592,23 @@ for (const env of ['web', 'admin'] as const) {
       })
 
       test('create user (fails due to unauthed)', async () => {
-        await assertFails(() => ur.user.create(userData))
+        await assertFails(async () => ur.user.create(userData))
       })
 
       describe('write to non-existing doc', () => {
         test('setMerge fails', async () => {
-          await assertFails(() => r.user.setMerge(userData))
+          await assertFails(async () => r.user.setMerge(userData))
         })
 
         test('update fails', async () => {
-          await assertFails(() => r.user.update(userData))
+          await assertFails(async () => r.user.update(userData))
         })
       })
 
       test('overwrite user fails', async () => {
         await r.user.create(userData)
         await r.user.update(userData)
-        await assertFails(() => r.user.create(userData))
+        await assertFails(async () => r.user.create(userData))
       })
     })
 
@@ -611,7 +617,7 @@ for (const env of ['web', 'admin'] as const) {
       async () => {
         await r.user.create(userData)
         // @ts-expect-error: wrong data type
-        void (() => r.user.create(postData))
+        void (async () => r.user.create(postData))
       },
       async () => {
         const b = r.typedFirestore.batch()
@@ -652,7 +658,7 @@ for (const env of ['web', 'admin'] as const) {
         async () => {
           await r.user[op](userUpdateData)
           // @ts-expect-error: wrong data type
-          void (() => r.user[op](postAData))
+          void (async () => r.user[op](postAData))
         },
         async () => {
           const b = r.typedFirestore.batch()

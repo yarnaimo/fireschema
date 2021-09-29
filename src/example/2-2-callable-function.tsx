@@ -29,5 +29,5 @@ const Component = () => {
     console.log(result.data)
   }
 
-  return <button onClick={createUser}></button>
+  return <button onClick={createUser} />
 }

@@ -85,7 +85,7 @@ export const assertFails = async (pr: () => Promise<any>) => {
     })
 
   const result = await pr().then(
-    () => {
+    async () => {
       return Promise.reject(
         new Error('Expected request to fail, but it succeeded.'),
       )
