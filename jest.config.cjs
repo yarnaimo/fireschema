@@ -18,5 +18,5 @@ module.exports = {
       diagnostics: false,
     },
   },
-  resolver: './jest.resolver.cjs',
+  resolver: '@yarnaimo/jest-ts-resolver',
 }

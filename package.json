@@ -70,7 +70,7 @@
     "@types/react": "^17.0.20",
     "@types/testing-library__react-hooks": "^4.0.0",
     "@yarnaimo/eslint-config": "^0.3.0",
-    "enhanced-resolve": "^5.8.2",
+    "@yarnaimo/jest-ts-resolver": "^0.0.1",
     "express": "^4.17.1",
     "firebase": "9.0.1",
     "firebase-admin": "^9.100.0-alpha.1",

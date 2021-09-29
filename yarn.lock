@@ -2173,6 +2173,13 @@
     eslint-plugin-react "^7.26.0"
     eslint-plugin-react-hooks "^4.2.0"
 
+"@yarnaimo/jest-ts-resolver@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@yarnaimo/jest-ts-resolver/-/jest-ts-resolver-0.0.1.tgz#d9eff823f6b96527492f2244c3630be4dbed55b8"
+  integrity sha512-SboZS/DPO0REXmnai5v9qdf6Rm6j17r7yzeI92/RjbPPAF5eCAeAOehhhY4tK31GYdcLZ4LdqHa29RpDrIHRaw==
+  dependencies:
+    enhanced-resolve "^5.8.3"
+
 "@yarnaimo/type-extends@^0.0.1":
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/@yarnaimo/type-extends/-/type-extends-0.0.1.tgz#d030f36a12b14712f4105922baf809a83085b19e"
@@ -3852,6 +3859,14 @@ enhanced-resolve@^5.8.2:
   version "5.8.2"
   resolved "https://registry.yarnpkg.com/enhanced-resolve/-/enhanced-resolve-5.8.2.tgz#15ddc779345cbb73e97c611cd00c01c1e7bf4d8b"
   integrity sha512-F27oB3WuHDzvR2DOGNTaYy0D5o0cnrv8TeI482VM4kYgQd/FT9lUQwuNsJ0oOHtBUq7eiW5ytqzp7nBFknL+GA==
+  dependencies:
+    graceful-fs "^4.2.4"
+    tapable "^2.2.0"
+
+enhanced-resolve@^5.8.3:
+  version "5.8.3"
+  resolved "https://registry.yarnpkg.com/enhanced-resolve/-/enhanced-resolve-5.8.3.tgz#6d552d465cce0423f5b3d718511ea53826a7b2f0"
+  integrity sha512-EGAbGvH7j7Xt2nc0E7D99La1OiEs8LnyimkRgwExpUMScN6O+3x9tIWs7PLQZVNx4YD+00skHXPXi1yQHpAmZA==
   dependencies:
     graceful-fs "^4.2.4"
     tapable "^2.2.0"
