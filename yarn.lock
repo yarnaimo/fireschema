@@ -1290,17 +1290,6 @@
     source-map "^0.6.1"
     write-file-atomic "^3.0.0"
 
-"@jest/types@^27.0.2":
-  version "27.0.2"
-  resolved "https://registry.yarnpkg.com/@jest/types/-/types-27.0.2.tgz#e153d6c46bda0f2589f0702b071f9898c7bbd37e"
-  integrity sha512-XpjCtJ/99HB4PmyJ2vgmN7vT+JLP7RW1FBT9RgnMFS4Dt7cvIyBee8O3/j98aUZ34ZpenPZFqmaaObWSeL65dg==
-  dependencies:
-    "@types/istanbul-lib-coverage" "^2.0.0"
-    "@types/istanbul-reports" "^3.0.0"
-    "@types/node" "*"
-    "@types/yargs" "^16.0.0"
-    chalk "^4.0.0"
-
 "@jest/types@^27.1.1":
   version "27.1.1"
   resolved "https://registry.yarnpkg.com/@jest/types/-/types-27.1.1.tgz#77a3fc014f906c65752d12123a0134359707c0ad"
@@ -1316,6 +1305,18 @@
   version "7.1.3"
   resolved "https://registry.yarnpkg.com/@jsdevtools/ono/-/ono-7.1.3.tgz#9df03bbd7c696a5c58885c34aa06da41c8543796"
   integrity sha512-4JQNk+3mVzK3xh2rqd6RB4J46qUR19azEHBneZyTZM+c456qOrbbM/5xcR8huNCCcbVt7+UmizG6GuUvPvKUYg==
+
+"@napi-rs/triples@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@napi-rs/triples/-/triples-1.0.3.tgz#76d6d0c3f4d16013c61e45dfca5ff1e6c31ae53c"
+  integrity sha512-jDJTpta+P4p1NZTFVLHJ/TLFVYVcOqv6l8xwOeBKNPMgY/zDYH/YH7SJbvrr/h1RcS9GzbPcLKGzpuK9cV56UA==
+
+"@node-rs/helper@^1.0.0":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@node-rs/helper/-/helper-1.2.1.tgz#e079b05f21ff4329d82c4e1f71c0290e4ecdc70c"
+  integrity sha512-R5wEmm8nbuQU0YGGmYVjEc0OHtYsuXdpRG+Ut/3wZ9XAvQWyThN08bTh2cBJgoZxHQUPtvRfeQuxcAgLuiBISg==
+  dependencies:
+    "@napi-rs/triples" "^1.0.3"
 
 "@nodelib/fs.scandir@2.1.3":
   version "2.1.3"
@@ -1489,6 +1490,91 @@
   integrity sha512-iQADsW4LBMISqZ6Ci1dupJL9pprqwcVFTcOsEmQOEhW+KLCVn/Y4Jrvg2k19fIHCp+iFprriYPTdRcQR8NbUPg==
   dependencies:
     "@sinonjs/commons" "^1.7.0"
+
+"@swc/core-android-arm64@1.2.92":
+  version "1.2.92"
+  resolved "https://registry.yarnpkg.com/@swc/core-android-arm64/-/core-android-arm64-1.2.92.tgz#f59700acd2986d09c19836567b22c240458ae46c"
+  integrity sha512-1f8ubT85yEjbKqoDc5y0/E5IS2Wwi1IAX4+A+xcVgaWXEhoWc+ZCMlvoOr/ndsgZvjxiaVm0xr4BUJh45sYixg==
+
+"@swc/core-darwin-arm64@1.2.92":
+  version "1.2.92"
+  resolved "https://registry.yarnpkg.com/@swc/core-darwin-arm64/-/core-darwin-arm64-1.2.92.tgz#3416d4e40dea0a6dfa424f05d95e21b73e399f7e"
+  integrity sha512-GgPL64no8z7NjWyKD6Wkf9VlGhJQB2Xkcq4LJH6FYu7vsgc0y9zG2zQ1YkXqAwoxDsP+IRyFX3VY07oX6sWSiA==
+
+"@swc/core-darwin-x64@1.2.92":
+  version "1.2.92"
+  resolved "https://registry.yarnpkg.com/@swc/core-darwin-x64/-/core-darwin-x64-1.2.92.tgz#e56e9f21566c01718f394404dd27b00157de446d"
+  integrity sha512-s/sbU3joEMrNryWAwoxFhmlDhzIjoPo9JVq6DerjdC8IzcVXCdxtz6HWsktA/6vPBrHV9O1ILaZ/YqzEddET2A==
+
+"@swc/core-freebsd-x64@1.2.92":
+  version "1.2.92"
+  resolved "https://registry.yarnpkg.com/@swc/core-freebsd-x64/-/core-freebsd-x64-1.2.92.tgz#52122bd99a709f1b8d5ab39f5ffcda888562eb0d"
+  integrity sha512-r+imJbQowOcik09t+M2MBUIQoEweHySuQ0BgPG+SRXpyfe/pG2b6/R7NTZ6xv7PsPjcp0hPBPL4yWol6EhNkOA==
+
+"@swc/core-linux-arm-gnueabihf@1.2.92":
+  version "1.2.92"
+  resolved "https://registry.yarnpkg.com/@swc/core-linux-arm-gnueabihf/-/core-linux-arm-gnueabihf-1.2.92.tgz#60479a3eaa48bbbaf2c791089b6bce7eb997cde4"
+  integrity sha512-VvfiXc/1kOXwNCFgn970mrmPqNJ8z7IMuslmqmHBMwL2YkIeyioD3IG79sBPWImUdfrXC0j8YzGndP14CkIRTw==
+
+"@swc/core-linux-arm64-gnu@1.2.92":
+  version "1.2.92"
+  resolved "https://registry.yarnpkg.com/@swc/core-linux-arm64-gnu/-/core-linux-arm64-gnu-1.2.92.tgz#1a06ed776862ab9d846f7e3f8b3d9afba9940b6d"
+  integrity sha512-6Ij5JiAjDhs9lr8xhaus7JCB5AcOHjmoOOn+JxzYc0+0jE5jTq+dvcvhSrsy4bWiHCaRU0PfnOpxJisKs1wR7Q==
+
+"@swc/core-linux-arm64-musl@1.2.92":
+  version "1.2.92"
+  resolved "https://registry.yarnpkg.com/@swc/core-linux-arm64-musl/-/core-linux-arm64-musl-1.2.92.tgz#ed8d082353b2683cb2fd074338d4eceecdc272ad"
+  integrity sha512-1snvAxGJO+IJFFpNhxkLyxJk8jByyWFYLnjkxQwcv6kZg9peacxVX9awKkgyI9B1STuj06NyGpG9AK/n40aFgQ==
+
+"@swc/core-linux-x64-gnu@1.2.92":
+  version "1.2.92"
+  resolved "https://registry.yarnpkg.com/@swc/core-linux-x64-gnu/-/core-linux-x64-gnu-1.2.92.tgz#a492ca4652eae2c9f7e92623cbf00489fefa751d"
+  integrity sha512-9qX2VXiF0OUP6IeAtcEoejv1BBHPm0EI6HRw6R9CRmr53/BoO2fSpGUPBe748z95rQGuTrGyYfas4jt+Z07CvA==
+
+"@swc/core-linux-x64-musl@1.2.92":
+  version "1.2.92"
+  resolved "https://registry.yarnpkg.com/@swc/core-linux-x64-musl/-/core-linux-x64-musl-1.2.92.tgz#25536870abe86b22ae8e74e3533cc36803e0d75d"
+  integrity sha512-mDihu8X03NLmx7LVtyFv6H3IDRuDZz6fUhwSBsyH/9AOTb7n9Jrnlk8R9iKze+8UeJCCbfxae5Emk7FosxkWHA==
+
+"@swc/core-win32-arm64-msvc@1.2.92":
+  version "1.2.92"
+  resolved "https://registry.yarnpkg.com/@swc/core-win32-arm64-msvc/-/core-win32-arm64-msvc-1.2.92.tgz#107359fdcad1de8a76312e1896d2a02246952625"
+  integrity sha512-O+NTk0Nvl4Btwk6D1ppZS7wU2nMTtu05OjPza8F5b86VIDTI0ZI94KRyHzbG6grSV8b3/TrOurneK9ouxHPCMA==
+
+"@swc/core-win32-ia32-msvc@1.2.92":
+  version "1.2.92"
+  resolved "https://registry.yarnpkg.com/@swc/core-win32-ia32-msvc/-/core-win32-ia32-msvc-1.2.92.tgz#33b914f249abd1aa963d7c1bbcdd245dcc4b9118"
+  integrity sha512-tuIs/VEMZrGfCtQvWFP4ipIinYM/Qg9QhBVMVFCrExzNdJ7nTb15wwd7QFGcOp3ac7OZp+LEkyVhckS1AgpRtg==
+
+"@swc/core-win32-x64-msvc@1.2.92":
+  version "1.2.92"
+  resolved "https://registry.yarnpkg.com/@swc/core-win32-x64-msvc/-/core-win32-x64-msvc-1.2.92.tgz#ed5995c59cbbe1c487106e5da68efe6d947f3c3f"
+  integrity sha512-39CrQQ1e7N6kjD0nBdM0RuDkphW+QKgJSi1zQHn9reiVgQ6bMVIjkSWDF4X2XlWoRMqKp+fmolMFyDcdy0U7tw==
+
+"@swc/core@^1.2.92":
+  version "1.2.92"
+  resolved "https://registry.yarnpkg.com/@swc/core/-/core-1.2.92.tgz#bd42e75823800d77fc175f7c8f74476fa919996f"
+  integrity sha512-JxsLIGQJmYE64FdYS/uTguDqT4fyc7tw/7WQ8b+4jU27ywskDFhtst+6CkENDek9QeCNc99SRv15lC+kB3VyIQ==
+  dependencies:
+    "@node-rs/helper" "^1.0.0"
+  optionalDependencies:
+    "@swc/core-android-arm64" "1.2.92"
+    "@swc/core-darwin-arm64" "1.2.92"
+    "@swc/core-darwin-x64" "1.2.92"
+    "@swc/core-freebsd-x64" "1.2.92"
+    "@swc/core-linux-arm-gnueabihf" "1.2.92"
+    "@swc/core-linux-arm64-gnu" "1.2.92"
+    "@swc/core-linux-arm64-musl" "1.2.92"
+    "@swc/core-linux-x64-gnu" "1.2.92"
+    "@swc/core-linux-x64-musl" "1.2.92"
+    "@swc/core-win32-arm64-msvc" "1.2.92"
+    "@swc/core-win32-ia32-msvc" "1.2.92"
+    "@swc/core-win32-x64-msvc" "1.2.92"
+
+"@swc/jest@^0.2.4":
+  version "0.2.4"
+  resolved "https://registry.yarnpkg.com/@swc/jest/-/jest-0.2.4.tgz#dbbda1511faa96dcf5d768b8d182ddabe3d6f72a"
+  integrity sha512-+50IX4juKZUK3j/J6FTDFiI+upAlfbbxgVM4dkt0bx3m4njFat1z+f2pqwAj7BvhK5XFiBMpVQ6dVgvZKUHKgw==
 
 "@szmarczak/http-timer@^1.1.2":
   version "1.1.2"
@@ -2802,13 +2888,6 @@ browserslist@^4.16.6:
     escalade "^3.1.1"
     node-releases "^1.1.71"
 
-bs-logger@0.x:
-  version "0.2.6"
-  resolved "https://registry.yarnpkg.com/bs-logger/-/bs-logger-0.2.6.tgz#eb7d365307a72cf974cc6cda76b68354ad336bd8"
-  integrity sha512-pd8DCoxmbgc7hyPKOvxtqNcjYoOsABPQdcCUjGp3d42VR2CX1ORhk2A87oqqu5R1kk+76nsxZupkmyd+MVtCog==
-  dependencies:
-    fast-json-stable-stringify "2.x"
-
 bser@2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/bser/-/bser-2.1.1.tgz#e6787da20ece9d07998533cfd9de6f5c38f4bc05"
@@ -3855,14 +3934,6 @@ end-of-stream@^1.1.0, end-of-stream@^1.4.1:
   dependencies:
     once "^1.4.0"
 
-enhanced-resolve@^5.8.2:
-  version "5.8.2"
-  resolved "https://registry.yarnpkg.com/enhanced-resolve/-/enhanced-resolve-5.8.2.tgz#15ddc779345cbb73e97c611cd00c01c1e7bf4d8b"
-  integrity sha512-F27oB3WuHDzvR2DOGNTaYy0D5o0cnrv8TeI482VM4kYgQd/FT9lUQwuNsJ0oOHtBUq7eiW5ytqzp7nBFknL+GA==
-  dependencies:
-    graceful-fs "^4.2.4"
-    tapable "^2.2.0"
-
 enhanced-resolve@^5.8.3:
   version "5.8.3"
   resolved "https://registry.yarnpkg.com/enhanced-resolve/-/enhanced-resolve-5.8.3.tgz#6d552d465cce0423f5b3d718511ea53826a7b2f0"
@@ -4438,7 +4509,7 @@ fast-glob@^3.0.3, fast-glob@^3.1.1:
     micromatch "^4.0.2"
     picomatch "^2.2.1"
 
-fast-json-stable-stringify@2.x, fast-json-stable-stringify@^2.0.0:
+fast-json-stable-stringify@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/fast-json-stable-stringify/-/fast-json-stable-stringify-2.1.0.tgz#874bf69c6f404c2b5d99c481341399fd55892633"
   integrity sha512-lhd/wF+Lk98HZoTCtlVraHtfh5XYijIjalXck7saUtuanSDyLMxnHhSXEDJqHxD7msR8D0uCmqlkwjCV8xvwHw==
@@ -6393,18 +6464,6 @@ jest-snapshot@^27.1.1:
     pretty-format "^27.1.1"
     semver "^7.3.2"
 
-jest-util@^27.0.0:
-  version "27.0.2"
-  resolved "https://registry.yarnpkg.com/jest-util/-/jest-util-27.0.2.tgz#fc2c7ace3c75ae561cf1e5fdb643bf685a5be7c7"
-  integrity sha512-1d9uH3a00OFGGWSibpNYr+jojZ6AckOMCXV2Z4K3YXDnzpkAaXQyIpY14FOJPiUmil7CD+A6Qs+lnnh6ctRbIA==
-  dependencies:
-    "@jest/types" "^27.0.2"
-    "@types/node" "*"
-    chalk "^4.0.0"
-    graceful-fs "^4.2.4"
-    is-ci "^3.0.0"
-    picomatch "^2.2.3"
-
 jest-util@^27.1.1:
   version "27.1.1"
   resolved "https://registry.yarnpkg.com/jest-util/-/jest-util-27.1.1.tgz#2b06db1391d779ec2bd406ab3690ddc56ac728b9"
@@ -6605,7 +6664,7 @@ json-stringify-safe@~5.0.1:
   resolved "https://registry.yarnpkg.com/json-stringify-safe/-/json-stringify-safe-5.0.1.tgz#1296a2d58fd45f19a0f6ce01d65701e2c735b6eb"
   integrity sha1-Epai1Y/UXxmg9s4B1lcB4sc1tus=
 
-json5@2.x, json5@^2.1.2:
+json5@^2.1.2:
   version "2.1.3"
   resolved "https://registry.yarnpkg.com/json5/-/json5-2.1.3.tgz#c9b0f7fa9233bfe5807fe66fcf3a5617ed597d43"
   integrity sha512-KXPvOm8K9IJKFM0bmdn8QXh7udDh1g/giieX0NLCaMnb4hEiVFqnop2ImTXCc5e0/oHz3LTqmHGtExn5hfMkOA==
@@ -6973,15 +7032,15 @@ lodash.values@^2.4.1:
   dependencies:
     lodash.keys "~2.4.1"
 
-lodash@4.x, lodash@^4.17.21, lodash@^4.7.0:
-  version "4.17.21"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
-  integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
-
 lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.14, lodash@^4.17.19, lodash@^4.17.5:
   version "4.17.19"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.19.tgz#e48ddedbe30b3321783c5b4301fbd353bc1e4a4b"
   integrity sha512-JNvd8XER9GQX0v2qJgsaN/mzFCNA5BRe/j8JN9d+tWyGLSodKQHKFicdwNYzWwI3wjRnaKPsGj1XkBjx/F96DQ==
+
+lodash@^4.17.21, lodash@^4.7.0:
+  version "4.17.21"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
+  integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
 
 log-symbols@^2.2.0:
   version "2.2.0"
@@ -7079,7 +7138,7 @@ make-dir@^3.0.0:
   dependencies:
     semver "^6.0.0"
 
-make-error@1.x, make-error@^1.1.1:
+make-error@^1.1.1:
   version "1.3.6"
   resolved "https://registry.yarnpkg.com/make-error/-/make-error-1.3.6.tgz#2eb2e37ea9b67c4891f684a1394799af484cf7a2"
   integrity sha512-s8UhlNe7vPKomQhC1qFelMokr/Sc3AgNbso3n74mVPA5LTZwkB9NlXf4XPamLxJE8h0gh73rM94xvwRT2CVInw==
@@ -8867,15 +8926,15 @@ semver-diff@^3.1.1:
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.7.1.tgz#a954f931aeba508d307bbf069eff0c01c96116f7"
   integrity sha512-sauaDf/PZdVgrLTNYHRtpXa1iRiKcaebiKQ1BJdpQlWH2lCvexQdX55snPFyK7QzpudqbCI0qXFfOasHdyNDGQ==
 
-semver@7.x, semver@^7.0.0, semver@^7.1.3, semver@^7.2.1, semver@^7.3.2:
-  version "7.3.2"
-  resolved "https://registry.yarnpkg.com/semver/-/semver-7.3.2.tgz#604962b052b81ed0786aae84389ffba70ffd3938"
-  integrity sha512-OrOb32TeeambH6UrhtShmF7CRDqhL6/5XpPNp2DuRH6+9QLw/orhp72j87v8Qa1ScDkvrrBNpZcDejAirJmfXQ==
-
 semver@^6.0.0, semver@^6.2.0, semver@^6.3.0:
   version "6.3.0"
   resolved "https://registry.yarnpkg.com/semver/-/semver-6.3.0.tgz#ee0a64c8af5e8ceea67687b133761e1becbd1d3d"
   integrity sha512-b39TBaTSfV6yBrapU89p5fKekE2m/NwnDocOVruQFS1/veMgdzuPcnOM34M6CwxW8jH/lxEa5rBoDeUwu5HHTw==
+
+semver@^7.0.0, semver@^7.1.3, semver@^7.2.1, semver@^7.3.2:
+  version "7.3.2"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-7.3.2.tgz#604962b052b81ed0786aae84389ffba70ffd3938"
+  integrity sha512-OrOb32TeeambH6UrhtShmF7CRDqhL6/5XpPNp2DuRH6+9QLw/orhp72j87v8Qa1ScDkvrrBNpZcDejAirJmfXQ==
 
 semver@^7.3.4, semver@^7.3.5:
   version "7.3.5"
@@ -9685,20 +9744,6 @@ trough@^1.0.0:
   resolved "https://registry.yarnpkg.com/trough/-/trough-1.0.5.tgz#b8b639cefad7d0bb2abd37d433ff8293efa5f406"
   integrity sha512-rvuRbTarPXmMb79SmzEp8aqXNKcK+y0XaB298IXueQ8I2PsrATcPBCSPyK/dDNa2iWOhKlfNnOjdAOTBU/nkFA==
 
-ts-jest@^27.0.5:
-  version "27.0.5"
-  resolved "https://registry.yarnpkg.com/ts-jest/-/ts-jest-27.0.5.tgz#0b0604e2271167ec43c12a69770f0bb65ad1b750"
-  integrity sha512-lIJApzfTaSSbtlksfFNHkWOzLJuuSm4faFAfo5kvzOiRAuoN4/eKxVJ2zEAho8aecE04qX6K1pAzfH5QHL1/8w==
-  dependencies:
-    bs-logger "0.x"
-    fast-json-stable-stringify "2.x"
-    jest-util "^27.0.0"
-    json5 "2.x"
-    lodash "4.x"
-    make-error "1.x"
-    semver "7.x"
-    yargs-parser "20.x"
-
 ts-node@^10.2.1:
   version "10.2.1"
   resolved "https://registry.yarnpkg.com/ts-node/-/ts-node-10.2.1.tgz#4cc93bea0a7aba2179497e65bb08ddfc198b3ab5"
@@ -10361,11 +10406,6 @@ yaml@^1.10.0:
   version "1.10.2"
   resolved "https://registry.yarnpkg.com/yaml/-/yaml-1.10.2.tgz#2301c5ffbf12b467de8da2333a459e29e7920e4b"
   integrity sha512-r3vXyErRCYJ7wg28yvBY5VSoAF8ZvlcW9/BwUzEtUsjvX/DKs24dIkuwjtuprwJJHsbyUbLApepYTR1BN4uHrg==
-
-yargs-parser@20.x:
-  version "20.2.4"
-  resolved "https://registry.yarnpkg.com/yargs-parser/-/yargs-parser-20.2.4.tgz#b42890f14566796f85ae8e3a25290d205f154a54"
-  integrity sha512-WOkpgNhPTlE73h4VFAFsOnomJVaovO8VqLDzy5saChRBFQFBoMYirowyW+Q9HB4HFF4Z7VZTiG3iSzJJA29yRA==
 
 yargs-parser@^20.2.2, yargs-parser@^20.2.3:
   version "20.2.9"

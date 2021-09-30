@@ -53,10 +53,8 @@ export const buildFunctionExportContent = async (
     subdirs.map(async ({ dirname, files }) => {
       const imports = await Promise.all(
         files.map(async (filename) => {
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
-          const _mod = await import(
-            join(relative(__dirname, baseDir), dirname, filename)
-          )
+          const modPath = join(relative(__dirname, baseDir), dirname, filename)
+          const _mod = await import(modPath)
           const _modKeys = Object.keys(_mod)
           const mod =
             _modKeys.length === 1 && _modKeys[0] === 'default'

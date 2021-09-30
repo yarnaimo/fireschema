@@ -8,36 +8,36 @@
   "exports": {
     ".": {
       "node": {
-        "import": "./esm/index.js",
-        "require": "./dist/index.cjs"
+        "import": "./esm/src/index.js",
+        "require": "./dist/src/index.cjs"
       },
-      "default": "./esm/index.js"
+      "default": "./esm/src/index.js"
     },
     "./admin": {
       "node": {
-        "import": "./esm/admin/index.js",
-        "require": "./dist/admin/index.cjs"
+        "import": "./esm/src/admin/index.js",
+        "require": "./dist/src/admin/index.cjs"
       },
-      "default": "./esm/admin/index.js"
+      "default": "./esm/src/admin/index.js"
     },
     "./hooks": {
       "node": {
-        "import": "./esm/hooks/index.js",
-        "require": "./dist/hooks/index.cjs"
+        "import": "./esm/src/hooks/index.js",
+        "require": "./dist/src/hooks/index.cjs"
       },
-      "default": "./esm/hooks/index.js"
+      "default": "./esm/src/hooks/index.js"
     }
   },
-  "main": "./dist/index.cjs",
-  "types": "./esm/index.d.ts",
-  "bin": "./esm/bin/main.js",
+  "main": "./dist/src/index.cjs",
+  "types": "./esm/src/index.d.ts",
+  "bin": "./esm/src/bin/main.js",
   "scripts": {
-    "build": "tsc -P tsconfig.cjs.json && cp src/lib/*.d.ts dist/lib/ && renamer --silent --force --find js --replace cjs 'dist/**' && ./scripts/after-build-cjs.sh",
-    "build:esm": "tsc && cp src/lib/*.d.ts esm/lib/ && ./scripts/after-build-esm.sh",
+    "build": "tsc -P tsconfig.cjs.json && cp src/lib/*.d.ts dist/src/lib/ && renamer --silent --force --find js --replace cjs 'dist/**' && ./scripts/after-build-cjs.sh",
+    "build:esm": "tsc && cp src/lib/*.d.ts esm/src/lib/ && ./scripts/after-build-esm.sh",
     "debug": "node --inspect -r ts-node/register",
     "docs": "./scripts/update-docs.sh",
-    "firestore:rules": "./esm/bin/main.js rules src/example/1-1-schema.ts",
-    "functions:export": "./esm/bin/main.js export src/__tests__/_functions",
+    "firestore:rules": "./esm/src/bin/main.js rules src/example/1-1-schema.ts",
+    "functions:export": "./esm/src/bin/main.js export src/__tests__/_functions",
     "lint": "eslint --ignore-path .gitignore '**/*.{js,jsx,ts,tsx}'",
     "prepare": "./scripts/append-emulator-proxyer.sh",
     "serve": "yarn build && firebase emulators:start --only firestore,functions,pubsub",
@@ -63,6 +63,8 @@
     "@arkweid/lefthook": "^0.7.6",
     "@google-cloud/pubsub": "^2.17.0",
     "@sindresorhus/tsconfig": "^1.0.2",
+    "@swc/core": "^1.2.92",
+    "@swc/jest": "^0.2.4",
     "@testing-library/react-hooks": "^7.0.2",
     "@types/express": "4.17.13",
     "@types/jest": "^27.0.1",
@@ -85,7 +87,6 @@
     "react-test-renderer": "^17.0.2",
     "renamer": "^4.0.0",
     "sort-package-json": "^1.50.0",
-    "ts-jest": "^27.0.5",
     "ts-node": "^10.2.1",
     "tsd": "^0.17.0",
     "typescript": "^4.4.2",

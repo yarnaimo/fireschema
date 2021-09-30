@@ -1,7 +1,7 @@
 {
   "private": true,
   "type": "module",
-  "main": "../dist/admin/index.cjs",
-  "module": "../esm/admin/index.js",
-  "types": "../esm/admin/index.d.ts"
+  "main": "../dist/src/admin/index.cjs",
+  "module": "../esm/src/admin/index.js",
+  "types": "../esm/src/admin/index.d.ts"
 }
