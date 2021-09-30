@@ -14,5 +14,4 @@ jobs:
           cache: yarn
       - run: yarn global add firebase-tools
       - run: yarn install
-      - run: yarn build
       - run: yarn test:all
