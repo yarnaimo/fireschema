@@ -25,5 +25,8 @@ export default /** @type {import('@jest/types').Config.InitialOptions} */ ({
   },
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
   transformIgnorePatterns: [`node_modules/(?!${esmPackages.join('|')})`],
-  resolver: '@yarnaimo/jest-ts-resolver',
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
+  resolver: '@yarnaimo/jest-esm-resolver',
 })
