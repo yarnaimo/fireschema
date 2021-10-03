@@ -1,5 +1,6 @@
 import { PubSub } from '@google-cloud/pubsub'
 import { connectFunctionsEmulator } from 'firebase/functions'
+
 import { TypedCaller, TypedTopic } from '../../index.js'
 import { getTestAppWeb } from './_app.js'
 import { emulatorConfig, localhost, projectId } from './_config.js'

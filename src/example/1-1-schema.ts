@@ -1,11 +1,12 @@
 import { Merge } from 'type-fest'
 import { z } from 'zod'
+
 import {
   $and,
   $or,
   DataModel,
-  docPath,
   FirestoreModel,
+  docPath,
   timestampType,
 } from '../index.js'
 

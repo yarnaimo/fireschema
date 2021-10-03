@@ -1,5 +1,6 @@
 import { expectType } from 'tsd'
 import { z } from 'zod'
+
 import { _schemaToRule } from '../../core/firestore/_renderer/transformer.js'
 import { timestampType } from '../../core/index.js'
 

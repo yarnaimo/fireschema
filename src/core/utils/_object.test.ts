@@ -1,4 +1,5 @@
 import { expectType } from 'tsd'
+
 import {
   getDeep,
   getLastSegment,

@@ -1,9 +1,9 @@
-import { FTypes, STypes } from '../../types/index.js'
 import {
   GetSchemaOptionsByLoc,
   JoinLoc,
   KeysWithoutDocLabel,
 } from '../../types/_object.js'
+import { FTypes, STypes } from '../../types/index.js'
 import { joinLoc } from '../../utils/_object.js'
 import { TypedCollectionRef, TypedQueryRef } from './TypedCollectionRef.js'
 import { FirestoreStatic } from './_static.js'

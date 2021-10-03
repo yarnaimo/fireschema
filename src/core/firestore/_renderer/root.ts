@@ -1,7 +1,7 @@
 import { _createdAt, _updatedAt } from '../../constants/index.js'
 import { STypes } from '../../types/index.js'
-import { $$or, $and } from '../../utils/index.js'
 import { join } from '../../utils/_string.js'
+import { $$or, $and } from '../../utils/index.js'
 import { FirestoreModel } from '../model.js'
 import { renderCollectionGroups, renderCollections } from './collections.js'
 import { validatorDef } from './format.js'

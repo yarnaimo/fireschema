@@ -1,11 +1,12 @@
 import { P } from 'lifts'
+
 import { R } from '../../../lib/fp.js'
-import { FTypes, STypes } from '../../types/index.js'
 import {
   GetSchemaOptionsByLoc,
   JoinLoc,
   OmitLastSegment,
 } from '../../types/_object.js'
+import { FTypes, STypes } from '../../types/index.js'
 import {
   getLastSegment,
   getSchemaOptionsByLoc,
@@ -18,7 +19,7 @@ import {
 } from './TypedDocumentRef.js'
 import { withDecoder } from './_query-cache.js'
 import { FirestoreStatic } from './_static.js'
-import { docUniv, getDocsUniv, GetSource, queryUniv } from './_universal.js'
+import { GetSource, docUniv, getDocsUniv, queryUniv } from './_universal.js'
 
 export class TypedQuerySnap<
   S extends STypes.RootOptions.All,

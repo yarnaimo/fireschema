@@ -1,4 +1,5 @@
 import React from 'react'
+
 import { useTypedDocument, useTypedQuery } from '../hooks/index.js'
 import { typedFirestore } from './1-3-typed-firestore.js'
 

@@ -1,12 +1,14 @@
 import {
-  collection,
-  collectionGroup,
   CollectionReference,
-  deleteDoc,
-  doc,
   DocumentReference,
   DocumentSnapshot,
   Firestore,
+  Query,
+  QueryConstraint,
+  collection,
+  collectionGroup,
+  deleteDoc,
+  doc,
   getDoc,
   getDocFromCache,
   getDocFromServer,
@@ -14,8 +16,6 @@ import {
   getDocsFromCache,
   getDocsFromServer,
   query,
-  Query,
-  QueryConstraint,
   queryEqual,
   refEqual,
   runTransaction,
@@ -23,13 +23,14 @@ import {
   updateDoc,
   writeBatch,
 } from 'firebase/firestore'
+
 import { FTypes } from '../../types/index.js'
 import {
-  queryAdmin,
   QueryBuilder,
+  QueryConstraintAdmin,
+  queryAdmin,
   queryBuilderAdmin,
   queryBuilderWeb,
-  QueryConstraintAdmin,
 } from './_query.js'
 
 export const collectionUniv = (

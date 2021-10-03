@@ -1,4 +1,5 @@
 import { QueryConstraint } from 'firebase/firestore'
+
 import { Type } from '../../lib/type.js'
 import { QueryBuilder } from '../firestore/controller/_query.js'
 import { FirestoreStatic } from '../firestore/controller/_static.js'

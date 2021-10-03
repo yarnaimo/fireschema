@@ -1,7 +1,9 @@
-import type { Attributes, PubSub } from '@google-cloud/pubsub'
 import { z } from 'zod'
-import { FunTypes } from '../../types/index.js'
+
 import { ExtractTopicNames, GetTopicMeta } from '../../types/_functions.js'
+import { FunTypes } from '../../types/index.js'
+
+import type { Attributes, PubSub } from '@google-cloud/pubsub'
 
 export class TypedTopic<M extends FunTypes.FunctionsModule> {
   constructor(readonly pubSubClient: PubSub) {}

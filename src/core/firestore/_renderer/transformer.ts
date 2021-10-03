@@ -1,6 +1,5 @@
 import { P } from 'lifts'
 import {
-  z,
   ZodAny,
   ZodArray,
   ZodBoolean,
@@ -16,7 +15,9 @@ import {
   ZodUndefined,
   ZodUnion,
   ZodUnknown,
+  z,
 } from 'zod'
+
 import { R } from '../../../lib/fp.js'
 import { is } from '../../../lib/type.js'
 import { ZodTimestamp } from '../../types/SchemaType.js'

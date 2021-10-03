@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app' // or firebase-admin
 import { initializeFirestore } from 'firebase/firestore'
+
 import { TypedFirestoreWeb } from '../index.js'
 import { firestoreModel } from './1-1-schema.js'
 

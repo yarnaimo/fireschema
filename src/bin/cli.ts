@@ -1,4 +1,5 @@
 import getopts from 'getopts'
+
 import { exportFunctions } from './commands/export.js'
 import { generateRules } from './commands/rules.js'
 

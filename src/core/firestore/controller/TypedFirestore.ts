@@ -1,6 +1,5 @@
-import type { Firestore } from 'firebase/firestore'
-import { FTypes, STypes } from '../../types/index.js'
 import { KeysWithoutDocLabel, SchemaLoc } from '../../types/_object.js'
+import { FTypes, STypes } from '../../types/index.js'
 import { firestorePathToLoc } from '../../utils/_firestore.js'
 import { FirestoreModel, InferFirestoreModelS } from '../model.js'
 import { TypedQueryRef } from './TypedCollectionRef.js'
@@ -14,6 +13,8 @@ import {
   runTransactionUniv,
   writeBatchUniv,
 } from './_universal.js'
+
+import type { Firestore } from 'firebase/firestore'
 
 export class TypedFirestoreUniv<
   M extends FirestoreModel<STypes.RootOptions.All>,

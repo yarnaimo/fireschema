@@ -1,8 +1,9 @@
 import { EntriesStrict, P } from 'lifts'
+
 import { R } from '../../../lib/fp.js'
-import { allowOptions, STypes } from '../../types/index.js'
+import { STypes, allowOptions } from '../../types/index.js'
+import { _, join } from '../../utils/_string.js'
 import { $and } from '../../utils/index.js'
-import { join, _ } from '../../utils/_string.js'
 import { DataModel } from '../model.js'
 import { addValidatorIndex, validatorCall, validatorDef } from './format.js'
 import { renderFunctions } from './functions.js'

@@ -3,10 +3,10 @@ import { TypedCollectionRef } from './TypedCollectionRef.js'
 import { TypedFDBase } from './TypedFDBase.js'
 import { FirestoreStatic } from './_static.js'
 import {
+  GetSource,
   deleteDocUniv,
   existsUniv,
   getDocUniv,
-  GetSource,
   setDocUniv,
   updateDocUniv,
 } from './_universal.js'

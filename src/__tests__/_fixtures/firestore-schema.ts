@@ -1,6 +1,7 @@
 import { expectType } from 'tsd'
 import { z } from 'zod'
-import { docPath, FirestoreModel, timestampType } from '../../core/index.js'
+
+import { FirestoreModel, docPath, timestampType } from '../../core/index.js'
 import { $or, DataModel, FTypes } from '../../index.js'
 import { Type } from '../../lib/type.js'
 

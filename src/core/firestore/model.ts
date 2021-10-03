@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import { SchemaType, STypes } from '../types/index.js'
+
+import { STypes, SchemaType } from '../types/index.js'
 
 type GetU<S extends SchemaType._DocData, D> = D extends STypes.Model.Decoder<
   any,

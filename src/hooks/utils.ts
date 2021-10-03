@@ -7,6 +7,7 @@ import {
   refEqual,
 } from 'firebase/firestore'
 import { useEffect, useRef } from 'react'
+
 import { _web } from '../lib/firestore-types'
 
 export type HasGetOptions = {

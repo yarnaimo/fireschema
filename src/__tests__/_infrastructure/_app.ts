@@ -8,9 +8,10 @@ import {
 import { getFirestore as getFirestoreAdmin } from 'firebase-admin/firestore'
 import firebase from 'firebase/compat/app'
 import 'firebase/compat/firestore'
-import { connectFirestoreEmulator, Firestore } from 'firebase/firestore'
+import { Firestore, connectFirestoreEmulator } from 'firebase/firestore'
 import got from 'got'
 import { MapAsync } from 'lifts'
+
 import { renderSchema } from '../../core/firestore/_renderer/root.js'
 import { firestoreModel } from '../_fixtures/firestore-schema.js'
 import { emulatorConfig, localhost, projectId } from './_config.js'

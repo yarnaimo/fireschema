@@ -1,7 +1,7 @@
 import { FTypes, STypes } from '../../types/index.js'
 import { TypedDocumentRef } from './TypedDocumentRef.js'
 import { FirestoreStatic } from './_static.js'
-import { docAsAdmin, docAsWeb, DocDataHelper } from './_utils.js'
+import { DocDataHelper, docAsAdmin, docAsWeb } from './_utils.js'
 
 export class TypedWriteBatch<
   S extends STypes.RootOptions.All,

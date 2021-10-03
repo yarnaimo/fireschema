@@ -1,5 +1,6 @@
 import * as firestore from 'firebase-admin/firestore'
 import { Firestore } from 'firebase-admin/firestore'
+
 import { STypes } from '../../types/index.js'
 import { FirestoreModel, InferFirestoreModelS } from '../model.js'
 import { TypedFirestoreUniv } from './TypedFirestore.js'

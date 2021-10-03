@@ -1,5 +1,6 @@
 import { firestore } from 'firebase-admin'
 import functionsTest from 'firebase-functions-test'
+
 import { firestoreStaticWeb } from '../../core/firestore/controller/_static.js'
 import { createUserData, postAData } from '../_fixtures/data.js'
 import { decodeUser } from '../_fixtures/firestore-schema.js'

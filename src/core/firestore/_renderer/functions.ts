@@ -1,4 +1,5 @@
 import { EntriesStrict, P } from 'lifts'
+
 import { R } from '../../../lib/fp.js'
 import { STypes } from '../../types/index.js'
 import { _ } from '../../utils/_string.js'

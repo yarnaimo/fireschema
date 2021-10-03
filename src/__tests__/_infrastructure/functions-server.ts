@@ -1,19 +1,20 @@
 import * as functions from 'firebase-functions'
 import { expectType } from 'tsd'
 import { z } from 'zod'
+
 import { TypedFunctions } from '../../admin/index.js'
-import { FunTypes, messages, STypes } from '../../index.js'
+import { FunTypes, STypes, messages } from '../../index.js'
 import { _admin } from '../../lib/firestore-types'
 import { _fadmin } from '../../lib/functions-types'
 import { Type } from '../../lib/type.js'
 import {
-  firestoreModel,
   IPostA,
   IPostB,
   IUser,
   IUserJson,
   IUserLocal,
   UserJsonType,
+  firestoreModel,
 } from '../_fixtures/firestore-schema.js'
 import { region } from './_config.js'
 

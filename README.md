@@ -78,12 +78,13 @@ The schema definition must be default exported.
 ```ts
 import { Merge } from 'type-fest'
 import { z } from 'zod'
+
 import {
   $and,
   $or,
   DataModel,
-  docPath,
   FirestoreModel,
+  docPath,
   timestampType,
 } from 'fireschema'
 
@@ -272,6 +273,7 @@ The Firestore interface of Fireschema supports both **Web SDK and Admin SDK**.
 ```ts
 import { initializeApp } from 'firebase/app' // or firebase-admin
 import { initializeFirestore } from 'firebase/firestore'
+
 import { TypedFirestoreWeb } from 'fireschema'
 import { firestoreModel } from './1-1-schema.js'
 
@@ -389,6 +391,7 @@ const techPostsGroup = typedFirestore.collectionGroupQuery(
 
 ```tsx
 import React from 'react'
+
 import { useTypedDocument, useTypedQuery } from 'fireschema/hooks'
 import { typedFirestore } from './1-3-typed-firestore.js'
 
@@ -441,8 +444,9 @@ export const UserComponent = ({ id }: { id: string }) => {
 ```ts
 import * as functions from 'firebase-functions'
 import { z } from 'zod'
+
 import { TypedFunctions } from 'fireschema/admin'
-import { firestoreModel, UserType } from './1-1-schema.js'
+import { UserType, firestoreModel } from './1-1-schema.js'
 
 /**
  * Initialize TypedFunctions
@@ -530,6 +534,7 @@ Automatically provide types to request/response data based on passed functions m
 import { initializeApp } from 'firebase/app'
 import { getFunctions } from 'firebase/functions'
 import React from 'react'
+
 import { TypedCaller } from 'fireschema'
 
 type FunctionsModule = typeof import('./2-1-typed-functions.js')

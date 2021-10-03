@@ -1,6 +1,7 @@
 import { renderHook } from '@testing-library/react-hooks'
 import { typeExtends } from '@yarnaimo/type-extends'
 import { expectType } from 'tsd'
+
 import { TypedFirestoreAdmin } from '../../core/firestore/controller/_TypedFirestoreAdmin.js'
 import {
   collectionUniv,
@@ -24,9 +25,9 @@ import {
   TypedQueryDocumentSnap,
   TypedQueryRef,
   TypedQuerySnap,
-  withRefTransformer,
   _createdAt,
   _updatedAt,
+  withRefTransformer,
 } from '../../core/index.js'
 import {
   useTypedDocument,
@@ -37,13 +38,13 @@ import {
 import { R } from '../../lib/fp.js'
 import { createUserData, postAData } from '../_fixtures/data.js'
 import {
-  firestoreModel,
   IPostA,
   IPostB,
   IUser,
   IUserLocal,
   PostModel,
   UserModel,
+  firestoreModel,
 } from '../_fixtures/firestore-schema.js'
 import {
   assertFails,

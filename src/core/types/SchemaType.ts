@@ -8,6 +8,7 @@ import {
   ZodType,
   ZodUnion,
 } from 'zod'
+
 import { FTypes } from './index.js'
 
 export namespace SchemaType {

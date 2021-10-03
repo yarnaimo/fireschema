@@ -5,7 +5,7 @@ import {
   TypedDocumentSnap,
 } from './TypedDocumentRef.js'
 import { FirestoreStatic } from './_static.js'
-import { docAsAdmin, docAsWeb, DocDataHelper } from './_utils.js'
+import { DocDataHelper, docAsAdmin, docAsWeb } from './_utils.js'
 
 export class TypedTransaction<
   S extends STypes.RootOptions.All,

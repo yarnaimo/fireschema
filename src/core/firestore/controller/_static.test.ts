@@ -1,4 +1,5 @@
 import * as firestore from 'firebase-admin/firestore'
+
 import { createFirestoreStaticAdmin } from './_static.js'
 
 const name = (instance: any) => instance.constructor.name
