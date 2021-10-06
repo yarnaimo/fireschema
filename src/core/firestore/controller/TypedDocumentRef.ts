@@ -1,7 +1,7 @@
 import { FTypes, STypes } from '../../types/index.js'
+import { TypedConstructorOptions } from './ConstructorOptions.js'
 import { TypedCollectionRef } from './TypedCollectionRef.js'
 import { TypedFDBase } from './TypedFDBase.js'
-import { FirestoreStatic } from './_static.js'
 import {
   GetSource,
   deleteDocUniv,
@@ -70,11 +70,7 @@ export class TypedDocumentSnap<
   readonly id: string
 
   constructor(
-    readonly options: {
-      schemaOptions: S
-      firestoreStatic: FirestoreStatic<F>
-      loc: L
-    },
+    readonly options: TypedConstructorOptions<S, F, L>,
     readonly raw: FTypes.DocumentSnap<U, F>,
   ) {
     this.id = raw.id
@@ -107,11 +103,7 @@ export class TypedQueryDocumentSnap<
   U = STypes.DocDataAt<S, F, L>,
 > extends TypedDocumentSnap<S, F, L, U> {
   constructor(
-    readonly options: {
-      schemaOptions: S
-      firestoreStatic: FirestoreStatic<F>
-      loc: L
-    },
+    readonly options: TypedConstructorOptions<S, F, L>,
     readonly raw: FTypes.QueryDocumentSnap<U, F>,
   ) {
     super(options, raw)
@@ -139,11 +131,7 @@ export class TypedDocumentRef<
   )
 
   constructor(
-    readonly options: {
-      schemaOptions: S
-      firestoreStatic: FirestoreStatic<F>
-      loc: L
-    },
+    readonly options: TypedConstructorOptions<S, F, L>,
     readonly raw: FTypes.DocumentRef<U, F>,
   ) {
     super(options, raw)

@@ -33,21 +33,23 @@ export const addQueryCache = (
   queryCache[collectionName] = newQueries
 }
 
-export const withDecoder =
-  (model: DataModel<any, any, any>, collectionName: string) =>
-  <F extends FTypes.FirestoreApp>(rawQuery: FTypes.Query<F>) => {
-    const { decoder } = model
+export const withDecoder = <F extends FTypes.FirestoreApp>(
+  rawQuery: FTypes.Query<any, F>,
+  model: DataModel<any, any, any>,
+  collectionName: string,
+) => {
+  const { decoder } = model
 
-    const cachedQuery = findCachedQuery(collectionName, rawQuery)
-    if (cachedQuery) {
-      return cachedQuery
-    }
-
-    const convertedQuery = (rawQuery.withConverter as any)(
-      createConverter(decoder),
-    ) as FTypes.Query<F>
-
-    addQueryCache(collectionName, rawQuery, convertedQuery)
-
-    return convertedQuery
+  const cachedQuery = findCachedQuery(collectionName, rawQuery)
+  if (cachedQuery) {
+    return cachedQuery as FTypes.Query<any, F>
   }
+
+  const convertedQuery = (rawQuery.withConverter as any)(
+    createConverter(decoder),
+  ) as FTypes.Query<any, F>
+
+  addQueryCache(collectionName, rawQuery, convertedQuery)
+
+  return convertedQuery
+}

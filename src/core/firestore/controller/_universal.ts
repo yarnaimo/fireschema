@@ -28,6 +28,7 @@ import { FTypes } from '../../types/index.js'
 import {
   QueryBuilder,
   QueryConstraintAdmin,
+  QueryConstraintUniv,
   queryAdmin,
   queryBuilderAdmin,
   queryBuilderWeb,
@@ -138,10 +139,8 @@ export const getDocsUniv = async (raw: FTypes.Query<any>, from: GetSource) => {
 
 export const queryUniv = (
   raw: FTypes.Query<any>,
-  fn: (q: QueryBuilder<string>) => (QueryConstraint | QueryConstraintAdmin)[],
+  constraints: QueryConstraintUniv[],
 ) => {
-  const constraints = fn(queryBuilderUniv(raw))
-
   if (raw instanceof Query) {
     return query(raw, ...(constraints as QueryConstraint[]))
   } else {
@@ -150,9 +149,17 @@ export const queryUniv = (
 }
 
 export const queryBuilderUniv = (raw: FTypes.Query<any>) => {
-  return raw instanceof Query
+  return raw instanceof Query || raw instanceof CollectionReference
     ? queryBuilderWeb
     : (queryBuilderAdmin as unknown as QueryBuilder<string>)
+}
+
+export const buildQueryUniv = (
+  raw: FTypes.Query<any>,
+  fn: (q: QueryBuilder<string>) => QueryConstraintUniv[],
+) => {
+  const constraints = fn(queryBuilderUniv(raw))
+  return queryUniv(raw, constraints)
 }
 
 export const refEqualUniv = <

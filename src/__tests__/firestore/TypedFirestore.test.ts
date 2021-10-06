@@ -4,13 +4,13 @@ import { expectType } from 'tsd'
 
 import { TypedFirestoreAdmin } from '../../core/firestore/controller/_TypedFirestoreAdmin.js'
 import {
+  buildQueryUniv,
   collectionUniv,
   docFromRootUniv,
   docUniv,
   existsUniv,
   getDocUniv,
   queryEqualUniv,
-  queryUniv,
   refEqualUniv,
   setDocUniv,
   updateDocUniv,
@@ -85,19 +85,15 @@ const _tcollections = (app: F, env: Env) => {
     )
   })
   const users = v1.collection('users')
-  const teenUsers = v1.collectionQuery('users', (q) => q.teen())
-  const usersOrderedById = v1.collectionQuery('users', (q) => q.orderById())
+  const teenUsers = v1.collection('users').select.teen()
+  const usersOrderedById = users.select.orderById()
   const user = users.doc('user')
 
   const posts = user.collection('posts')
   const post = posts.doc('post')
 
   const usersGroup = typedFirestore.collectionGroup('users', 'versions.users')
-  const teenUsersGroup = typedFirestore.collectionGroupQuery(
-    'users',
-    'versions.users',
-    (q) => q.teen(),
-  )
+  const teenUsersGroup = usersGroup.select.teen()
 
   return {
     typedFirestore,
@@ -185,7 +181,7 @@ for (const env of ['web', 'admin'] as const) {
       test('query equality', () => {
         expect(
           queryEqualUniv(
-            queryUniv(r.users.raw, (q) => [
+            buildQueryUniv(r.users.raw, (q) => [
               q.where('age', '>=', 10),
               q.where('age', '<', 20),
             ]),
@@ -195,7 +191,7 @@ for (const env of ['web', 'admin'] as const) {
 
         expect(
           queryEqualUniv(
-            queryUniv(r.usersGroup.raw, (q) => [
+            buildQueryUniv(r.usersGroup.raw, (q) => [
               q.where('age', '>=', 10),
               q.where('age', '<', 20),
             ]),
@@ -205,7 +201,7 @@ for (const env of ['web', 'admin'] as const) {
 
         expect(
           queryEqualUniv(
-            queryUniv(r.users.raw, (q) => [
+            buildQueryUniv(r.users.raw, (q) => [
               q.orderBy(firestoreStatic.documentId()),
             ]),
             r.usersOrderedById.raw,
@@ -847,7 +843,7 @@ for (const env of ['web', 'admin'] as const) {
         test('safeRef', async () => {
           let ref: any
           const updateRef = () => {
-            ref = r.v1.collectionQuery('users', (q) => q._teen())
+            ref = r.v1.collection('users').select._teen()
           }
           updateRef()
 

@@ -1,13 +1,15 @@
-import { QueryConstraint } from 'firebase/firestore'
-
 import { Type } from '../../lib/type.js'
-import { QueryBuilder } from '../firestore/controller/_query.js'
+import {
+  QueryBuilder,
+  QueryConstraintUniv,
+} from '../firestore/controller/_query.js'
 import { FirestoreStatic } from '../firestore/controller/_static.js'
 import {
   DataModel,
   InferDataModelSL,
   InferDataModelT,
   InferDataModelU,
+  TypedQueryRef,
 } from '../firestore/index.js'
 import { FTypes } from './FTypes.js'
 import { GetSchemaOptionsByLoc, PlainLoc } from './_object.js'
@@ -120,31 +122,22 @@ export declare namespace STypes {
     ) => SL
 
     export type SelectorsConstraint = {
-      [key: string]: (...args: any[]) => QueryConstraint[]
+      [key: string]: (...args: any[]) => QueryConstraintUniv[]
     }
   }
 
   export type FieldPath<T> = PlainLoc<T> | keyof DocumentMeta
 
-  export type Selector<
-    S extends RootOptions.All,
+  export type MappedSelectors<
+    S extends STypes.RootOptions.All,
     F extends FTypes.FirestoreApp,
     L extends string,
-    // P extends Utils.Parent,
-    // N extends Extract<keyof PC, string>,
-    // PC,
-    _C = GetSchemaOptionsByLoc<S, L>,
-  > = (q: GetSL<_C>) => QueryConstraint[]
-
-  export type SelectorOptions<
-    T,
-    L extends string | null,
-    SL,
-    F extends FTypes.FirestoreApp,
+    U = STypes.DocDataAt<S, F, L>,
+    SL = STypes.GetSL<GetSchemaOptionsByLoc<S, L>>,
   > = {
-    [K in keyof SL]: SL[K] extends (...args: infer A) => FTypes.Query<infer U>
-      ? (...args: A) => FTypes.Query<DocData<F, U, NonNullable<L>, T>, F>
-      : SL[K]
+    [K in keyof SL]: SL[K] extends (...args: infer A) => any
+      ? (...args: A) => TypedQueryRef<S, F, L, U>
+      : never
   }
 
   export type HasLoc<L extends string> = {

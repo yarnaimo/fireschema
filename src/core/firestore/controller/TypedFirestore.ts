@@ -2,7 +2,7 @@ import { KeysWithoutDocLabel, SchemaLoc } from '../../types/_object.js'
 import { FTypes, STypes } from '../../types/index.js'
 import { firestorePathToLoc } from '../../utils/_firestore.js'
 import { FirestoreModel, InferFirestoreModelS } from '../model.js'
-import { TypedQueryRef } from './TypedCollectionRef.js'
+import { TypedSelectable } from './TypedCollectionRef.js'
 import { TypedDocumentRef } from './TypedDocumentRef.js'
 import { TypedFDBase } from './TypedFDBase.js'
 import { TypedTransaction } from './TypedTransaction.js'
@@ -44,21 +44,9 @@ export class TypedFirestoreUniv<
     collectionName: KeysWithoutDocLabel<S['collectionGroups']>,
     loc: L,
   ) {
-    return new TypedQueryRef<S, F, L>(
+    return new TypedSelectable<S, F, L>(
       { ...this.options, loc },
       this.origGroup(collectionName),
-    )
-  }
-
-  collectionGroupQuery<L extends SchemaLoc<S>>(
-    collectionName: KeysWithoutDocLabel<S['collectionGroups']>,
-    loc: L,
-    selector: STypes.Selector<S, F, L>,
-  ) {
-    return new TypedQueryRef<S, F, L>(
-      { ...this.options, loc },
-      this.origGroup(collectionName),
-      selector,
     )
   }
 

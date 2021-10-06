@@ -1,10 +1,10 @@
 import { FTypes, STypes } from '../../types/index.js'
+import { TypedConstructorOptionsWithoutLoc } from './ConstructorOptions.js'
 import {
   DocumentSnapDataOptions,
   TypedDocumentRef,
   TypedDocumentSnap,
 } from './TypedDocumentRef.js'
-import { FirestoreStatic } from './_static.js'
 import { DocDataHelper, docAsAdmin, docAsWeb } from './_utils.js'
 
 export class TypedTransaction<
@@ -16,10 +16,7 @@ export class TypedTransaction<
   )
 
   constructor(
-    readonly options: {
-      schemaOptions: S
-      firestoreStatic: FirestoreStatic<F>
-    },
+    readonly options: TypedConstructorOptionsWithoutLoc<S, F>,
     readonly raw: FTypes.Transaction<F>,
   ) {}
 

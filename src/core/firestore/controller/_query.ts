@@ -33,6 +33,8 @@ export type Where<K> = (
 
 export type QueryConstraintAdmin = ReturnType<typeof queryBuilderAdmin[string]>
 
+export type QueryConstraintUniv = QueryConstraint | QueryConstraintAdmin
+
 export const queryBuilderAdmin = Object.fromEntries(
   Object.keys(queryBuilderWeb).map((key) => {
     return [

@@ -20,31 +20,28 @@ export const typedFirestore: TypedFirestoreWeb<typeof firestoreModel> =
 /**
  * Reference collections/documents and get snapshot
  */
-const users = typedFirestore.collection('users') // TypedCollectionRef instance
-const user = users.doc('userId') // TypedDocumentRef instance
+const usersRef = typedFirestore.collection('users') // TypedCollectionRef instance
+const userRef = usersRef.doc('userId') // TypedDocumentRef instance
 
-const posts = user.collection('posts')
-const post = posts.doc('123')
-const techPosts = user.collectionQuery(
-  'posts',
-  (q) => q.byTag('tech'), // selector defined in schema
-)
+const postsRef = userRef.collection('posts')
+const postRef = postsRef.doc('123')
+const techPostsQuery = postsRef.select.byTag('tech') // selector defined in schema
 
 !(async () => {
-  await user.get() // DocumentSnapshot<User>
-  await user.getData() // User
+  await userRef.get() // DocumentSnapshot<User>
+  await userRef.getData() // User
 
-  await post.get() // DocumentSnapshot<PostA | PostB>
-  await posts.get() // QuerySnapshot<PostA | PostB>
-  await posts.getData() // (PostA | PostB)[]
-  await techPosts.get() // QuerySnapshot<PostA | PostB>
+  await postRef.get() // DocumentSnapshot<PostA | PostB>
+  await postsRef.get() // QuerySnapshot<PostA | PostB>
+  await postsRef.getData() // (PostA | PostB)[]
+  await techPostsQuery.get() // QuerySnapshot<PostA | PostB>
 })
 
 /**
  * Get child collection of retrived document snapshot
  */
 !(async () => {
-  const snap = await users.get()
+  const snap = await usersRef.get()
   const firstUserRef = snap.typedDocs[0]!.typedRef
 
   await firstUserRef.collection('posts').get()
@@ -53,8 +50,8 @@ const techPosts = user.collectionQuery(
 /**
  * Reference parent collection/document
  */
-const _posts = post.parentCollection()
-const _user = posts.parentDocument()
+const _postsRef = postRef.parentCollection()
+const _userRef = postsRef.parentDocument()
 
 /**
  * Reference collections groups and get snapshot
@@ -63,11 +60,7 @@ const postsGroup = typedFirestore.collectionGroup(
   'posts', // collection name: passed to original collectionGroup method
   'users.posts', // to get schema options
 )
-const techPostsGroup = typedFirestore.collectionGroupQuery(
-  'posts',
-  'users.posts',
-  (q) => q.byTag('tech'),
-)
+const techPostsGroup = postsGroup.select.byTag('tech')
 
 !(async () => {
   await postsGroup.get() // QuerySnapshot<PostA | PostB>
@@ -78,20 +71,20 @@ const techPostsGroup = typedFirestore.collectionGroupQuery(
  * Write data
  */
 !(async () => {
-  await user.create({
+  await userRef.create({
     name: 'test',
     displayName: 'Test',
     age: 20,
     timestamp: typedFirestore.firestoreStatic.serverTimestamp(),
     options: { a: true },
   })
-  await user.setMerge({
+  await userRef.setMerge({
     age: 21,
   })
-  await user.update({
+  await userRef.update({
     age: 21,
   })
-  await user.delete()
+  await userRef.delete()
 })
 
 /**
@@ -99,8 +92,8 @@ const techPostsGroup = typedFirestore.collectionGroupQuery(
  */
 !(async () => {
   await typedFirestore.runTransaction(async (tt) => {
-    const snap = await tt.get(user)
-    tt.update(user, {
+    const snap = await tt.get(userRef)
+    tt.update(userRef, {
       age: snap.data()!.age + 1,
     })
   })

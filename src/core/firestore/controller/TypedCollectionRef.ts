@@ -1,25 +1,24 @@
-import { P } from 'lifts'
-
-import { R } from '../../../lib/fp.js'
-import {
-  GetSchemaOptionsByLoc,
-  JoinLoc,
-  OmitLastSegment,
-} from '../../types/_object.js'
+import { JoinLoc, OmitLastSegment } from '../../types/_object.js'
 import { FTypes, STypes } from '../../types/index.js'
 import {
   getLastSegment,
   getSchemaOptionsByLoc,
   omitLastSegment,
 } from '../../utils/_object.js'
+import { TypedConstructorOptions } from './ConstructorOptions'
 import {
   QueryDocumentSnapDataOptions,
   TypedDocumentRef,
   TypedQueryDocumentSnap,
 } from './TypedDocumentRef.js'
 import { withDecoder } from './_query-cache.js'
-import { FirestoreStatic } from './_static.js'
-import { GetSource, docUniv, getDocsUniv, queryUniv } from './_universal.js'
+import {
+  GetSource,
+  docUniv,
+  getDocsUniv,
+  queryBuilderUniv,
+  queryUniv,
+} from './_universal.js'
 
 export class TypedQuerySnap<
   S extends STypes.RootOptions.All,
@@ -30,11 +29,7 @@ export class TypedQuerySnap<
   readonly typedDocs: TypedQueryDocumentSnap<S, F, L, U>[]
 
   constructor(
-    readonly options: {
-      schemaOptions: S
-      firestoreStatic: FirestoreStatic<F>
-      loc: L
-    },
+    readonly options: TypedConstructorOptions<S, F, L>,
     readonly raw: FTypes.QuerySnap<U, F>,
   ) {
     this.typedDocs = raw.docs.map((rawDocSnap) => {
@@ -53,42 +48,22 @@ export class TypedQueryRef<
   U = STypes.DocDataAt<S, F, L>,
 > {
   readonly raw: FTypes.Query<U, F>
+  readonly collectionOptions: STypes.CollectionOptions.Meta
 
   constructor(
-    readonly options: {
-      schemaOptions: S
-      firestoreStatic: FirestoreStatic<F>
-      loc: L
-    },
+    readonly options: TypedConstructorOptions<S, F, L>,
     origQuery: FTypes.Query<any, F>,
-    selector?: STypes.Selector<S, F, L>,
     skipDecoder?: boolean,
   ) {
     const name = getLastSegment(options.loc)
-    const collectionOptions = getSchemaOptionsByLoc(
+    this.collectionOptions = getSchemaOptionsByLoc(
       options.schemaOptions,
       options.loc,
     )
 
-    const convertedQuery = P(
-      origQuery,
-      skipDecoder ? R.identity : withDecoder(collectionOptions.model, name),
-
-      (query) => {
-        if (!selector) {
-          return query
-        }
-
-        return queryUniv(query, (q) => {
-          const selectorsConstraint = collectionOptions.model.selectors(
-            q,
-            this.options.firestoreStatic,
-          ) as STypes.GetSL<GetSchemaOptionsByLoc<S, L>>
-
-          return selector(selectorsConstraint)
-        })
-      },
-    ) as FTypes.Query<any, F>
+    const convertedQuery = skipDecoder
+      ? origQuery
+      : withDecoder(origQuery, this.collectionOptions.model, name)
 
     this.raw = convertedQuery
   }
@@ -113,27 +88,63 @@ export class TypedQueryRef<
   }
 }
 
-export class TypedCollectionRef<
+export class TypedSelectable<
   S extends STypes.RootOptions.All,
   F extends FTypes.FirestoreApp,
   L extends string,
   U = STypes.DocDataAt<S, F, L>,
 > extends TypedQueryRef<S, F, L, U> {
+  readonly select: STypes.MappedSelectors<S, F, L>
+
+  constructor(
+    options: TypedConstructorOptions<S, F, L>,
+    origQuery: FTypes.Query<any, F>,
+    skipDecoder?: boolean,
+  ) {
+    super(options, origQuery, skipDecoder)
+
+    const selectorsConstraint = this.collectionOptions.model.selectors(
+      queryBuilderUniv(this.raw),
+      this.options.firestoreStatic,
+    )
+
+    this.select = Object.fromEntries(
+      Object.entries(selectorsConstraint).map(([k, fn]) => {
+        return [
+          k,
+          (...args: any[]) => {
+            const queryConstraints = fn(...args)
+            const query = queryUniv(this.raw, queryConstraints)
+
+            return new TypedQueryRef<S, F, L, U>(
+              this.options,
+              query as FTypes.Query<any, F>,
+              true,
+            )
+          },
+        ]
+      }),
+    ) as STypes.MappedSelectors<S, F, L>
+  }
+}
+
+export class TypedCollectionRef<
+  S extends STypes.RootOptions.All,
+  F extends FTypes.FirestoreApp,
+  L extends string,
+  U = STypes.DocDataAt<S, F, L>,
+> extends TypedSelectable<S, F, L, U> {
   readonly id: string
   readonly path: string
 
   declare readonly raw: FTypes.CollectionRef<U, F>
 
   constructor(
-    readonly options: {
-      schemaOptions: S
-      firestoreStatic: FirestoreStatic<F>
-      loc: L
-    },
+    readonly options: TypedConstructorOptions<S, F, L>,
     origCollection: FTypes.CollectionRef<any, F>,
     skipDecoder?: boolean,
   ) {
-    super(options, origCollection, undefined, skipDecoder)
+    super(options, origCollection, skipDecoder)
     this.id = this.raw.id
     this.path = this.raw.path
   }

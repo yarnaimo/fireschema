@@ -46,7 +46,10 @@ const PostType = z.object({
 const PostModel = new DataModel({
   schema: PostType,
   selectors: (q) => ({
-    byTag: (tag: string) => [q.where('tags', 'array-contains', tag)],
+    byTag: (tag: string) => [
+      q.where('tags', 'array-contains', tag),
+      q.limit(20),
+    ],
   }),
 })
 
