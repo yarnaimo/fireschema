@@ -5,7 +5,7 @@ import { STypes } from '../../types/index.js'
 import { _ } from '../../utils/_string.js'
 
 export const renderFunctions = (
-  functions: STypes.FunctionsOptions,
+  functions: STypes.FunctionsRenderOptions,
   pIndent: number,
 ) => {
   const indent = pIndent + 2

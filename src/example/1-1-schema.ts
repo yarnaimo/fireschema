@@ -54,15 +54,13 @@ const PostModel = new DataModel({
 })
 
 export const firestoreModel = new FirestoreModel({
-  functions: {
-    'isAdmin()': `
-      return exists(${docPath('admins/$(request.auth.uid)')});
-    `,
+  'function isAdmin()': `
+    return exists(${docPath('admins/$(request.auth.uid)')});
+  `,
 
-    'requestUserIs(uid)': `
-      return request.auth.uid == uid;
-    `,
-  },
+  'function requestUserIs(uid)': `
+    return request.auth.uid == uid;
+  `,
 
   collectionGroups: {
     'posts/{postId}': {
@@ -81,11 +79,9 @@ export const firestoreModel = new FirestoreModel({
     },
 
     'posts/{postId}': {
-      functions: {
-        'authorUidMatches()': `
-          return request.resource.data.authorUid == uid;
-        `,
-      },
+      'function authorUidMatches()': `
+        return request.resource.data.authorUid == uid;
+      `,
 
       model: PostModel,
       allow: {

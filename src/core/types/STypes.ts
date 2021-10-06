@@ -76,12 +76,14 @@ export declare namespace STypes {
   export type ConditionExp = string | boolean
 
   export type FunctionsOptions = {
+    [key: `function ${string}`]: string
+  }
+  export type FunctionsRenderOptions = {
     [key: string]: string
   }
 
   export namespace RootOptions {
-    export type Meta = {
-      functions: FunctionsOptions
+    export type Meta = FunctionsOptions & {
       collectionGroups: CollectionOptions.Children
     }
     export type Children = {
@@ -92,8 +94,7 @@ export declare namespace STypes {
   }
 
   export namespace CollectionOptions {
-    export type Meta = {
-      functions?: FunctionsOptions
+    export type Meta = FunctionsOptions & {
       model: DataModel<any, any, STypes.Model.SelectorsConstraint>
       // [$collectionGroup]?: boolean
       allow: AllowOptions

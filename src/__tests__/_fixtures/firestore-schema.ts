@@ -93,17 +93,15 @@ export const PostModel = new DataModel({ schema: PostType })
 export const PostAModel = new DataModel({ schema: PostAType })
 
 export const firestoreModel = new FirestoreModel({
-  functions: {
-    'getCurrentAuthUserDoc()': `
-      return get(${docPath('authUsers/$(request.auth.uid)')});
-    `,
-    'isAdmin()': `
-      return getCurrentAuthUserDoc().data.isAdmin == true;
-    `,
-    'requestUserIs(uid)': `
-      return request.auth.uid == uid;
-    `,
-  },
+  'function getCurrentAuthUserDoc()': `
+    return get(${docPath('authUsers/$(request.auth.uid)')});
+  `,
+  'function isAdmin()': `
+    return getCurrentAuthUserDoc().data.isAdmin == true;
+  `,
+  'function requestUserIs(uid)': `
+    return request.auth.uid == uid;
+  `,
 
   collectionGroups: {
     'users/{uid}': {
@@ -127,11 +125,9 @@ export const firestoreModel = new FirestoreModel({
       },
 
       'posts/{postId}': {
-        functions: {
-          'test()': `
-            return true;
-          `,
-        },
+        'function test()': `
+          return true;
+        `,
 
         model: PostModel,
         allow: {

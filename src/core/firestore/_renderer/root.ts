@@ -3,6 +3,7 @@ import { STypes } from '../../types/index.js'
 import { join } from '../../utils/_string.js'
 import { $$or, $and } from '../../utils/index.js'
 import { FirestoreModel } from '../model.js'
+import { parseSchemaOptions } from './_utils.js'
 import { renderCollectionGroups, renderCollections } from './collections.js'
 import { validatorDef } from './format.js'
 import { renderFunctions } from './functions.js'
@@ -37,7 +38,7 @@ const metaRules = $$or([
 const keysRules = `data.keys().removeAll(['${_createdAt}', '${_updatedAt}']).hasOnly(keys)`
 
 export const renderRoot = (
-  functions: STypes.FunctionsOptions,
+  functions: STypes.FunctionsRenderOptions,
   collectionGroups: STypes.CollectionOptions.Children,
   collections: STypes.CollectionOptions.Children,
 ) => {
@@ -65,9 +66,9 @@ export const renderRoot = (
 }
 
 export const renderSchema = <S extends STypes.RootOptions.All>({
-  schemaOptions,
+  schemaOptions: { collectionGroups, ...options },
 }: FirestoreModel<S>) => {
-  const { functions, collectionGroups, ...collections } = schemaOptions
+  const { functions, collections } = parseSchemaOptions(options)
 
   const rendered = renderRoot(functions, collectionGroups, collections).join(
     '\n',
