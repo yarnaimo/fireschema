@@ -87,7 +87,7 @@ export declare namespace STypes {
       collectionGroups: CollectionOptions.Children
     }
     export type Children = {
-      [K in `${string}/{${string}}`]: CollectionOptions.All
+      [K in `/${string}/{${string}}`]: CollectionOptions.All
     }
 
     export type All = Meta & Children
@@ -100,7 +100,7 @@ export declare namespace STypes {
       allow: AllowOptions
     }
     export type Children = {
-      [K in `${string}/{${string}}`]: Meta & Children
+      [K in `/${string}/{${string}}`]: Meta & Children
     }
 
     export type All = Meta & Children

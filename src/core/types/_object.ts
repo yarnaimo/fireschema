@@ -81,7 +81,7 @@ export type ParseLocString<L extends string> = L extends ''
   ? [T, ...ParseLocString<U>]
   : [L]
 
-export type OmitDocLabel<K> = K extends `${infer N}/{${string}}` ? N : never
+export type OmitDocLabel<K> = K extends `/${infer N}/{${string}}` ? N : never
 
 export type KeysWithoutDocLabel<_C> = {
   [K in keyof _C]: OmitDocLabel<K>
@@ -102,7 +102,7 @@ type Shift<U> = U extends readonly [string, ...string[]]
   : never
 
 type ChildOfSchemaOptions<T, LS extends string> = {
-  [K in keyof T]: K extends `${LS}/{${string}}` ? T[K] : never
+  [K in keyof T]: K extends `/${LS}/{${string}}` ? T[K] : never
 }[keyof T]
 
 export type GetDeep<T, LA extends readonly string[], D extends number = 5> = [

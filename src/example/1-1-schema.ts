@@ -63,7 +63,7 @@ export const firestoreModel = new FirestoreModel({
   `,
 
   collectionGroups: {
-    'posts/{postId}': {
+    '/posts/{postId}': {
       model: PostModel,
       allow: {
         read: true,
@@ -71,14 +71,14 @@ export const firestoreModel = new FirestoreModel({
     },
   },
 
-  'users/{uid}': {
+  '/users/{uid}': {
     model: UserModel,
     allow: {
       read: true, // open access
       write: $or(['requestUserIs(uid)', 'isAdmin()']),
     },
 
-    'posts/{postId}': {
+    '/posts/{postId}': {
       'function authorUidMatches()': `
         return request.resource.data.authorUid == uid;
       `,

@@ -38,7 +38,7 @@ export const getSchemaOptionsByLoc = (
 ) => {
   const result = parseLocString(loc).reduce((parent, segment) => {
     const foundKey = Object.keys(parent).find((key) =>
-      key.startsWith(`${segment}/{`),
+      key.startsWith(`/${segment}/{`),
     )!
     return parent[foundKey] as any
   }, schemaOptions as any)

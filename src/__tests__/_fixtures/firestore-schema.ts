@@ -104,7 +104,7 @@ export const firestoreModel = new FirestoreModel({
   `,
 
   collectionGroups: {
-    'users/{uid}': {
+    '/users/{uid}': {
       model: UserModel,
       allow: {
         read: true,
@@ -112,11 +112,11 @@ export const firestoreModel = new FirestoreModel({
     },
   },
 
-  'versions/{version}': {
+  '/versions/{version}': {
     model: VersionModel,
     allow: {},
 
-    'users/{uid}': {
+    '/users/{uid}': {
       model: UserModel,
       allow: {
         read: true,
@@ -124,7 +124,7 @@ export const firestoreModel = new FirestoreModel({
         delete: 'requestUserIs(uid)',
       },
 
-      'posts/{postId}': {
+      '/posts/{postId}': {
         'function test()': `
           return true;
         `,
@@ -137,7 +137,7 @@ export const firestoreModel = new FirestoreModel({
         },
       },
 
-      'privatePosts/{postId}': {
+      '/privatePosts/{postId}': {
         model: PostAModel,
         allow: {
           read: $or(['isAdmin()', 'requestUserIs(uid)']),

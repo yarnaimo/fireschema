@@ -28,7 +28,7 @@ const renderFromArray =
           renderCollections(collections, indent),
         ])
         return join('\n')([
-          `${_(indent)}match /${collectionNameWithDocLabel} {`,
+          `${_(indent)}match ${collectionNameWithDocLabel} {`,
           body,
           `${_(indent)}}`,
         ])
@@ -53,7 +53,7 @@ export const renderCollectionGroups = (
     EntriesStrict,
     R.map(
       ([collectionPath, options]) =>
-        [`{path=**}/${collectionPath}`, options] as const,
+        [`/{path=**}${collectionPath}`, options] as const,
     ),
     renderFromArray(pIndent),
   )
