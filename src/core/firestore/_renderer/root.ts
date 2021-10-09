@@ -39,7 +39,7 @@ const keysRules = `data.keys().removeAll(['${_createdAt}', '${_updatedAt}']).has
 
 export const renderRoot = (
   functions: STypes.FunctionsRenderOptions,
-  collectionGroups: STypes.CollectionOptions.Children,
+  collectionGroups: STypes.CollectionOptions.GroupChildren,
   collections: STypes.CollectionOptions.Children,
 ) => {
   const body = join('\n\n')([

@@ -1,3 +1,5 @@
+import { Merge } from 'type-fest'
+
 import { Type } from '../../lib/type.js'
 import {
   QueryBuilder,
@@ -84,13 +86,10 @@ export declare namespace STypes {
 
   export namespace RootOptions {
     export type Meta = FunctionsOptions & {
-      collectionGroups: CollectionOptions.Children
-    }
-    export type Children = {
-      [K in `/${string}/{${string}}`]: CollectionOptions.All
+      collectionGroups: CollectionOptions.GroupChildren
     }
 
-    export type All = Meta & Children
+    export type All = Meta & CollectionOptions.Children
   }
 
   export namespace CollectionOptions {
@@ -99,8 +98,13 @@ export declare namespace STypes {
       // [$collectionGroup]?: boolean
       allow: AllowOptions
     }
+    export type GroupMeta = Merge<Meta, { model?: never }>
+
     export type Children = {
-      [K in `/${string}/{${string}}`]: Meta & Children
+      [K in `/${string}/{${string}}`]: All
+    }
+    export type GroupChildren = {
+      [K in `/${string}/{${string}}`]: GroupMeta
     }
 
     export type All = Meta & Children

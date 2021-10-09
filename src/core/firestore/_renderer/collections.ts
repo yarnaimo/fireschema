@@ -12,7 +12,7 @@ const renderFromArray =
   (
     array: (readonly [
       string,
-      STypes.CollectionOptions.Meta & STypes.CollectionOptions.Children,
+      STypes.CollectionOptions.All | STypes.CollectionOptions.GroupMeta,
     ])[],
   ) => {
     const indent = pIndent + 2
@@ -45,7 +45,7 @@ export const renderCollections = (
 }
 
 export const renderCollectionGroups = (
-  collections: STypes.CollectionOptions.Children,
+  collections: STypes.CollectionOptions.GroupChildren,
   pIndent: number,
 ): string | null => {
   return P(

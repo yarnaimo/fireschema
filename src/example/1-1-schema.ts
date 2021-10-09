@@ -64,7 +64,6 @@ export const firestoreModel = new FirestoreModel({
 
   collectionGroups: {
     '/posts/{postId}': {
-      model: PostModel,
       allow: {
         read: true,
       },

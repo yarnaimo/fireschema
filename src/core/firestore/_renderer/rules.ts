@@ -11,15 +11,17 @@ import { schemaToRuleWithMeta } from './transformer.js'
 
 export const renderRules = (
   $allow: STypes.AllowOptions,
-  model: DataModel<any, any, any>,
+  model: DataModel<any, any, any> | undefined,
   pIndent: number,
 ) => {
   const indent = pIndent + 2
 
-  const functions = renderFunctions(
-    validatorDef('data', schemaToRuleWithMeta(model.schema), indent),
-    pIndent,
-  )
+  const functions = model
+    ? renderFunctions(
+        validatorDef('data', schemaToRuleWithMeta(model.schema), indent),
+        pIndent,
+      )
+    : null
 
   const array = EntriesStrict($allow)
   const hasWriteRules = array.some(([op]) => op in allowOptions.write)

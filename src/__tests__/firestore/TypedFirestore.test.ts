@@ -17,6 +17,7 @@ import {
 } from '../../core/firestore/controller/_universal.js'
 import {
   FTypes,
+  FirestoreModel,
   STypes,
   TypedDocumentRef,
   TypedDocumentSnap,
@@ -29,6 +30,8 @@ import {
   _updatedAt,
   withRefTransformer,
 } from '../../core/index.js'
+import { CollectionNameToLoc } from '../../core/types/_object.js'
+import { getCollectionOptionsByName } from '../../core/utils/_object.js'
 import {
   useTypedDocument,
   useTypedDocumentOnce,
@@ -62,12 +65,26 @@ type F = FTypes.FirestoreApp
 
 type Env = 'web' | 'admin'
 
+const firestoreModelWithDup = new FirestoreModel({
+  ...firestoreModel.schemaOptions,
+  '/posts/{_post}':
+    firestoreModel.schemaOptions['/versions/{version}']['/users/{uid}'][
+      '/posts/{postId}'
+    ],
+})
+
 const _tcollections = (app: F, env: Env) => {
   const typedFirestore = (
     env === 'web'
       ? new TypedFirestoreWeb(firestoreModel, app as any)
       : new TypedFirestoreAdmin(firestoreModel, app as any)
   ) as TypedFirestoreUniv<typeof firestoreModel, F>
+
+  const typedFirestoreWithCollectionDup = (
+    env === 'web'
+      ? new TypedFirestoreWeb(firestoreModelWithDup, app as any)
+      : new TypedFirestoreAdmin(firestoreModelWithDup, app as any)
+  ) as TypedFirestoreUniv<typeof firestoreModelWithDup, F>
 
   void (() => {
     typedFirestore.collection(
@@ -92,11 +109,12 @@ const _tcollections = (app: F, env: Env) => {
   const posts = user.collection('posts')
   const post = posts.doc('post')
 
-  const usersGroup = typedFirestore.collectionGroup('users', 'versions.users')
+  const usersGroup = typedFirestore.collectionGroup('users')
   const teenUsersGroup = usersGroup.select.teen()
 
   return {
     typedFirestore,
+    typedFirestoreWithCollectionDup,
     versions,
     v1,
     users,
@@ -138,6 +156,37 @@ describe('types', () => {
       {} as STypes.DocDataAt<S, F, 'versions.users'>,
     )
   })
+
+  test('CollectionNameToLoc', () => {
+    expectType<'versions.users'>({} as CollectionNameToLoc<S, 'users'>)
+    expectType<'versions.users.posts'>({} as CollectionNameToLoc<S, 'posts'>)
+  })
+})
+
+describe('utils', () => {
+  test('getCollectionOptionsByName', () => {
+    expect(
+      getCollectionOptionsByName(firestoreModel.schemaOptions, 'posts'),
+    ).toEqual([
+      {
+        loc: 'versions.users.posts',
+        options: expect.objectContaining({ model: PostModel }),
+      },
+    ])
+
+    expect(
+      getCollectionOptionsByName(firestoreModelWithDup.schemaOptions, 'posts'),
+    ).toEqual([
+      {
+        loc: 'versions.users.posts',
+        options: expect.objectContaining({ model: PostModel }),
+      },
+      {
+        loc: 'posts',
+        options: expect.objectContaining({ model: PostModel }),
+      },
+    ])
+  })
 })
 
 for (const env of ['web', 'admin'] as const) {
@@ -158,6 +207,17 @@ for (const env of ['web', 'admin'] as const) {
 
   const expectAnyTimestamp =
     env === 'web' ? expectAnyTimestampWeb : expectAnyTimestampAdmin
+
+  describe($env('collectionGroup'), () => {
+    test('collection name duplication', () => {
+      expect(() => {
+        r.typedFirestoreWithCollectionDup.collectionGroup('users')
+      }).not.toThrowError()
+      expect(() => {
+        r.typedFirestoreWithCollectionDup.collectionGroup('posts')
+      }).toThrowError()
+    })
+  })
 
   describe($env('refs'), () => {
     test('ref equality', () => {

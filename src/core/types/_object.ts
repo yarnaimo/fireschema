@@ -64,6 +64,36 @@ export type SchemaLoc<T, Depth extends number = 5> = [Depth] extends [never]
     }[keyof T & string]
   : never
 
+export type SchemaCollectionName<T, Depth extends number = 5> = [
+  Depth,
+] extends [never]
+  ? never
+  : T extends object
+  ? {
+      [K in keyof T & string]-?:
+        | OmitDocLabel<K>
+        | SchemaCollectionName<T[K], Subtract[Depth]>
+    }[keyof T & string]
+  : never
+
+export type CollectionNameToLoc<
+  T,
+  N extends string,
+  Depth extends number = 5,
+> = [Depth] extends [never]
+  ? never
+  : T extends object
+  ? {
+      [K in keyof T & string]-?:
+        | (OmitDocLabel<K> extends N ? OmitDocLabel<K> : never)
+        | (CollectionNameToLoc<T[K], N, Subtract[Depth]> extends infer P
+            ? P extends string
+              ? JoinLoc<OmitDocLabel<K>, P>
+              : never
+            : never)
+    }[keyof T & string]
+  : never
+
 export type JoinLoc<T extends string, U extends string> = T extends ''
   ? U
   : `${T}.${U}`

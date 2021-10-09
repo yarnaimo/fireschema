@@ -105,7 +105,6 @@ export const firestoreModel = new FirestoreModel({
 
   collectionGroups: {
     '/users/{uid}': {
-      model: UserModel,
       allow: {
         read: true,
       },

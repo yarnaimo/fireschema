@@ -1,6 +1,10 @@
-import { KeysWithoutDocLabel, SchemaLoc } from '../../types/_object.js'
+import {
+  CollectionNameToLoc,
+  SchemaCollectionName,
+} from '../../types/_object.js'
 import { FTypes, STypes } from '../../types/index.js'
 import { firestorePathToLoc } from '../../utils/_firestore.js'
+import { getCollectionOptionsByName } from '../../utils/_object.js'
 import { FirestoreModel, InferFirestoreModelS } from '../model.js'
 import { TypedSelectable } from './TypedCollectionRef.js'
 import { TypedDocumentRef } from './TypedDocumentRef.js'
@@ -40,11 +44,19 @@ export class TypedFirestoreUniv<
     return collectionGroupUniv(this.raw, collectionName) as FTypes.Query<any, F>
   }
 
-  collectionGroup<L extends SchemaLoc<S>>(
-    collectionName: KeysWithoutDocLabel<S['collectionGroups']>,
-    loc: L,
-  ) {
-    return new TypedSelectable<S, F, L>(
+  collectionGroup<N extends SchemaCollectionName<S>>(collectionName: N) {
+    const collectionOptionsList = getCollectionOptionsByName(
+      this.options.schemaOptions,
+      collectionName,
+    )
+    if (collectionOptionsList.length >= 2) {
+      throw new Error(
+        'If there are multiple collections with the same name in the model, they cannot be referenced by collectionGroup.',
+      )
+    }
+    const loc = collectionOptionsList[0]!.loc as CollectionNameToLoc<S, N>
+
+    return new TypedSelectable<S, F, CollectionNameToLoc<S, N>>(
       { ...this.options, loc },
       this.origGroup(collectionName),
     )

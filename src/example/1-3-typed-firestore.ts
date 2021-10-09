@@ -56,10 +56,7 @@ const _userRef = postsRef.parentDocument()
 /**
  * Reference collections groups and get snapshot
  */
-const postsGroup = typedFirestore.collectionGroup(
-  'posts', // collection name: passed to original collectionGroup method
-  'users.posts', // to get schema options
-)
+const postsGroup = typedFirestore.collectionGroup('posts')
 const techPostsGroup = postsGroup.select.byTag('tech')
 
 !(async () => {

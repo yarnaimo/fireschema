@@ -46,6 +46,26 @@ export const getSchemaOptionsByLoc = (
   return result as STypes.CollectionOptions.Meta
 }
 
+export const getCollectionOptionsByName = (
+  options: STypes.CollectionOptions.Children,
+  targetCollectionName: string,
+  _loc = '',
+): { loc: string; options: STypes.CollectionOptions.Meta }[] => {
+  return Object.entries(options).flatMap(([key, value]) => {
+    const collectionName = key.match(/^\/(.+)\/\{.+\}$/)?.[1]
+    if (!collectionName) {
+      return []
+    }
+    const loc = joinLoc(_loc, collectionName)
+    return [
+      ...(collectionName === targetCollectionName
+        ? [{ loc, options: value }]
+        : []),
+      ...getCollectionOptionsByName(value, targetCollectionName, loc),
+    ]
+  })
+}
+
 export const joinLoc = <T extends string, U extends string>(
   t: T,
   u: U,
