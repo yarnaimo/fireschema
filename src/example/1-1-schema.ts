@@ -1,14 +1,7 @@
 import { Merge } from 'type-fest'
 import { z } from 'zod'
 
-import {
-  $and,
-  $or,
-  DataModel,
-  FirestoreModel,
-  docPath,
-  timestampType,
-} from '../index.js'
+import { DataModel, FirestoreModel, rules, timestampType } from '../index.js'
 
 export const UserType = z.object({
   name: z.string(),
@@ -55,7 +48,7 @@ const PostModel = new DataModel({
 
 export const firestoreModel = new FirestoreModel({
   'function isAdmin()': `
-    return exists(${docPath('admins/$(request.auth.uid)')});
+    return exists(${rules.basePath}/admins/$(request.auth.uid));
   `,
 
   'function requestUserIs(uid)': `
@@ -74,7 +67,7 @@ export const firestoreModel = new FirestoreModel({
     model: UserModel,
     allow: {
       read: true, // open access
-      write: $or(['requestUserIs(uid)', 'isAdmin()']),
+      write: rules.or('requestUserIs(uid)', 'isAdmin()'),
     },
 
     '/posts/{postId}': {
@@ -85,7 +78,7 @@ export const firestoreModel = new FirestoreModel({
       model: PostModel,
       allow: {
         read: true,
-        write: $and(['requestUserIs(uid)', 'authorUidMatches()']),
+        write: rules.and('requestUserIs(uid)', 'authorUidMatches()'),
       },
     },
   },

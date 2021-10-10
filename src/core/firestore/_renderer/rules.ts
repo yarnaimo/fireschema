@@ -3,7 +3,7 @@ import { EntriesStrict, P } from 'lifts'
 import { R } from '../../../lib/fp.js'
 import { STypes, allowOptions } from '../../types/index.js'
 import { _, join } from '../../utils/_string.js'
-import { $and } from '../../utils/index.js'
+import { rules } from '../../utils/index.js'
 import { DataModel } from '../model.js'
 import { addValidatorIndex, validatorCall, validatorDef } from './format.js'
 import { renderFunctions } from './functions.js'
@@ -26,11 +26,14 @@ export const renderRules = (
   const array = EntriesStrict($allow)
   const hasWriteRules = array.some(([op]) => op in allowOptions.write)
 
-  const rules = P(
+  const rulesStr = P(
     array,
     R.map(([op, condition]) => {
       if (op in allowOptions.write && op !== 'delete') {
-        return [op, $and([condition!, validatorCall('request.resource.data')])] // eslint-disable-line @typescript-eslint/no-non-null-assertion
+        return [
+          op,
+          rules.and(condition!, validatorCall('request.resource.data')),
+        ]
       }
       return [op, condition]
     }),
@@ -42,8 +45,8 @@ export const renderRules = (
 
   if (hasWriteRules) {
     addValidatorIndex()
-    return join('\n\n')([functions, rules])
+    return join('\n\n')([functions, rulesStr])
   } else {
-    return rules
+    return rulesStr
   }
 }

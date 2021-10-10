@@ -18,13 +18,12 @@ import {
   z,
 } from 'zod'
 
-import { R } from '../../../lib/fp.js'
 import { is } from '../../../lib/type.js'
 import { ZodTimestamp } from '../../types/SchemaType.js'
-import { $$and, $and, $or } from '../../utils/index.js'
+import { rules } from '../../utils/index.js'
 
 export const schemaToRuleWithMeta = (t: ZodTypeAny): string => {
-  return $and([`__validator_meta__(data)`, _schemaToRule()(t)])
+  return rules.and(`__validator_meta__(data)`, _schemaToRule()(t))
 }
 
 export const _schemaToRule =
@@ -37,13 +36,11 @@ export const _schemaToRule =
       : `${parent}.${key}`
 
     if (t instanceof ZodUnion)
-      return P(t.options, R.map(_schemaToRule(parent, key)), $or)
+      return rules.or(...t.options.map(_schemaToRule(parent, key)))
 
     if (t instanceof ZodIntersection)
-      return P(
-        [t._def.left, t._def.right],
-        R.map(_schemaToRule(parent, key)),
-        $and,
+      return rules.and(
+        ...[t._def.left, t._def.right].map(_schemaToRule(parent, key)),
       )
 
     if (t instanceof ZodOptional)
@@ -58,7 +55,7 @@ export const _schemaToRule =
     if (t instanceof ZodTimestamp) return `${name} is timestamp`
 
     if (t instanceof ZodString) {
-      return $and([
+      return rules.and(
         `${name} is string`,
 
         ...t._def.checks.flatMap((c) => {
@@ -70,11 +67,11 @@ export const _schemaToRule =
             ? [`${name}.matches(${JSON.stringify(c.regex.source)})`]
             : []
         }),
-      ])
+      )
     }
 
     if (t instanceof ZodNumber) {
-      return $and([
+      return rules.and(
         t.isInt ? `${name} is int` : `${name} is number`,
 
         ...t._def.checks.flatMap((c) => {
@@ -84,14 +81,14 @@ export const _schemaToRule =
             ? [`${name} <= ${c.value}`]
             : []
         }),
-      ])
+      )
     }
 
     if (t instanceof ZodArray) {
       const { minLength: min, maxLength: max } = t._def
       // const isEmpty = `${name}.size() == 0`
 
-      return $and([
+      return rules.and(
         `${name} is list`,
         // $or([isEmpty, _schemaToRule(name, 0)(t.element)]),
 
@@ -99,35 +96,35 @@ export const _schemaToRule =
           min && `${name}.size() >= ${min.value}`,
           max && `${name}.size() <= ${max.value}`,
         ].filter(is.string),
-      ])
+      )
     }
 
     if (t instanceof ZodTuple) {
-      return $and([
+      return rules.and(
         `${name} is list`,
 
         ...(t.items as ZodTypeAny[]).map((_t, i) => {
           return _schemaToRule(name, i)(_t as any)
         }),
-      ])
+      )
     }
 
     if (t instanceof ZodObject) {
-      return P(
-        Object.entries(t.shape),
-        R.map(([key, _t]) => {
-          return _schemaToRule(name, key)(_t as any)
-        }),
-        (rules) => {
-          if (name !== 'data') {
-            return rules
-          }
-          const keysArray = `[${Object.keys(t.shape)
-            .map((k) => `'${k}'`)
-            .join(', ')}]`
-          return [`__validator_keys__(data, ${keysArray})`, ...rules]
-        },
-        name === 'data' ? $$and : $and,
+      return (name === 'data' ? rules.andMultiline : rules.and)(
+        ...P(
+          Object.entries(t.shape).map(([key, _t]) => {
+            return _schemaToRule(name, key)(_t as any)
+          }),
+          (rules) => {
+            if (name !== 'data') {
+              return rules
+            }
+            const keysArray = `[${Object.keys(t.shape)
+              .map((k) => `'${k}'`)
+              .join(', ')}]`
+            return [`__validator_keys__(data, ${keysArray})`, ...rules]
+          },
+        ),
       )
     }
 

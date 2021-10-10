@@ -3,7 +3,7 @@ import { STypes } from '../types/index.js'
 
 const $join =
   (separator: string, newline = false) =>
-  (conditions: STypes.ConditionExp[]) => {
+  (...conditions: STypes.ConditionExp[]) => {
     const uniqConditions = R.uniq(conditions)
 
     return uniqConditions.length === 0
@@ -15,7 +15,11 @@ const $join =
       : `(${uniqConditions.join(separator)})`
   }
 
-export const $or = $join(' || ')
-export const $and = $join(' && ')
-export const $$or = $join('\n  || ', true)
-export const $$and = $join('\n  && ', true)
+export const rules = {
+  or: $join(' || '),
+  and: $join(' && '),
+  orMultiline: $join('\n  || ', true),
+  andMultiline: $join('\n  && ', true),
+
+  basePath: '/databases/$(database)/documents' as const,
+}

@@ -1,7 +1,7 @@
 import { _createdAt, _updatedAt } from '../../constants/index.js'
 import { STypes } from '../../types/index.js'
 import { join } from '../../utils/_string.js'
-import { $$or, $and } from '../../utils/index.js'
+import { rules } from '../../utils/index.js'
 import { FirestoreModel } from '../model.js'
 import { parseSchemaOptions } from './_utils.js'
 import { renderCollectionGroups, renderCollections } from './collections.js'
@@ -22,18 +22,18 @@ import { renderFunctions } from './functions.js'
  *   - data._createdAt not changed
  *   - data._updatedAt is server timestamp
  */
-const metaRules = $$or([
-  $and([
+const metaRules = rules.orMultiline(
+  rules.and(
     'request.method == "create"',
     `data.${_createdAt} == request.time`,
     `data.${_updatedAt} == request.time`,
-  ]),
-  $and([
+  ),
+  rules.and(
     'request.method == "update"',
     `data.${_createdAt} == resource.data.${_createdAt}`,
     `data.${_updatedAt} == request.time`,
-  ]),
-])
+  ),
+)
 
 const keysRules = `data.keys().removeAll(['${_createdAt}', '${_updatedAt}']).hasOnly(keys)`
 

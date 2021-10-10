@@ -1,2 +1,1 @@
-export * from './operators.js'
-export * from './rule.js'
+export * from './rules.js'
