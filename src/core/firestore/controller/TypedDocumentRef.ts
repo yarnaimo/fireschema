@@ -10,7 +10,7 @@ import {
   setDocUniv,
   updateDocUniv,
 } from './_universal.js'
-import { DocDataHelper } from './_utils.js'
+import { DataOrFn, DocDataHelper } from './_utils.js'
 
 export type DocumentSnapTransformer<
   S extends STypes.RootOptions.All,
@@ -172,8 +172,8 @@ export class TypedDocumentRef<
     return typedSnap.data(dataOptions)
   }
 
-  async create(data: STypes.WriteData<S, F, L>) {
-    const args = this.dataHelper.create(data)
+  async create(dataOrFn: DataOrFn<STypes.WriteData<S, F, L>>) {
+    const args = this.dataHelper.create(dataOrFn)
 
     return this.wrapWriteResult(
       'create' in this.raw
@@ -182,15 +182,15 @@ export class TypedDocumentRef<
     )
   }
 
-  async setMerge(data: Partial<STypes.WriteData<S, F, L>>) {
+  async setMerge(dataOrFn: DataOrFn<Partial<STypes.WriteData<S, F, L>>>) {
     return this.wrapWriteResult(
-      await setDocUniv(this.raw, ...this.dataHelper.setMerge(data)),
+      await setDocUniv(this.raw, ...this.dataHelper.setMerge(dataOrFn)),
     )
   }
 
-  async update(data: Partial<STypes.WriteData<S, F, L>>) {
+  async update(dataOrFn: DataOrFn<Partial<STypes.WriteData<S, F, L>>>) {
     return this.wrapWriteResult(
-      await updateDocUniv(this.raw, ...this.dataHelper.update(data)),
+      await updateDocUniv(this.raw, ...this.dataHelper.update(dataOrFn)),
     )
   }
 

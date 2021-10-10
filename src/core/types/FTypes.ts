@@ -15,11 +15,6 @@ export declare namespace FTypes {
 
   export type DocumentObject = { [key: string]: DocumentValue }
 
-  export type FirestoreStatic<F extends FirestoreApp> = Env<
-    F,
-    typeof _web,
-    typeof _admin
-  >
   export type FirestoreApp = _web.Firestore | _admin.Firestore
 
   export type FieldValue<F extends FirestoreApp = FirestoreApp> = Env<

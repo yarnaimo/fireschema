@@ -6,18 +6,25 @@ import { FTypes } from '../../core/types/index.js'
 import { Type } from '../../lib/type.js'
 import { IPostA, IUser } from './firestore-schema.js'
 
-export const createUserData = (
-  firestoreStatic: FirestoreStatic<FTypes.FirestoreApp>,
-): Type.Merge<IUser, { timestamp: FTypes.FieldValue }> => ({
+export const userDataBase = {
   name: 'name1',
   displayName: null,
   age: 16,
-  timestamp: firestoreStatic.serverTimestamp(),
   tags: [
     { id: 0, name: 'tag0' },
     { id: 1, name: 'tag1' },
   ],
   options: { a: true, b: 'value' },
+}
+
+export const createUserData = ({
+  serverTimestamp,
+}: FirestoreStatic<FTypes.FirestoreApp>): Type.Merge<
+  IUser,
+  { timestamp: FTypes.FieldValue }
+> => ({
+  ...userDataBase,
+  timestamp: serverTimestamp(),
 })
 
 export const userDataJson = {

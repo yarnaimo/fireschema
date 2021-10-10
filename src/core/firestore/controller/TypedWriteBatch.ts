@@ -1,7 +1,7 @@
 import { FTypes, STypes } from '../../types/index.js'
 import { TypedDocumentRef } from './TypedDocumentRef.js'
 import { FirestoreStatic } from './_static.js'
-import { DocDataHelper, docAsAdmin, docAsWeb } from './_utils.js'
+import { DataOrFn, DocDataHelper, docAsAdmin, docAsWeb } from './_utils.js'
 
 export class TypedWriteBatch<
   S extends STypes.RootOptions.All,
@@ -20,9 +20,9 @@ export class TypedWriteBatch<
 
   create<L extends string>(
     typedDoc: TypedDocumentRef<S, F, L>,
-    data: STypes.WriteData<S, F, L>,
+    dataOrFn: DataOrFn<STypes.WriteData<S, F, L>>,
   ) {
-    const args = this.dataHelper.create(data)
+    const args = this.dataHelper.create(dataOrFn)
 
     if ('create' in this.raw) {
       this.raw.create(docAsAdmin(typedDoc.raw), ...args)
@@ -34,9 +34,9 @@ export class TypedWriteBatch<
 
   setMerge<L extends string>(
     typedDoc: TypedDocumentRef<S, F, L>,
-    data: Partial<STypes.WriteData<S, F, L>>,
+    dataOrFn: DataOrFn<Partial<STypes.WriteData<S, F, L>>>,
   ) {
-    const args = this.dataHelper.setMerge(data)
+    const args = this.dataHelper.setMerge(dataOrFn)
 
     if ('create' in this.raw) {
       this.raw.set(docAsAdmin(typedDoc.raw), ...args)
@@ -48,9 +48,9 @@ export class TypedWriteBatch<
 
   update<L extends string>(
     typedDoc: TypedDocumentRef<S, F, L>,
-    data: Partial<STypes.WriteData<S, F, L>>,
+    dataOrFn: DataOrFn<Partial<STypes.WriteData<S, F, L>>>,
   ) {
-    const args = this.dataHelper.update(data)
+    const args = this.dataHelper.update(dataOrFn)
 
     if ('create' in this.raw) {
       this.raw.update(docAsAdmin(typedDoc.raw), ...args)

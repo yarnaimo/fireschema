@@ -5,7 +5,7 @@ import {
   TypedDocumentRef,
   TypedDocumentSnap,
 } from './TypedDocumentRef.js'
-import { DocDataHelper, docAsAdmin, docAsWeb } from './_utils.js'
+import { DataOrFn, DocDataHelper, docAsAdmin, docAsWeb } from './_utils.js'
 
 export class TypedTransaction<
   S extends STypes.RootOptions.All,
@@ -46,9 +46,9 @@ export class TypedTransaction<
 
   create<L extends string>(
     typedDoc: TypedDocumentRef<S, F, L>,
-    data: STypes.WriteData<S, F, L>,
+    dataOrFn: DataOrFn<STypes.WriteData<S, F, L>>,
   ) {
-    const args = this.dataHelper.create(data)
+    const args = this.dataHelper.create(dataOrFn)
 
     if ('create' in this.raw) {
       this.raw.create(docAsAdmin(typedDoc.raw), ...args)
@@ -60,9 +60,9 @@ export class TypedTransaction<
 
   setMerge<L extends string>(
     typedDoc: TypedDocumentRef<S, F, L>,
-    data: Partial<STypes.WriteData<S, F, L>>,
+    dataOrFn: DataOrFn<Partial<STypes.WriteData<S, F, L>>>,
   ) {
-    const args = this.dataHelper.setMerge(data)
+    const args = this.dataHelper.setMerge(dataOrFn)
 
     if ('create' in this.raw) {
       this.raw.set(docAsAdmin(typedDoc.raw), ...args)
@@ -74,9 +74,9 @@ export class TypedTransaction<
 
   update<L extends string>(
     typedDoc: TypedDocumentRef<S, F, L>,
-    data: Partial<STypes.WriteData<S, F, L>>,
+    dataOrFn: DataOrFn<Partial<STypes.WriteData<S, F, L>>>,
   ) {
-    const args = this.dataHelper.update(data)
+    const args = this.dataHelper.update(dataOrFn)
 
     if ('create' in this.raw) {
       this.raw.update(docAsAdmin(typedDoc.raw), ...args)

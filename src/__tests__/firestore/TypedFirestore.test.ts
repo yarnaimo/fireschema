@@ -39,7 +39,7 @@ import {
   useTypedQueryOnce,
 } from '../../hooks/index.js'
 import { R } from '../../lib/fp.js'
-import { createUserData, postAData } from '../_fixtures/data.js'
+import { createUserData, postAData, userDataBase } from '../_fixtures/data.js'
 import {
   IPostA,
   IPostB,
@@ -413,7 +413,7 @@ for (const env of ['web', 'admin'] as const) {
         // @ts-expect-error: wrong data type
         expectType<PostU>(data)
         expect<UserU>(data).toMatchObject({
-          ...userData,
+          ...userDataBase,
           timestamp: expect.any(String),
           id: snap.id,
         })
@@ -488,7 +488,7 @@ for (const env of ['web', 'admin'] as const) {
           // @ts-expect-error: wrong data type
           expectType<PostU>(data)
           expect<UserU>(data).toMatchObject({
-            ...userData,
+            ...userDataBase,
             timestamp: expect.any(String),
             id: snap.typedDocs[0].id,
           })
@@ -522,7 +522,7 @@ for (const env of ['web', 'admin'] as const) {
           // @ts-expect-error: wrong data type
           expectType<PostU>(data)
           expect<UserU>(data).toMatchObject({
-            ...userData,
+            ...userDataBase,
             timestamp: expect.any(String),
             id: snap.typedDocs[0].id,
           })
@@ -649,43 +649,43 @@ for (const env of ['web', 'admin'] as const) {
       })
 
       test('create user (fails due to unauthed)', async () => {
-        await assertFails(async () => ur.user.create(userData))
+        await assertFails(async () => ur.user.create(createUserData))
       })
 
       describe('write to non-existing doc', () => {
         test('setMerge fails', async () => {
-          await assertFails(async () => r.user.setMerge(userData))
+          await assertFails(async () => r.user.setMerge(createUserData))
         })
 
         test('update fails', async () => {
-          await assertFails(async () => r.user.update(userData))
+          await assertFails(async () => r.user.update(createUserData))
         })
       })
 
       test('overwrite user fails', async () => {
-        await r.user.create(userData)
-        await r.user.update(userData)
-        await assertFails(async () => r.user.create(userData))
+        await r.user.create(createUserData)
+        await r.user.update(createUserData)
+        await assertFails(async () => r.user.create(createUserData))
       })
     })
 
   describe($env('write'), () => {
     test.each([
       async () => {
-        await r.user.create(userData)
+        await r.user.create(createUserData)
         // @ts-expect-error: wrong data type
         void (async () => r.user.create(postData))
       },
       async () => {
         const b = r.typedFirestore.batch()
-        b.create(r.user, userData)
+        b.create(r.user, createUserData)
         // @ts-expect-error: wrong data type
         void (() => b.create(r.user, postAData))
         await b.commit()
       },
       async () => {
         await r.typedFirestore.runTransaction(async (tt) => {
-          tt.create(r.user, userData)
+          tt.create(r.user, createUserData)
           // @ts-expect-error: wrong data type
           void (() => tt.create(r.user, postAData))
         })
@@ -695,7 +695,7 @@ for (const env of ['web', 'admin'] as const) {
 
       const snapRaw = await getDocUniv(docUniv(usersRaw, 'user'), undefined)
       expect(snapRaw.data()).toMatchObject({
-        ...userData,
+        ...userDataBase,
         _createdAt: expectAnyTimestamp(),
         _updatedAt: expectAnyTimestamp(),
         timestamp: expectAnyTimestamp(),
@@ -736,9 +736,9 @@ for (const env of ['web', 'admin'] as const) {
 
         const snapRaw = await getDocUniv(docUniv(usersRaw, 'user'), undefined)
         expect(snapRaw.data()).toMatchObject({
-          ...userData,
+          ...userDataBase,
           name: 'name1-updated',
-          tags: [...userData.tags, { id: 2, name: 'tag2' }],
+          tags: [...userDataBase.tags, { id: 2, name: 'tag2' }],
           _updatedAt: expectAnyTimestamp(),
           timestamp: expectAnyTimestamp(),
         })
@@ -758,8 +758,8 @@ for (const env of ['web', 'admin'] as const) {
 
         const snapRaw = await getDocUniv(docUniv(usersRaw, 'user'), undefined)
         expect(snapRaw.data()).toMatchObject({
-          ...userData,
-          age: userData.age + 1,
+          ...userDataBase,
+          age: userDataBase.age + 1,
           _updatedAt: expectAnyTimestamp(),
           timestamp: expectAnyTimestamp(),
         })
@@ -854,7 +854,7 @@ for (const env of ['web', 'admin'] as const) {
               error: undefined,
               loading: false,
               snap: expect.any(TypedDocumentSnap),
-              data: { ...userData, timestamp: expect.any(String) },
+              data: { ...userDataBase, timestamp: expect.any(String) },
             })
             expect(
               refEqualUniv(result.current.snap!.typedRef.raw, r.user.raw),
@@ -885,7 +885,7 @@ for (const env of ['web', 'admin'] as const) {
               error: undefined,
               loading: false,
               snap: expect.any(TypedDocumentSnap),
-              data: userData.name,
+              data: userDataBase.name,
             })
             expect(
               refEqualUniv(result.current.snap!.typedRef.raw, r.user.raw),
@@ -949,7 +949,7 @@ for (const env of ['web', 'admin'] as const) {
               error: undefined,
               loading: false,
               snap: expect.any(TypedQuerySnap),
-              data: [{ ...userData, timestamp: expect.any(String) }],
+              data: [{ ...userDataBase, timestamp: expect.any(String) }],
             })
             expect(
               refEqualUniv(
@@ -985,7 +985,7 @@ for (const env of ['web', 'admin'] as const) {
               error: undefined,
               loading: false,
               snap: expect.any(TypedQuerySnap),
-              data: [userData.name],
+              data: [userDataBase.name],
             })
             expect(
               refEqualUniv(

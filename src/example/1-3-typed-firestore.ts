@@ -68,13 +68,13 @@ const techPostsGroup = postsGroup.select.byTag('tech')
  * Write data
  */
 !(async () => {
-  await userRef.create({
+  await userRef.create(({ serverTimestamp }) => ({
     name: 'test',
     displayName: 'Test',
     age: 20,
-    timestamp: typedFirestore.firestoreStatic.serverTimestamp(),
+    timestamp: serverTimestamp(),
     options: { a: true },
-  })
+  }))
   await userRef.setMerge({
     age: 21,
   })
