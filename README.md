@@ -19,14 +19,14 @@
 
 ## Requirement
 
-- **TypeScript** (>= 4.3)
+- **TypeScript** (>= 4.4)
 
 <br />
 
 ## Install
 
 ```sh
-yarn add fireschema
+yarn add fireschema firebase firebase-admin firebase-functions zod
 yarn add -D typescript ts-node
 ```
 
