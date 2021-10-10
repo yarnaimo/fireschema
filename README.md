@@ -291,25 +291,21 @@ const postsRef = userRef.collection('posts')
 const postRef = postsRef.doc('123')
 const techPostsQuery = postsRef.select.byTag('tech') // selector defined in schema
 
-!(async () => {
-  await userRef.get() // DocumentSnapshot<User>
-  await userRef.getData() // User
+await userRef.get() // DocumentSnapshot<User>
+await userRef.getData() // User
 
-  await postRef.get() // DocumentSnapshot<PostA | PostB>
-  await postsRef.get() // QuerySnapshot<PostA | PostB>
-  await postsRef.getData() // (PostA | PostB)[]
-  await techPostsQuery.get() // QuerySnapshot<PostA | PostB>
-})
+await postRef.get() // DocumentSnapshot<PostA | PostB>
+await postsRef.get() // QuerySnapshot<PostA | PostB>
+await postsRef.getData() // (PostA | PostB)[]
+await techPostsQuery.get() // QuerySnapshot<PostA | PostB>
 
 /**
  * Get child collection of retrived document snapshot
  */
-!(async () => {
-  const snap = await usersRef.get()
-  const firstUserRef = snap.typedDocs[0]!.typedRef
+const snap = await usersRef.get()
+const firstUserRef = snap.typedDocs[0]!.typedRef
 
-  await firstUserRef.collection('posts').get()
-})
+await firstUserRef.collection('posts').get()
 
 /**
  * Reference parent collection/document
@@ -323,40 +319,34 @@ const _userRef = postsRef.parentDocument()
 const postsGroup = typedFirestore.collectionGroup('posts')
 const techPostsGroup = postsGroup.select.byTag('tech')
 
-!(async () => {
-  await postsGroup.get() // QuerySnapshot<PostA | PostB>
-  await techPostsGroup.get() // QuerySnapshot<PostA | PostB>
-})
+await postsGroup.get() // QuerySnapshot<PostA | PostB>
+await techPostsGroup.get() // QuerySnapshot<PostA | PostB>
 
 /**
  * Write data
  */
-!(async () => {
-  await userRef.create(({ serverTimestamp }) => ({
-    name: 'test',
-    displayName: 'Test',
-    age: 20,
-    timestamp: serverTimestamp(),
-    options: { a: true },
-  }))
-  await userRef.setMerge({
-    age: 21,
-  })
-  await userRef.update({
-    age: 21,
-  })
-  await userRef.delete()
+await userRef.create(({ serverTimestamp }) => ({
+  name: 'test',
+  displayName: 'Test',
+  age: 20,
+  timestamp: serverTimestamp(),
+  options: { a: true },
+}))
+await userRef.setMerge({
+  age: 21,
 })
+await userRef.update({
+  age: 21,
+})
+await userRef.delete()
 
 /**
  * Transaction
  */
-!(async () => {
-  await typedFirestore.runTransaction(async (tt) => {
-    const snap = await tt.get(userRef)
-    tt.update(userRef, {
-      age: snap.data()!.age + 1,
-    })
+await typedFirestore.runTransaction(async (tt) => {
+  const snap = await tt.get(userRef)
+  tt.update(userRef, {
+    age: snap.data()!.age + 1,
   })
 })
 ```
