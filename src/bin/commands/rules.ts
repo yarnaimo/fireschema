@@ -17,7 +17,7 @@ export const generateRules = async (path: string) => {
     ? '../../../src/core/firestore/_renderer/root.js'
     : isEsm
     ? '../../../esm/src/core/firestore/_renderer/root.js'
-    : '../../../dist/src/core/firestore/_renderer/root.cjs'
+    : '../../../dist/src/core/firestore/_renderer/root.js'
   const rendererModule = await import(rendererPath)
 
   const rendered = rendererModule.renderSchema(

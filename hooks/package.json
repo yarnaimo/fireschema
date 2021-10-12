@@ -1,7 +1,7 @@
 {
   "private": true,
   "type": "module",
-  "main": "../dist/src/hooks/index.cjs",
+  "main": "../dist/src/hooks/index.js",
   "module": "../esm/src/hooks/index.js",
   "types": "../esm/src/hooks/index.d.ts"
 }

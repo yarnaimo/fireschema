@@ -9,30 +9,30 @@
     ".": {
       "node": {
         "import": "./esm/src/index.js",
-        "require": "./dist/src/index.cjs"
+        "require": "./dist/src/index.js"
       },
       "default": "./esm/src/index.js"
     },
     "./admin": {
       "node": {
         "import": "./esm/src/admin/index.js",
-        "require": "./dist/src/admin/index.cjs"
+        "require": "./dist/src/admin/index.js"
       },
       "default": "./esm/src/admin/index.js"
     },
     "./hooks": {
       "node": {
         "import": "./esm/src/hooks/index.js",
-        "require": "./dist/src/hooks/index.cjs"
+        "require": "./dist/src/hooks/index.js"
       },
       "default": "./esm/src/hooks/index.js"
     }
   },
-  "main": "./dist/src/index.cjs",
+  "main": "./dist/src/index.js",
   "types": "./esm/src/index.d.ts",
   "bin": "./esm/src/bin/main.js",
   "scripts": {
-    "build": "tsc -P tsconfig.cjs.json && cp src/lib/*.d.ts dist/src/lib/ && renamer --silent --force --find js --replace cjs 'dist/**' && ./scripts/after-build-cjs.sh",
+    "build": "tsc -P tsconfig.cjs.json && cp src/lib/*.d.ts dist/src/lib/ && echo '{ \"type\": \"commonjs\" }' > dist/package.json",
     "build:esm": "tsc && cp src/lib/*.d.ts esm/src/lib/ && ./scripts/after-build-esm.sh",
     "debug": "node --inspect -r ts-node/register",
     "docs": "./scripts/update-docs.sh",
@@ -85,7 +85,6 @@
     "prettier": "^2.3.2",
     "react": "^17.0.2",
     "react-test-renderer": "^17.0.2",
-    "renamer": "^4.0.0",
     "sort-package-json": "^1.50.0",
     "ts-node": "^10.2.1",
     "tsd": "^0.17.0",
