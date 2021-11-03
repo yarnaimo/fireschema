@@ -21,7 +21,7 @@ export type UseTypedQuery<
   S extends STypes.RootOptions.All,
   F extends _web.Firestore,
   L extends string,
-  U,
+  U = STypes.DocDataAt<S, F, L>,
   V = U,
 > = {
   snap: TypedQuerySnap<S, F, L, U> | undefined

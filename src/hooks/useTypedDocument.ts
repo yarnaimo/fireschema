@@ -18,7 +18,7 @@ export type UseTypedDocument<
   S extends STypes.RootOptions.All,
   F extends _web.Firestore,
   L extends string,
-  U,
+  U = STypes.DocDataAt<S, F, L>,
   V = U,
 > = {
   snap: TypedDocumentSnap<S, F, L, U> | undefined
