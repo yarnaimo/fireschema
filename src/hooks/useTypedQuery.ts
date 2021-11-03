@@ -2,6 +2,10 @@ import {
   useCollection,
   useCollectionOnce,
 } from 'react-firebase-hooks/firestore'
+import {
+  OnceOptions,
+  Options,
+} from 'react-firebase-hooks/firestore/dist/firestore/types'
 
 import {
   QueryDocumentSnapDataOptions,
@@ -11,12 +15,7 @@ import {
 } from '../core/index.js'
 import { _web } from '../lib/firestore-types'
 import { useQuerySnapData } from './useSnapData.js'
-import {
-  HasGetOptions,
-  HasSnapListenOptions,
-  useFirestoreErrorLogger,
-  useRefChangeLimitExceeded,
-} from './utils.js'
+import { useFirestoreErrorLogger, useRefChangeLimitExceeded } from './utils.js'
 
 export type UseTypedQuery<
   S extends STypes.RootOptions.All,
@@ -41,7 +40,7 @@ export const useTypedQueryOnce = <
   {
     getOptions,
     ...dataOptions
-  }: HasGetOptions &
+  }: OnceOptions &
     QueryDocumentSnapDataOptions<S, _web.Firestore, L, U, V> = {},
 ): UseTypedQuery<S, _web.Firestore, L, U, V> => {
   const { safeRef } = useRefChangeLimitExceeded(typedQuery?.raw)
@@ -49,8 +48,7 @@ export const useTypedQueryOnce = <
   const [_snap, loading, error] = useCollectionOnce<U>(safeRef(), {
     getOptions,
   })
-  // FIXME: remove as any
-  useFirestoreErrorLogger(error as any)
+  useFirestoreErrorLogger(error)
   const { snap, data } = useQuerySnapData(typedQuery, _snap, dataOptions)
 
   return { snap, data, loading, error }
@@ -66,16 +64,14 @@ export const useTypedQuery = <
   {
     snapshotListenOptions,
     ...dataOptions
-  }: HasSnapListenOptions &
-    QueryDocumentSnapDataOptions<S, _web.Firestore, L, U, V> = {},
+  }: Options & QueryDocumentSnapDataOptions<S, _web.Firestore, L, U, V> = {},
 ): UseTypedQuery<S, _web.Firestore, L, U, V> => {
   const { safeRef } = useRefChangeLimitExceeded(typedQuery?.raw)
 
   const [_snap, loading, error] = useCollection<U>(safeRef(), {
     snapshotListenOptions,
   })
-  // FIXME: remove as any
-  useFirestoreErrorLogger(error as any)
+  useFirestoreErrorLogger(error)
   const { snap, data } = useQuerySnapData(typedQuery, _snap, dataOptions)
 
   return { snap, data, loading, error }

@@ -8595,10 +8595,10 @@ react-error-boundary@^3.1.0:
   dependencies:
     "@babel/runtime" "^7.12.5"
 
-react-firebase-hooks@^3.0.4:
-  version "3.0.4"
-  resolved "https://registry.yarnpkg.com/react-firebase-hooks/-/react-firebase-hooks-3.0.4.tgz#2185357d2bd6f7292552bc65f2459bbf9364e673"
-  integrity sha512-eqhj8O5t/9nzGS/DfCGQX9goqbxTP2T/qrY2B13s4rx/VIJ4Bx3WnZgqxEVA0Y/mWZBh7gOlXSPdRGbxBq5d8g==
+react-firebase-hooks@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/react-firebase-hooks/-/react-firebase-hooks-4.0.0.tgz#0e82c6c7a336834dfd73ccdd6897ee4f654396e8"
+  integrity sha512-nWumMnve8eD51+aW3hQ6ItgcQB2r5PUXCKWGuJE8PbvCy6GQfVTe0KCX9ACoFq0WMHLDtxhx+WPbqGpnQ3XPQA==
 
 "react-is@^16.12.0 || ^17.0.0", react-is@^17.0.1:
   version "17.0.1"

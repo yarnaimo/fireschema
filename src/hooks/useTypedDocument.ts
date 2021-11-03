@@ -1,4 +1,8 @@
 import { useDocument, useDocumentOnce } from 'react-firebase-hooks/firestore'
+import {
+  OnceOptions,
+  Options,
+} from 'react-firebase-hooks/firestore/dist/firestore/types'
 
 import {
   DocumentSnapDataOptions,
@@ -8,12 +12,7 @@ import {
 } from '../core/index.js'
 import { _web } from '../lib/firestore-types'
 import { useDocumentSnapData } from './useSnapData.js'
-import {
-  HasGetOptions,
-  HasSnapListenOptions,
-  useFirestoreErrorLogger,
-  useRefChangeLimitExceeded,
-} from './utils.js'
+import { useFirestoreErrorLogger, useRefChangeLimitExceeded } from './utils.js'
 
 export type UseTypedDocument<
   S extends STypes.RootOptions.All,
@@ -38,15 +37,14 @@ export const useTypedDocumentOnce = <
   {
     getOptions,
     ...dataOptions
-  }: HasGetOptions & DocumentSnapDataOptions<S, _web.Firestore, L, U, V> = {},
+  }: OnceOptions & DocumentSnapDataOptions<S, _web.Firestore, L, U, V> = {},
 ): UseTypedDocument<S, _web.Firestore, L, U, V> => {
   const { safeRef } = useRefChangeLimitExceeded(typedDoc?.raw)
 
   const [_snap, loading, error] = useDocumentOnce<U>(safeRef(), {
     getOptions,
   })
-  // FIXME: remove as any
-  useFirestoreErrorLogger(error as any)
+  useFirestoreErrorLogger(error)
   const { snap, data } = useDocumentSnapData(typedDoc, _snap, dataOptions)
 
   return { snap, data, loading, error }
@@ -62,16 +60,14 @@ export const useTypedDocument = <
   {
     snapshotListenOptions,
     ...dataOptions
-  }: HasSnapListenOptions &
-    DocumentSnapDataOptions<S, _web.Firestore, L, U, V> = {},
+  }: Options & DocumentSnapDataOptions<S, _web.Firestore, L, U, V> = {},
 ): UseTypedDocument<S, _web.Firestore, L, U, V> => {
   const { safeRef } = useRefChangeLimitExceeded(typedDoc?.raw)
 
   const [_snap, loading, error] = useDocument<U>(safeRef(), {
     snapshotListenOptions,
   })
-  // FIXME: remove as any
-  useFirestoreErrorLogger(error as any)
+  useFirestoreErrorLogger(error)
   const { snap, data } = useDocumentSnapData(typedDoc, _snap, dataOptions)
 
   return { snap, data, loading, error }

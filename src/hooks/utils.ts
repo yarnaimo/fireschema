@@ -10,36 +10,6 @@ import { useEffect, useRef } from 'react'
 
 import { _web } from '../lib/firestore-types'
 
-export type HasGetOptions = {
-  // TODO:
-  getOptions?: unknown
-}
-
-export type HasSnapListenOptions = {
-  snapshotListenOptions?: _web.SnapshotListenOptions
-}
-
-type RefHook<T> = {
-  current: T
-}
-
-// export const useComparatorRef = <T>(
-//   value: T | null | undefined,
-//   isEqual: (v1: T | null | undefined, v2: T | null | undefined) => boolean,
-//   onChange?: () => void,
-// ): RefHook<T | null | undefined> => {
-//   const ref = useRef(value)
-//   useEffect(() => {
-//     if (!isEqual(value, ref.current)) {
-//       ref.current = value
-//       if (onChange) {
-//         onChange()
-//       }
-//     }
-//   })
-//   return ref
-// }
-
 type RefOrQuery = DocumentReference | CollectionReference | Query
 
 const queryOrRefEqual = <T extends RefOrQuery>(left: T, right: T) => {
@@ -57,13 +27,6 @@ const isEqual = <T extends RefOrQuery>(
 
   return bothNull || equal
 }
-
-// export const useIsEqualRef = <T extends HasIsEqual<T>>(
-//   value: T | null | undefined,
-//   onChange?: () => void,
-// ): RefHook<T | null | undefined> => {
-//   return useComparatorRef(value, isEqual, onChange)
-// }
 
 export const useRefChangeLimitExceeded = <T extends RefOrQuery>(
   fref: T | null | undefined,

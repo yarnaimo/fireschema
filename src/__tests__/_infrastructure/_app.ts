@@ -1,14 +1,12 @@
-import { deleteApp, getApps } from '@firebase/app'
-import { getFunctions } from '@firebase/functions'
 import {
   deleteApp as deleteAppAdmin,
   getApps as getAppsAdmin,
   initializeApp as initializeAdminApp,
 } from 'firebase-admin/app'
 import { getFirestore as getFirestoreAdmin } from 'firebase-admin/firestore'
-import firebase from 'firebase/compat/app'
-import 'firebase/compat/firestore'
-import { Firestore, connectFirestoreEmulator } from 'firebase/firestore'
+import { deleteApp, getApps, initializeApp } from 'firebase/app'
+import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore'
+import { getFunctions } from 'firebase/functions'
 import got from 'got'
 import { MapAsync } from 'lifts'
 
@@ -43,8 +41,8 @@ afterAll(async () => {
 const appName = () => Date.now() + '_' + Math.random()
 
 export const getTestAppWeb = (uid: string) => {
-  const app = firebase.initializeApp({ projectId }, appName())
-  const firestore = app.firestore() as unknown as Firestore
+  const app = initializeApp({ projectId }, appName())
+  const firestore = getFirestore(app)
   connectFirestoreEmulator(
     firestore,
     localhost,
