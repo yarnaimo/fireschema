@@ -36,7 +36,7 @@
     "build:esm": "tsc && cp src/lib/*.d.ts esm/src/lib/ && ./scripts/after-build-esm.sh",
     "debug": "node --inspect -r ts-node/register",
     "docs": "./scripts/update-docs.sh",
-    "firestore:rules": "./esm/src/bin/main.js rules src/example/1-1-schema.ts",
+    "firestore:rules": "./esm/src/bin/main.js rules esm/src/example/1-1-schema.js",
     "functions:export": "./esm/src/bin/main.js export src/__tests__/_functions",
     "lint": "eslint --ignore-path .gitignore '**/*.{js,jsx,ts,tsx}'",
     "prepare": "./scripts/append-emulator-proxyer.sh",
@@ -56,6 +56,7 @@
     "getopts": "^2.3.0",
     "lifts": "^0.1.4",
     "react-firebase-hooks": "^4.0.0",
+    "read-pkg-up": "^9.0.0",
     "remeda": "^0.0.30",
     "type-fest": "^2.2.0"
   },

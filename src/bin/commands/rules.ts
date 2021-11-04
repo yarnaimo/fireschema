@@ -1,23 +1,21 @@
-import { readFileSync, writeFileSync } from 'fs'
-import { relative, resolve } from 'path'
+import { writeFileSync } from 'fs'
+import { dirname, resolve } from 'path'
+
+import { readPackageUp } from 'read-pkg-up'
 
 const rulesPath = 'firestore.rules'
 
-const relativePath = relative(process.cwd(), __dirname)
-const isDev = !relativePath.startsWith('node_modules/')
-
 export const generateRules = async (path: string) => {
-  const packageJson = JSON.parse(readFileSync('package.json', 'utf8'))
-  const isEsm = (packageJson.type === 'module') as boolean
+  const pkg = await readPackageUp({ cwd: dirname(path) })
+  const isEsm = pkg?.packageJson.type === 'module'
 
   const schemaPath = resolve(path)
   const schemaModule = await import(schemaPath)
 
-  const rendererPath = isDev
-    ? '../../../src/core/firestore/_renderer/root.js'
-    : isEsm
-    ? '../../../esm/src/core/firestore/_renderer/root.js'
-    : '../../../dist/src/core/firestore/_renderer/root.js'
+  const srcDir = isEsm
+    ? '../..' // esm/src/bin/commands to esm/src
+    : '../../../../dist/src' // esm/src/bin/commands to dist/src
+  const rendererPath = `${srcDir}/core/firestore/_renderer/root.js`
   const rendererModule = await import(rendererPath)
 
   const rendered = rendererModule.renderSchema(
