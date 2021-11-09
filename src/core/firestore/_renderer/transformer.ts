@@ -6,6 +6,7 @@ import {
   ZodIntersection,
   ZodLiteral,
   ZodNull,
+  ZodNullable,
   ZodNumber,
   ZodObject,
   ZodOptional,
@@ -45,6 +46,9 @@ export const _schemaToRule =
 
     if (t instanceof ZodOptional)
       return _schemaToRule(parent, key)(z.union([t.unwrap(), z.undefined()]))
+
+    if (t instanceof ZodNullable)
+      return _schemaToRule(parent, key)(z.union([t.unwrap(), z.null()]))
 
     if (t instanceof ZodAny) return `true`
     if (t instanceof ZodUnknown) return `true`

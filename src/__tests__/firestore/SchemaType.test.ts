@@ -28,6 +28,10 @@ test.each([
   [z.null(), 'data == null'],
   [z.boolean(), 'data is bool'],
   [z.string(), 'data is string'],
+  [
+    z.string().min(5).nullable(),
+    '((data is string && data.size() >= 5) || data == null)',
+  ],
   [z.string().min(5), '(data is string && data.size() >= 5)'],
   [z.string().max(20), '(data is string && data.size() <= 20)'],
   [
