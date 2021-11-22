@@ -1,6 +1,6 @@
 import { httpsCallable } from 'firebase/functions'
 
-import { _fweb } from '../../../lib/functions-types'
+import { FunctionsErrorFixed, _fweb } from '../../../lib/functions-types.js'
 import { is } from '../../../lib/type.js'
 import { ExtractFP } from '../../types/_functions.js'
 import { FunTypes } from '../../types/index.js'
@@ -36,7 +36,7 @@ export class TypedCaller<M extends FunTypes.FunctionsModule> {
         data: result.data as FunTypes.Callable.OutputOf<MC, FP>,
       }
     } catch (error) {
-      return { error: error as _fweb.FunctionsError }
+      return { error: error as FunctionsErrorFixed }
     }
   }
 }

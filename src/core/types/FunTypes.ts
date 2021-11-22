@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
-import { _admin } from '../../lib/firestore-types'
-import { _fadmin, _fweb } from '../../lib/functions-types'
+import { _admin } from '../../lib/firestore-types.js'
+import { FunctionsErrorFixed, _fadmin } from '../../lib/functions-types.js'
 import { ExtractFP, ParseFP } from './_functions.js'
 import { GetDeep } from './_object.js'
 
@@ -55,7 +55,7 @@ export declare namespace FunTypes {
       FP extends ExtractFP<MC>,
     > = z.infer<GetByFP<MC, FP>['output']>
 
-    export type CallResult<T, E = _fweb.FunctionsError> =
+    export type CallResult<T, E = FunctionsErrorFixed> =
       | { data: T; error?: never }
       | { data?: never; error: E }
   }
