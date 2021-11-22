@@ -1,7 +1,6 @@
 import { JsonValue } from 'type-fest'
 import {
   OK,
-  ParseContext,
   ParseReturnType,
   ZodIntersection,
   ZodObject,
@@ -20,12 +19,9 @@ export namespace SchemaType {
 }
 
 export class ZodTimestamp extends ZodType<FTypes.Timestamp> {
-  _parse(
-    ctx: ParseContext,
-    data: any,
-    parsedType: any,
-  ): ParseReturnType<FTypes.Timestamp> {
-    return OK(data)
+  _parse(input: any): ParseReturnType<FTypes.Timestamp> {
+    const { ctx } = this._processInputParams(input)
+    return OK(ctx.data)
   }
 }
 

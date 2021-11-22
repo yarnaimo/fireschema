@@ -41,7 +41,10 @@ export class TypedTransaction<
     dataOptions: DocumentSnapDataOptions<S, F, L, U, V> = {},
   ) {
     const typedSnap = await this.get(typedDoc)
-    return typedSnap.data(dataOptions)
+    return typedSnap.data(
+      // @ts-ignore TODO:
+      dataOptions,
+    )
   }
 
   create<L extends string>(
