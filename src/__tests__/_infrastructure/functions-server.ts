@@ -4,8 +4,8 @@ import { z } from 'zod'
 
 import { TypedFunctions } from '../../admin/index.js'
 import { FunTypes, STypes, messages } from '../../index.js'
-import { _admin } from '../../lib/firestore-types'
-import { _fadmin } from '../../lib/functions-types'
+import { _admin } from '../../lib/firestore-types.js'
+import { _fadmin } from '../../lib/functions-types.js'
 import { Type } from '../../lib/type.js'
 import {
   IPostA,

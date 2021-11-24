@@ -10,7 +10,7 @@ import {
   TypedDocumentRef,
   TypedDocumentSnap,
 } from '../core/index.js'
-import { _web } from '../lib/firestore-types'
+import { _web } from '../lib/firestore-types.js'
 import { useDocumentSnapData } from './useSnapData.js'
 import { useFirestoreErrorLogger, useRefChangeLimitExceeded } from './utils.js'
 

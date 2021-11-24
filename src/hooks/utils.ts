@@ -8,7 +8,7 @@ import {
 } from 'firebase/firestore'
 import { useEffect, useRef } from 'react'
 
-import { _web } from '../lib/firestore-types'
+import { _web } from '../lib/firestore-types.js'
 
 type RefOrQuery = DocumentReference | CollectionReference | Query
 

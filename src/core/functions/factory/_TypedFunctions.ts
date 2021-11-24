@@ -2,7 +2,7 @@ import * as firestore from 'firebase-admin/firestore'
 import * as functions from 'firebase-functions'
 import { z } from 'zod'
 
-import { _fadmin } from '../../../lib/functions-types'
+import { _fadmin } from '../../../lib/functions-types.js'
 import { messages } from '../../constants/index.js'
 import { FirestoreModel, InferFirestoreModelS } from '../../firestore/index.js'
 import { FunTypes, STypes, SchemaType } from '../../types/index.js'

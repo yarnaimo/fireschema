@@ -1,4 +1,4 @@
-import { _admin, _web } from '../../lib/firestore-types'
+import { _admin, _web } from '../../lib/firestore-types.js'
 
 export declare namespace FTypes {
   export type Env<F, W, A> = F extends _web.Firestore ? W : A

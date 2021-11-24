@@ -1,4 +1,4 @@
-import { _fadmin } from '../../lib/functions-types'
+import { _fadmin } from '../../lib/functions-types.js'
 import { FunTypes } from '../types/index.js'
 import { Subtract } from './_object.js'
 

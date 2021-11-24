@@ -13,7 +13,7 @@ import {
   TypedQueryRef,
   TypedQuerySnap,
 } from '../core/index.js'
-import { _web } from '../lib/firestore-types'
+import { _web } from '../lib/firestore-types.js'
 import { useQuerySnapData } from './useSnapData.js'
 import { useFirestoreErrorLogger, useRefChangeLimitExceeded } from './utils.js'
 

@@ -1,4 +1,4 @@
-import { _admin, _web } from '../../../lib/firestore-types'
+import { _admin, _web } from '../../../lib/firestore-types.js'
 import { is } from '../../../lib/type.js'
 import { _createdAt, _updatedAt } from '../../constants/index.js'
 import { FTypes } from '../../types/index.js'

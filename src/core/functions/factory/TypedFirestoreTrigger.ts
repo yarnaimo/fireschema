@@ -1,5 +1,5 @@
-import { _admin } from '../../../lib/firestore-types'
-import { _fadmin } from '../../../lib/functions-types'
+import { _admin } from '../../../lib/firestore-types.js'
+import { _fadmin } from '../../../lib/functions-types.js'
 import { ParseDocumentPath } from '../../types/_firestore.js'
 import { FunTypes, STypes } from '../../types/index.js'
 import { firestorePathToLoc } from '../../utils/_firestore.js'

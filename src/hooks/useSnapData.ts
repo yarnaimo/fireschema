@@ -9,7 +9,7 @@ import {
   TypedQueryRef,
   TypedQuerySnap,
 } from '../core/index.js'
-import { _web } from '../lib/firestore-types'
+import { _web } from '../lib/firestore-types.js'
 
 export const useDocumentSnapData = <
   S extends STypes.RootOptions.All,
