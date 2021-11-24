@@ -12,7 +12,7 @@ import {
 } from '../core/index.js'
 import { _web } from '../lib/firestore-types.js'
 import { useDocumentSnapData } from './useSnapData.js'
-import { useFirestoreErrorLogger, useRefChangeLimitExceeded } from './utils.js'
+import { useFirestoreErrorLogger, useSafeRef } from './utils.js'
 
 export type UseTypedDocument<
   S extends STypes.RootOptions.All,
@@ -33,17 +33,19 @@ export const useTypedDocumentOnce = <
   U,
   V = U,
 >(
-  typedDoc: TypedDocumentRef<S, _web.Firestore, L, U> | null | undefined,
+  typedDoc: TypedDocumentRef<S, _web.Firestore, L, U> | undefined,
   {
     getOptions,
     ...dataOptions
   }: OnceOptions & DocumentSnapDataOptions<S, _web.Firestore, L, U, V> = {},
 ): UseTypedDocument<S, _web.Firestore, L, U, V> => {
-  const { safeRef } = useRefChangeLimitExceeded(typedDoc?.raw)
+  const { safeRef, refChanged } = useSafeRef(typedDoc?.raw)
 
-  const [_snap, loading, error] = useDocumentOnce<U>(safeRef(), {
+  const [_snap, _loading, error] = useDocumentOnce<U>(safeRef, {
     getOptions,
   })
+  const loading = _loading || refChanged
+
   useFirestoreErrorLogger(error)
   const { snap, data } = useDocumentSnapData(typedDoc, _snap, dataOptions)
 
@@ -56,17 +58,19 @@ export const useTypedDocument = <
   U,
   V = U,
 >(
-  typedDoc: TypedDocumentRef<S, _web.Firestore, L, U> | null | undefined,
+  typedDoc: TypedDocumentRef<S, _web.Firestore, L, U> | undefined,
   {
     snapshotListenOptions,
     ...dataOptions
   }: Options & DocumentSnapDataOptions<S, _web.Firestore, L, U, V> = {},
 ): UseTypedDocument<S, _web.Firestore, L, U, V> => {
-  const { safeRef } = useRefChangeLimitExceeded(typedDoc?.raw)
+  const { safeRef, refChanged } = useSafeRef(typedDoc?.raw)
 
-  const [_snap, loading, error] = useDocument<U>(safeRef(), {
+  const [_snap, _loading, error] = useDocument<U>(safeRef, {
     snapshotListenOptions,
   })
+  const loading = _loading || refChanged
+
   useFirestoreErrorLogger(error)
   const { snap, data } = useDocumentSnapData(typedDoc, _snap, dataOptions)
 

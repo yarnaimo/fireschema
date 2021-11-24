@@ -815,6 +815,8 @@ for (const env of ['web', 'admin'] as const) {
           const { result, rerender, waitForNextUpdate, unmount } = renderHook(
             () => useTypedDocument(ref),
           )
+          expect(result.current).toMatchObject({ loading: true })
+
           await waitForNextUpdate()
 
           expect(result.current).toMatchObject({
@@ -824,9 +826,10 @@ for (const env of ['web', 'admin'] as const) {
           })
 
           const consoleMock = jest.spyOn(console, 'error').mockImplementation()
-          for (const _ of R.range(0, 3)) {
+          for (const i of R.range(0, 3)) {
             updateRef()
             rerender()
+            expect(result.current).toMatchObject({ loading: i < 2 })
             await sleep(500)
           }
           consoleMock.mockRestore()
@@ -910,6 +913,8 @@ for (const env of ['web', 'admin'] as const) {
           const { result, rerender, waitForNextUpdate, unmount } = renderHook(
             () => useTypedQuery(ref),
           )
+          expect(result.current).toMatchObject({ loading: true })
+
           await waitForNextUpdate()
 
           expect(result.current).toMatchObject({
@@ -919,9 +924,10 @@ for (const env of ['web', 'admin'] as const) {
           })
 
           const consoleMock = jest.spyOn(console, 'error').mockImplementation()
-          for (const _ of R.range(0, 3)) {
+          for (const i of R.range(0, 3)) {
             updateRef()
             rerender()
+            expect(result.current).toMatchObject({ loading: i < 2 })
             await sleep(500)
           }
           consoleMock.mockRestore()

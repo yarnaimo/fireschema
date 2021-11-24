@@ -4,7 +4,7 @@ import { collection, query, where } from 'firebase/firestore'
 
 import { getTestAppWeb } from '../__tests__/_infrastructure/_app.js'
 import { sleep } from '../__tests__/_utils/common.js'
-import { useRefChangeLimitExceeded } from './utils.js'
+import { useSafeRef } from './utils.js'
 
 const logTimestamps = (timestamps: dayjs.Dayjs[]) => {
   console.log(
@@ -16,53 +16,97 @@ const logTimestamps = (timestamps: dayjs.Dayjs[]) => {
 const app = getTestAppWeb('user').firestore()
 const posts = collection(app, 'posts')
 
-test('exceeded', async () => {
-  const { result, rerender, unmount } = renderHook(() => {
+describe('useSafeRef', () => {
+  test('exceeded', async () => {
+    const { result, rerender, unmount } = renderHook(() => {
+      const consoleMock = jest.spyOn(console, 'error').mockImplementation()
+
+      const date = dayjs().toDate()
+      const result = useSafeRef(query(posts, where('date', '==', date)))
+
+      consoleMock.mockRestore()
+      return result
+    })
+    expect(result.current.refChanged).toBe(true)
+
+    rerender()
+    expect(result.current.refChanged).toBe(true)
+    await sleep(250)
+    rerender()
+    await sleep(250)
+    rerender()
+    await sleep(250)
+
+    rerender()
+    expect(result.current.refChanged).toBe(true)
+    expect(result.current.timestamps.current.length).toBeGreaterThan(1)
+    expect(result.current.safeRef).toBeFalsy()
+
+    await sleep(5100)
+
+    // logTimestamps(result.current.timestamps.current)
+
+    rerender()
+    expect(result.current.refChanged).toBe(true)
+    expect(result.current.timestamps.current.length).toBeGreaterThan(1)
+    expect(result.current.safeRef).toBeTruthy()
+
+    unmount()
+  })
+
+  test('not exceeded', async () => {
     const date = dayjs().toDate()
-    return useRefChangeLimitExceeded(query(posts, where('date', '==', date)))
+
+    const { result, rerender, unmount } = renderHook(() => {
+      return useSafeRef(query(posts, where('date', '==', date)))
+    })
+    expect(result.current.refChanged).toBe(true)
+
+    rerender()
+    expect(result.current.refChanged).toBe(false)
+    await sleep(500)
+
+    rerender()
+    expect(result.current.refChanged).toBe(false)
+    expect(result.current.timestamps.current.length).toBe(1)
+    expect(result.current.safeRef).toBeTruthy()
+
+    await sleep(5100)
+
+    rerender()
+    expect(result.current.refChanged).toBe(false)
+    expect(result.current.timestamps.current.length).toBe(1)
+    expect(result.current.safeRef).toBeTruthy()
+
+    unmount()
   })
-
-  rerender()
-  await sleep(250)
-  rerender()
-  await sleep(250)
-  rerender()
-  await sleep(250)
-
-  expect(result.current.timestamps.current.length).toBeGreaterThan(1)
-  expect(result.current.exceeded()).toBe(true)
-  expect(result.current.safeRef()).toBeFalsy()
-
-  await sleep(5100)
-
-  // logTimestamps(result.current.timestamps.current)
-
-  expect(result.current.timestamps.current.length).toBeGreaterThan(1)
-  expect(result.current.exceeded()).toBe(false)
-  expect(result.current.safeRef()).toBeTruthy()
-
-  unmount()
 })
 
-test('not exceeded', async () => {
-  const date = dayjs().toDate()
+// test('useLoadingOverride', () => {
+//   const q = (tag: string) => query(posts, where('tag', '==', tag))
 
-  const { result, rerender, unmount } = renderHook(() => {
-    return useRefChangeLimitExceeded(query(posts, where('date', '==', date)))
-  })
+//   let args: [Query | undefined, boolean] = [undefined, true]
+//   const update = (..._args: [Query | undefined, boolean]) => {
+//     args = _args
+//     rerender()
+//   }
 
-  rerender()
-  await sleep(500)
+//   const { result, rerender, unmount } = renderHook(() =>
+//     useLoadingOverride(useSafeRef(args[0]).safeRef, args[1]),
+//   )
+//   expect(result.current).toBeTruthy()
 
-  expect(result.current.timestamps.current.length).toBe(1)
-  expect(result.current.exceeded()).toBe(false)
-  expect(result.current.safeRef()).toBeTruthy()
+//   update(undefined, false)
+//   expect(result.current).toBeFalsy()
 
-  await sleep(5100)
+//   update(q('tag1'), false)
+//   expect(result.current).toBeTruthy() // ref changed
 
-  expect(result.current.timestamps.current.length).toBe(1)
-  expect(result.current.exceeded()).toBe(false)
-  expect(result.current.safeRef()).toBeTruthy()
+//   update(q('tag1'), true)
+//   expect(result.current).toBeTruthy()
 
-  unmount()
-})
+//   update(q('tag1'), false)
+//   expect(result.current).toBeFalsy()
+
+//   unmount()
+// })

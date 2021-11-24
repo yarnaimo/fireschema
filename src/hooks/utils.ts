@@ -28,35 +28,31 @@ const isEqual = <T extends RefOrQuery>(
   return bothNull || equal
 }
 
-export const useRefChangeLimitExceeded = <T extends RefOrQuery>(
-  fref: T | null | undefined,
-) => {
+export const useSafeRef = <T extends RefOrQuery>(ref: T | undefined) => {
   const timestampsRef = useRef<Dayjs[]>([])
 
-  const frefRef = useRef<RefOrQuery | null | undefined>(null)
-  useEffect(() => {
-    if (!isEqual(fref, frefRef.current)) {
-      frefRef.current = fref
-      timestampsRef.current = [dayjs(), ...timestampsRef.current]
-    }
-  })
+  const prevRef = useRef<RefOrQuery>()
+  const refChanged = !isEqual(prevRef.current, ref)
+  prevRef.current = ref
 
-  const exceeded = () => {
-    const a = !!timestampsRef.current[3]?.isAfter(dayjs().subtract(3, 'second'))
-    const b = !!timestampsRef.current[5]?.isAfter(dayjs().subtract(5, 'second'))
-    return a || b
+  if (refChanged) {
+    timestampsRef.current = [dayjs(), ...timestampsRef.current]
   }
 
-  const safeRef = () => (exceeded() ? undefined : fref)
+  const a = !!timestampsRef.current[3]?.isAfter(dayjs().subtract(3, 'second'))
+  const b = !!timestampsRef.current[5]?.isAfter(dayjs().subtract(5, 'second'))
+  const exceeded = a || b
 
-  if (exceeded()) {
+  const safeRef = exceeded ? undefined : ref
+
+  if (exceeded) {
     console.error(
       '%cRef change limit exceeded!!!',
       'font-weight: bold; font-size: large; color: red;',
     )
   }
 
-  return { exceeded, safeRef, timestamps: timestampsRef }
+  return { safeRef, refChanged, timestamps: timestampsRef }
 }
 
 export const useFirestoreErrorLogger = (
