@@ -4,6 +4,7 @@ import { collection, query, where } from 'firebase/firestore'
 
 import { getTestAppWeb } from '../__tests__/_infrastructure/_app.js'
 import { sleep } from '../__tests__/_utils/common.js'
+import { wrapSuspendable } from '../__tests__/_utils/hooks.js'
 import { useSafeRef } from './utils.js'
 
 const logTimestamps = (timestamps: dayjs.Dayjs[]) => {
@@ -22,15 +23,17 @@ describe('useSafeRef', () => {
       const consoleMock = jest.spyOn(console, 'error').mockImplementation()
 
       const date = dayjs().toDate()
-      const result = useSafeRef(query(posts, where('date', '==', date)))
+      const result = wrapSuspendable(() =>
+        useSafeRef(query(posts, where('date', '==', date))),
+      )
 
       consoleMock.mockRestore()
       return result
     })
-    expect(result.current.refChanged).toBe(true)
+    expect(result.current!.refChanged).toBe(true)
 
     rerender()
-    expect(result.current.refChanged).toBe(true)
+    expect(result.current!.refChanged).toBe(true)
     await sleep(250)
     rerender()
     await sleep(250)
@@ -38,18 +41,14 @@ describe('useSafeRef', () => {
     await sleep(250)
 
     rerender()
-    expect(result.current.refChanged).toBe(true)
-    expect(result.current.timestamps.current.length).toBeGreaterThan(1)
-    expect(result.current.safeRef).toBeFalsy()
+    expect(result.current).toBe(null)
 
     await sleep(5100)
 
     // logTimestamps(result.current.timestamps.current)
 
     rerender()
-    expect(result.current.refChanged).toBe(true)
-    expect(result.current.timestamps.current.length).toBeGreaterThan(1)
-    expect(result.current.safeRef).toBeTruthy()
+    expect(result.current).toBe(null)
 
     unmount()
   })

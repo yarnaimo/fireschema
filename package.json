@@ -55,7 +55,7 @@
     "dayjs": "^1.10.7",
     "getopts": "^2.3.0",
     "lifts": "^0.1.4",
-    "react-firebase-hooks": "^4.0.1",
+    "reactfire": "^4.2.1",
     "read-pkg-up": "^9.0.0",
     "remeda": "^0.0.30",
     "type-fest": "^2.5.4"

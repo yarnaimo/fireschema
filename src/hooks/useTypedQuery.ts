@@ -1,11 +1,5 @@
-import {
-  useCollection,
-  useCollectionOnce,
-} from 'react-firebase-hooks/firestore'
-import {
-  OnceOptions,
-  Options,
-} from 'react-firebase-hooks/firestore/dist/firestore/types'
+import { ObservableStatus, useFirestoreCollection } from 'reactfire'
+import { Except } from 'type-fest'
 
 import {
   QueryDocumentSnapDataOptions,
@@ -24,37 +18,9 @@ export type UseTypedQuery<
   U = STypes.DocDataAt<S, F, L>,
   V = U,
 > = {
-  snap: TypedQuerySnap<S, F, L, U> | undefined
-  data: V[] | undefined
-  loading: boolean
-  error: Error | undefined
-}
-
-export const useTypedQueryOnce = <
-  S extends STypes.RootOptions.All,
-  L extends string,
-  U,
-  V = U,
->(
-  typedQuery: TypedQueryRef<S, _web.Firestore, L, U> | undefined,
-  {
-    getOptions,
-    ...dataOptions
-  }: OnceOptions &
-    QueryDocumentSnapDataOptions<S, _web.Firestore, L, U, V> = {},
-): UseTypedQuery<S, _web.Firestore, L, U, V> => {
-  const { safeRef, refChanged } = useSafeRef(typedQuery?.raw)
-
-  const [_snap, _loading, error] = useCollectionOnce<U>(safeRef, {
-    getOptions,
-  })
-  const loading = _loading || refChanged
-
-  useFirestoreErrorLogger(error)
-  const { snap, data } = useQuerySnapData(typedQuery, _snap, dataOptions)
-
-  return { snap, data, loading, error }
-}
+  snap: TypedQuerySnap<S, F, L, U>
+  data: V[]
+} & Except<ObservableStatus<unknown>, 'data'>
 
 export const useTypedQuery = <
   S extends STypes.RootOptions.All,
@@ -62,21 +28,19 @@ export const useTypedQuery = <
   U,
   V = U,
 >(
-  typedQuery: TypedQueryRef<S, _web.Firestore, L, U> | undefined,
-  {
-    snapshotListenOptions,
-    ...dataOptions
-  }: Options & QueryDocumentSnapDataOptions<S, _web.Firestore, L, U, V> = {},
+  typedQuery: TypedQueryRef<S, _web.Firestore, L, U>,
+  dataOptions: QueryDocumentSnapDataOptions<S, _web.Firestore, L, U, V> = {},
 ): UseTypedQuery<S, _web.Firestore, L, U, V> => {
-  const { safeRef, refChanged } = useSafeRef(typedQuery?.raw)
+  const { safeRef } = useSafeRef(typedQuery.raw)
 
-  const [_snap, _loading, error] = useCollection<U>(safeRef, {
-    snapshotListenOptions,
-  })
-  const loading = _loading || refChanged
-
+  const {
+    data: _snap,
+    error,
+    ...status
+  } = useFirestoreCollection(safeRef, { suspense: true })
   useFirestoreErrorLogger(error)
+
   const { snap, data } = useQuerySnapData(typedQuery, _snap, dataOptions)
 
-  return { snap, data, loading, error }
+  return { snap, data, error, ...status }
 }

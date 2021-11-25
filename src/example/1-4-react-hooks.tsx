@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 
-import { useTypedDocument, useTypedQuery } from '../hooks/index.js'
+import { useTypedDoc, useTypedQuery } from '../hooks/index.js'
 import { typedFirestore } from './1-3-typed-firestore.js'
 
 /**
@@ -8,16 +8,15 @@ import { typedFirestore } from './1-3-typed-firestore.js'
  */
 export const UsersComponent = () => {
   const users = useTypedQuery(typedFirestore.collection('users'))
-  if (!users.data) {
-    return <span>{'Loading...'}</span>
-  }
 
   return (
-    <ul>
-      {users.data.map((user, i) => (
-        <li key={i}>{user.displayName}</li>
-      ))}
-    </ul>
+    <Suspense fallback={'Loading...'}>
+      <ul>
+        {users.data.map((user, i) => (
+          <li key={i}>{user.displayName}</li>
+        ))}
+      </ul>
+    </Suspense>
   )
 }
 
@@ -25,10 +24,11 @@ export const UsersComponent = () => {
  * Get realtime updates of document
  */
 export const UserComponent = ({ id }: { id: string }) => {
-  const user = useTypedDocument(typedFirestore.collection('users').doc(id))
-  if (!user.data) {
-    return <span>{'Loading...'}</span>
-  }
+  const user = useTypedDoc(typedFirestore.collection('users').doc(id))
 
-  return <span>{user.data.displayName}</span>
+  return (
+    <Suspense fallback={'Loading...'}>
+      <span>{user.data?.displayName}</span>
+    </Suspense>
+  )
 }

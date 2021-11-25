@@ -17,25 +17,22 @@ export const useDocumentSnapData = <
   U,
   V = U,
 >(
-  typedDoc: TypedDocumentRef<S, _web.Firestore, L, U> | null | undefined,
-  _snap: _web.DocumentSnapshot<U> | undefined,
+  typedDoc: TypedDocumentRef<S, _web.Firestore, L, U>,
+  _snap: _web.DocumentSnapshot<U>,
   {
     transformer,
     snapshotOptions,
   }: DocumentSnapDataOptions<S, _web.Firestore, L, U, V> = {},
 ) => {
   const snap = useMemo(
-    () =>
-      typedDoc && _snap
-        ? new TypedDocumentSnap(typedDoc.options, _snap)
-        : undefined,
+    () => new TypedDocumentSnap(typedDoc.options, _snap),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [_snap],
   )
 
   const data = useMemo(
     () =>
-      snap?.data({
+      snap.data({
         transformer,
         snapshotOptions: {
           serverTimestamps: 'estimate',
@@ -55,25 +52,22 @@ export const useQuerySnapData = <
   U,
   V = U,
 >(
-  typedQuery: TypedQueryRef<S, _web.Firestore, L, U> | null | undefined,
-  _snap: _web.QuerySnapshot<U> | undefined,
+  typedQuery: TypedQueryRef<S, _web.Firestore, L, U>,
+  _snap: _web.QuerySnapshot<U>,
   {
     transformer,
     snapshotOptions,
   }: QueryDocumentSnapDataOptions<S, _web.Firestore, L, U, V>,
 ) => {
   const snap = useMemo(
-    () =>
-      typedQuery && _snap
-        ? new TypedQuerySnap(typedQuery.options, _snap)
-        : undefined,
+    () => new TypedQuerySnap(typedQuery.options, _snap),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [_snap],
   )
 
   const data = useMemo(
     () =>
-      snap?.typedDocs.map((docSnap) =>
+      snap.typedDocs.map((docSnap) =>
         docSnap.data({
           transformer,
           snapshotOptions: {

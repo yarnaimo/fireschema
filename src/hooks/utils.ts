@@ -8,8 +8,6 @@ import {
 } from 'firebase/firestore'
 import { useEffect, useRef } from 'react'
 
-import { _web } from '../lib/firestore-types.js'
-
 type RefOrQuery = DocumentReference | CollectionReference | Query
 
 const queryOrRefEqual = <T extends RefOrQuery>(left: T, right: T) => {
@@ -28,7 +26,7 @@ const isEqual = <T extends RefOrQuery>(
   return bothNull || equal
 }
 
-export const useSafeRef = <T extends RefOrQuery>(ref: T | undefined) => {
+export const useSafeRef = <T extends RefOrQuery>(ref: T) => {
   const timestampsRef = useRef<Dayjs[]>([])
 
   const prevRef = useRef<RefOrQuery>()
@@ -39,25 +37,25 @@ export const useSafeRef = <T extends RefOrQuery>(ref: T | undefined) => {
     timestampsRef.current = [dayjs(), ...timestampsRef.current]
   }
 
+  const exceeded = useRef(false)
   const a = !!timestampsRef.current[3]?.isAfter(dayjs().subtract(3, 'second'))
   const b = !!timestampsRef.current[5]?.isAfter(dayjs().subtract(5, 'second'))
-  const exceeded = a || b
+  exceeded.current ||= a || b
 
-  const safeRef = exceeded ? undefined : ref
+  const safeRef = exceeded.current ? undefined : ref
 
-  if (exceeded) {
+  if (!safeRef) {
     console.error(
       '%cRef change limit exceeded!!!',
       'font-weight: bold; font-size: large; color: red;',
     )
+    throw new Promise(() => {})
   }
 
   return { safeRef, refChanged, timestamps: timestampsRef }
 }
 
-export const useFirestoreErrorLogger = (
-  error: _web.FirestoreError | undefined,
-) => {
+export const useFirestoreErrorLogger = (error: Error | undefined) => {
   useEffect(() => {
     if (error) {
       console.error(error)
