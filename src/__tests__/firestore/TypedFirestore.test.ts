@@ -3,7 +3,6 @@ import { typeExtends } from '@yarnaimo/type-extends'
 import { ReactFireGlobals } from 'reactfire'
 import { expectType } from 'tsd'
 
-import { TypedFirestoreAdmin } from '../../core/firestore/controller/_TypedFirestoreAdmin.js'
 import {
   buildQueryUniv,
   collectionUniv,
@@ -18,12 +17,9 @@ import {
 } from '../../core/firestore/controller/_universal.js'
 import {
   FTypes,
-  FirestoreModel,
   STypes,
   TypedDocumentRef,
   TypedDocumentSnap,
-  TypedFirestoreUniv,
-  TypedFirestoreWeb,
   TypedQueryDocumentSnap,
   TypedQueryRef,
   TypedQuerySnap,
@@ -33,16 +29,11 @@ import {
 } from '../../core/index.js'
 import { CollectionNameToLoc } from '../../core/types/_object.js'
 import { getCollectionOptionsByName } from '../../core/utils/_object.js'
-import {
-  useTypedDoc,
-  useTypedDocOnce,
-  useTypedQuery,
-} from '../../hooks/index.js'
+import { useTypedDoc, useTypedDocOnce } from '../../hooks/useTypedDocument.js'
+import { useTypedQuery } from '../../hooks/useTypedQuery.js'
 import { R } from '../../lib/fp.js'
 import { createUserData, postAData, userDataBase } from '../_fixtures/data.js'
 import {
-  IPostA,
-  IPostB,
   IUser,
   IUserLocal,
   PostModel,
@@ -53,92 +44,20 @@ import {
   assertFails,
   getTestAppAdmin,
   getTestAppWeb,
-} from '../_infrastructure/_app.js'
+} from '../_services/app.js'
+import {
+  F,
+  PostU,
+  S,
+  UserU,
+  _tcollections,
+  firestoreModelWithDup,
+} from '../_services/firestore-collections.js'
 import { sleep } from '../_utils/common.js'
 import {
   expectAnyTimestampAdmin,
   expectAnyTimestampWeb,
 } from '../_utils/firestore.js'
-
-type S = typeof firestoreModel.schemaOptions
-type F = FTypes.FirestoreApp
-
-type Env = 'web' | 'admin'
-
-const firestoreModelWithDup = new FirestoreModel({
-  ...firestoreModel.schemaOptions,
-  '/posts/{_post}':
-    firestoreModel.schemaOptions['/versions/{version}']['/users/{uid}'][
-      '/posts/{postId}'
-    ],
-})
-
-const _tcollections = (app: F, env: Env) => {
-  const typedFirestore = (
-    env === 'web'
-      ? new TypedFirestoreWeb(firestoreModel, app as any)
-      : new TypedFirestoreAdmin(firestoreModel, app as any)
-  ) as TypedFirestoreUniv<typeof firestoreModel, F>
-
-  const typedFirestoreWithCollectionDup = (
-    env === 'web'
-      ? new TypedFirestoreWeb(firestoreModelWithDup, app as any)
-      : new TypedFirestoreAdmin(firestoreModelWithDup, app as any)
-  ) as TypedFirestoreUniv<typeof firestoreModelWithDup, F>
-
-  void (() => {
-    typedFirestore.collection(
-      // @ts-expect-error: wrong collection name
-      'users',
-    )
-  })
-  const versions = typedFirestore.collection('versions')
-  const v1 = versions.doc('v1')
-
-  void (() => {
-    v1.collection(
-      // @ts-expect-error: wrong collection name
-      'posts',
-    )
-  })
-  const users = v1.collection('users')
-  const teenUsers = v1.collection('users').select.teen()
-  const usersOrderedById = users.select.orderById()
-  const user = users.doc('user')
-
-  const posts = user.collection('posts')
-  const post = posts.doc('post')
-
-  const usersGroup = typedFirestore.collectionGroup('users')
-  const teenUsersGroup = usersGroup.select.teen()
-
-  return {
-    typedFirestore,
-    typedFirestoreWithCollectionDup,
-    versions,
-    v1,
-    users,
-    user,
-    teenUsers,
-    usersOrderedById,
-    posts,
-    post,
-    usersGroup,
-    teenUsersGroup,
-  }
-}
-
-type UserU = IUserLocal &
-  STypes.DocumentMeta<F> &
-  STypes.HasLoc<'versions.users'> &
-  STypes.HasT<IUser> &
-  STypes.HasId
-
-type PostU = (IPostA | IPostB) &
-  STypes.DocumentMeta<F> &
-  STypes.HasLoc<'versions.users.posts'> &
-  STypes.HasT<IPostA | IPostB> &
-  STypes.HasId
 
 describe('types', () => {
   test('decoder', () => {
@@ -358,30 +277,10 @@ for (const env of ['web', 'admin'] as const) {
     })
   })
 
-  const userData = createUserData(firestoreStatic)
-
-  const usersRaw = collectionUniv(
-    docUniv(collectionUniv(app, 'versions'), 'v1'),
-    'users',
-  )
-
-  const createInitialUserAndPost = async () => {
-    const meta = {
-      [_createdAt]: firestoreStatic.serverTimestamp(),
-      [_updatedAt]: firestoreStatic.serverTimestamp(),
-    }
-
-    const userRef = docUniv(usersRaw, 'user')
-    await setDocUniv(userRef, { ...userData, ...meta } as any)
-
-    const postRef = docUniv(collectionUniv(userRef, 'posts'), 'post')
-    await setDocUniv(postRef, { ...postAData, ...meta } as any)
-  }
-
   const transformer = withRefTransformer
 
   describe($env('read'), () => {
-    beforeEach(createInitialUserAndPost)
+    beforeEach(r.createInitialUserAndPost)
 
     test.each([
       {
@@ -587,7 +486,7 @@ for (const env of ['web', 'admin'] as const) {
   env === 'web' &&
     describe($env('write (test rules)'), () => {
       test('create user (empty array)', async () => {
-        await r.user.create({ ...userData, tags: [] })
+        await r.user.create({ ...r.userData, tags: [] })
       })
 
       test('create user (fails due to invalid timestamp)', async () => {
@@ -595,16 +494,16 @@ for (const env of ['web', 'admin'] as const) {
         const localTs = () => firestoreStatic.Timestamp.fromDate(new Date())
 
         for (const data of [
-          { ...userData, [_createdAt]: serverTs() },
-          { ...userData, [_updatedAt]: serverTs() },
-          { ...userData, [_createdAt]: localTs(), [_updatedAt]: serverTs() },
-          { ...userData, [_createdAt]: serverTs(), [_updatedAt]: localTs() },
+          { ...r.userData, [_createdAt]: serverTs() },
+          { ...r.userData, [_updatedAt]: serverTs() },
+          { ...r.userData, [_createdAt]: localTs(), [_updatedAt]: serverTs() },
+          { ...r.userData, [_createdAt]: serverTs(), [_updatedAt]: localTs() },
         ]) {
           await assertFails(async () => setDocUniv(r.user.raw, data as any))
         }
 
         await setDocUniv(r.user.raw, {
-          ...userData,
+          ...r.userData,
           [_createdAt]: serverTs(),
           [_updatedAt]: serverTs(),
         } as any)
@@ -625,7 +524,7 @@ for (const env of ['web', 'admin'] as const) {
       test('create user (fails due to invalid data)', async () => {
         await assertFails(async () =>
           r.user.create({
-            ...userData,
+            ...r.userData,
             // @ts-expect-error: number
             age: '20',
           }),
@@ -633,7 +532,7 @@ for (const env of ['web', 'admin'] as const) {
 
         await assertFails(async () =>
           r.user.create({
-            ...userData,
+            ...r.userData,
             // @ts-expect-error: options.a
             options: { a: 1, b: 'value' },
           }),
@@ -641,7 +540,7 @@ for (const env of ['web', 'admin'] as const) {
 
         await assertFails(async () =>
           r.user.create({
-            ...userData,
+            ...r.userData,
             // @ts-expect-error: excess property
             excessProperty: 'text',
           }),
@@ -693,7 +592,7 @@ for (const env of ['web', 'admin'] as const) {
     ])('create user %#', async (fn) => {
       await fn()
 
-      const snapRaw = await getDocUniv(docUniv(usersRaw, 'user'), undefined)
+      const snapRaw = await getDocUniv(docUniv(r.usersRaw, 'user'), undefined)
       expect(snapRaw.data()).toMatchObject({
         ...userDataBase,
         _createdAt: expectAnyTimestamp(),
@@ -704,7 +603,7 @@ for (const env of ['web', 'admin'] as const) {
   })
 
   describe($env('write (with initial docs)'), () => {
-    beforeEach(createInitialUserAndPost)
+    beforeEach(r.createInitialUserAndPost)
 
     const userUpdateData = {
       name: 'name1-updated',
@@ -734,7 +633,7 @@ for (const env of ['web', 'admin'] as const) {
       ])(`${op} user %#`, async (fn) => {
         await fn()
 
-        const snapRaw = await getDocUniv(docUniv(usersRaw, 'user'), undefined)
+        const snapRaw = await getDocUniv(docUniv(r.usersRaw, 'user'), undefined)
         expect(snapRaw.data()).toMatchObject({
           ...userDataBase,
           name: 'name1-updated',
@@ -756,7 +655,7 @@ for (const env of ['web', 'admin'] as const) {
       ])(`${op} user (transaction using .get()) %#`, async (fn) => {
         await fn()
 
-        const snapRaw = await getDocUniv(docUniv(usersRaw, 'user'), undefined)
+        const snapRaw = await getDocUniv(docUniv(r.usersRaw, 'user'), undefined)
         expect(snapRaw.data()).toMatchObject({
           ...userDataBase,
           age: userDataBase.age + 1,
@@ -783,14 +682,14 @@ for (const env of ['web', 'admin'] as const) {
     ])('delete user %#', async (fn) => {
       await fn()
 
-      const snapRaw = await getDocUniv(docUniv(usersRaw, 'user'), undefined)
+      const snapRaw = await getDocUniv(docUniv(r.usersRaw, 'user'), undefined)
       expect(existsUniv(snapRaw)).toBeFalsy()
     })
   })
 
   env === 'web' &&
     describe($env('hooks'), () => {
-      beforeEach(createInitialUserAndPost)
+      beforeEach(r.createInitialUserAndPost)
       beforeEach(() => {
         const _globalThis = globalThis as any as ReactFireGlobals
         _globalThis._reactFirePreloadedObservables.clear()

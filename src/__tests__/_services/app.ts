@@ -12,12 +12,12 @@ import { MapAsync } from 'lifts'
 
 import { renderSchema } from '../../core/firestore/_renderer/root.js'
 import { firestoreModel } from '../_fixtures/firestore-schema.js'
-import { emulatorConfig, localhost, projectId } from './_config.js'
+import { emulators, localhost, projectId } from './emulator.js'
 
 const rules = renderSchema(firestoreModel)
 
 const firestoreEmulatorUrl = (path: string) =>
-  `http://${localhost}:${emulatorConfig.firestore.port}/emulator/v1/projects/${projectId}${path}`
+  `http://${localhost}:${emulators.firestore.port}/emulator/v1/projects/${projectId}${path}`
 
 beforeAll(async () => {
   await got.put(firestoreEmulatorUrl(':securityRules'), {
@@ -43,12 +43,9 @@ const appName = () => Date.now() + '_' + Math.random()
 export const getTestAppWeb = (uid: string) => {
   const app = initializeApp({ projectId }, appName())
   const firestore = getFirestore(app)
-  connectFirestoreEmulator(
-    firestore,
-    localhost,
-    emulatorConfig.firestore.port,
-    { mockUserToken: { user_id: uid } },
-  )
+  connectFirestoreEmulator(firestore, localhost, emulators.firestore.port, {
+    mockUserToken: { user_id: uid },
+  })
 
   return {
     firestore: () => firestore,
@@ -60,7 +57,7 @@ export const getTestAppAdmin = () => {
   const app = initializeAdminApp({ projectId }, appName())
   const firestore = getFirestoreAdmin(app)
   firestore.settings({
-    host: `${localhost}:${emulatorConfig.firestore.port}`,
+    host: `${localhost}:${emulators.firestore.port}`,
     ssl: false,
   })
   return {

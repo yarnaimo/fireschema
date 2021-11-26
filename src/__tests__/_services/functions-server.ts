@@ -16,7 +16,7 @@ import {
   UserJsonType,
   firestoreModel,
 } from '../_fixtures/firestore-schema.js'
-import { region } from './_config.js'
+import { region } from './emulator.js'
 
 const timezone = 'Asia/Tokyo'
 const typedFunctions = new TypedFunctions(firestoreModel, timezone)

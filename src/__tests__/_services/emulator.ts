@@ -1,4 +1,4 @@
-export const emulatorConfig = {
+export const emulators = {
   firestore: {
     port: 8080,
   },

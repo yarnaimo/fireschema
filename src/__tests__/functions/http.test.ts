@@ -1,16 +1,16 @@
 import got from 'got'
 
 import {
-  emulatorConfig,
+  emulators,
   localhost,
   projectId,
   region,
-} from '../_infrastructure/_config.js'
+} from '../_services/emulator.js'
 
 test('http', async () => {
   const resp = await got
     .post(
-      `http://${localhost}:${emulatorConfig.functions.port}/${projectId}/${region}/http-getKeys`,
+      `http://${localhost}:${emulators.functions.port}/${projectId}/${region}/http-getKeys`,
       {
         json: { a: 0, b: '' },
       },

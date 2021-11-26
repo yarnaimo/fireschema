@@ -4,7 +4,7 @@ import functionsTest from 'firebase-functions-test'
 import { firestoreStaticWeb } from '../../core/firestore/controller/_static.js'
 import { createUserData, postAData } from '../_fixtures/data.js'
 import { decodeUser } from '../_fixtures/firestore-schema.js'
-import { firestoreTrigger } from '../_infrastructure/functions-server.js'
+import { firestoreTrigger } from '../_services/functions-server.js'
 
 const ftest = functionsTest()
 const userPath = 'versions/v1/users/user'

@@ -2,7 +2,7 @@ import { expectType } from 'tsd'
 
 import { messages } from '../../core/index.js'
 import { userDataJson } from '../_fixtures/data.js'
-import { typedCaller } from '../_infrastructure/functions-client.js'
+import { typedCaller } from '../_services/functions-client.js'
 
 !(async () => {
   await typedCaller.call(

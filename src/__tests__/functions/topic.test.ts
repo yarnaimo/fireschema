@@ -1,4 +1,4 @@
-import { typedTopic } from '../_infrastructure/functions-client.js'
+import { typedTopic } from '../_services/functions-client.js'
 
 test('topic', async () => {
   !(async () => {
