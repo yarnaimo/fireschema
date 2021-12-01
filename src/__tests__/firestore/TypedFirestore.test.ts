@@ -29,8 +29,8 @@ import {
 } from '../../core/index.js'
 import { CollectionNameToLoc } from '../../core/types/_object.js'
 import { getCollectionOptionsByName } from '../../core/utils/_object.js'
+import { useTypedCollection } from '../../hooks/useTypedCollection.js'
 import { useTypedDoc, useTypedDocOnce } from '../../hooks/useTypedDocument.js'
-import { useTypedQuery } from '../../hooks/useTypedQuery.js'
 import { R } from '../../lib/fp.js'
 import { createUserData, postAData, userDataBase } from '../_fixtures/data.js'
 import {
@@ -721,6 +721,16 @@ for (const env of ['web', 'admin'] as const) {
           })
           expect(result.all.length).toBe(2)
 
+          const typedRef1 = result.current.typedRef
+          rerender()
+          expect(typedRef1 === result.current.typedRef).toBe(true)
+
+          const typedRef2 = result.current.typedRef
+          updateRef()
+          rerender()
+          await sleep(100)
+          expect(typedRef2 === result.current.typedRef).toBe(false)
+
           const consoleMock = jest.spyOn(console, 'error').mockImplementation()
           for (const i of R.range(0, 8)) {
             updateRef()
@@ -728,7 +738,7 @@ for (const env of ['web', 'admin'] as const) {
             await sleep(100)
           }
           consoleMock.mockRestore()
-          expect(result.all.length).toBe(4)
+          expect(result.all.length).toBe(5)
 
           unmount()
         })
@@ -789,16 +799,16 @@ for (const env of ['web', 'admin'] as const) {
         )
       })
 
-      describe('useTypedQuery', () => {
+      describe('useTypedCollection', () => {
         test('safeRef', async () => {
-          let ref: any
+          let random = 0
           const updateRef = () => {
-            ref = r.v1.collection('users').select._teen()
+            random = Math.random()
           }
           updateRef()
 
           const { result, rerender, waitForNextUpdate, unmount } = renderHook(
-            () => useTypedQuery(ref),
+            () => useTypedCollection(r.users, (select) => select._teen(random)),
           )
           expect(result.current).toBe(undefined)
 
@@ -809,6 +819,10 @@ for (const env of ['web', 'admin'] as const) {
           })
           expect(result.all.length).toBe(2)
 
+          const typedRef1 = result.current.typedRef
+          rerender()
+          expect(typedRef1 === result.current.typedRef).toBe(true)
+
           const consoleMock = jest.spyOn(console, 'error').mockImplementation()
           for (const i of R.range(0, 8)) {
             updateRef()
@@ -816,16 +830,16 @@ for (const env of ['web', 'admin'] as const) {
             await sleep(100)
           }
           consoleMock.mockRestore()
-          expect(result.all.length).toBe(6)
+          expect(result.all.length).toBe(7)
 
           unmount()
         })
 
-        test.each([useTypedQuery /** useTypedQueryOnce */])(
+        test.each([useTypedCollection /** useTypedQueryOnce */])(
           'without transformer %#',
           async (hook) => {
             const { result, waitForNextUpdate, unmount } = renderHook(() =>
-              hook(r.teenUsers),
+              hook(r.users, (select) => select.teen()),
             )
             expect(result.current).toBe(undefined)
 
@@ -849,11 +863,11 @@ for (const env of ['web', 'admin'] as const) {
           },
         )
 
-        test.each([useTypedQuery /** useTypedQueryOnce */])(
+        test.each([useTypedCollection /** useTypedQueryOnce */])(
           'with transformer %#',
           async (hook) => {
             const { result, waitForNextUpdate, unmount } = renderHook(() =>
-              hook(r.teenUsers, {
+              hook(r.users, (select) => select.teen(), {
                 transformer: (data, snap) => {
                   expectType<TypedQueryDocumentSnap<S, F, 'versions.users'>>(
                     snap,

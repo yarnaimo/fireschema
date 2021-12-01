@@ -75,9 +75,9 @@ export const UserModel = new DataModel({
       q.where('age_', '>=', 10),
     ],
     teen: () => [q.where('age', '>=', 10), q.where('age', '<', 20)],
-    _teen: () => [
+    _teen: (random: number) => [
       q.where('age', '>=', 10),
-      q.where('age', '<', 20 + Math.random()),
+      q.where('age', '<', 20 + random),
     ],
     orderById: () => [q.orderBy(firestoreStatic.documentId())],
   }),

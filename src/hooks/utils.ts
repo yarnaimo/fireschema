@@ -29,11 +29,11 @@ const isEqual = <T extends RefOrQuery>(
 export const useSafeRef = <T extends RefOrQuery>(ref: T) => {
   const timestampsRef = useRef<Dayjs[]>([])
 
-  const prevRef = useRef<RefOrQuery>()
-  const refChanged = !isEqual(prevRef.current, ref)
-  prevRef.current = ref
+  const memoizedRef = useRef<T>()
+  const refChanged = !isEqual(memoizedRef.current, ref)
 
   if (refChanged) {
+    memoizedRef.current = ref
     timestampsRef.current = [dayjs(), ...timestampsRef.current]
   }
 
@@ -42,7 +42,7 @@ export const useSafeRef = <T extends RefOrQuery>(ref: T) => {
   const b = !!timestampsRef.current[5]?.isAfter(dayjs().subtract(5, 'second'))
   exceeded.current ||= a || b
 
-  const safeRef = exceeded.current ? undefined : ref
+  const safeRef = exceeded.current ? undefined : memoizedRef.current
 
   if (!safeRef) {
     console.error(

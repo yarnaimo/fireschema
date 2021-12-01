@@ -1,19 +1,24 @@
 import React, { Suspense } from 'react'
 
-import { useTypedDoc, useTypedQuery } from '../hooks/index.js'
+import { useTypedCollection, useTypedDoc } from '../hooks/index.js'
 import { typedFirestore } from './1-3-typed-firestore.js'
 
 /**
  * Get realtime updates of collection/query
  */
-export const UsersComponent = () => {
-  const users = useTypedQuery(typedFirestore.collection('users'))
+export const PostsComponent = () => {
+  const userRef = typedFirestore.collection('users').doc('user1')
+
+  const posts = useTypedCollection(userRef.collection('posts'))
+  const techPosts = useTypedCollection(userRef.collection('posts'), (select) =>
+    select.byTag('tech'),
+  )
 
   return (
     <Suspense fallback={'Loading...'}>
       <ul>
-        {users.data.map((user, i) => (
-          <li key={i}>{user.displayName}</li>
+        {posts.data.map((post, i) => (
+          <li key={i}>{post.text}</li>
         ))}
       </ul>
     </Suspense>
