@@ -36,7 +36,12 @@ export const useTypedCollection = <
         select: STypes.MappedSelectors<S, _web.Firestore, L, U>,
       ) => TypedQueryRef<S, _web.Firestore, L, U>)
     | undefined,
-  dataOptions: QueryDocumentSnapDataOptions<S, _web.Firestore, L, U, V> = {},
+  {
+    suspense = true,
+    ...dataOptions
+  }: QueryDocumentSnapDataOptions<S, _web.Firestore, L, U, V> & {
+    suspense?: boolean
+  } = {},
 ): UseTypedQuery<S, L, U, V> => {
   const _typedQuery = selector?.(typedRef.select as any) ?? typedRef
   const { safeRef: safeQuery, refChanged } = useSafeRef(_typedQuery.raw)
@@ -46,9 +51,7 @@ export const useTypedCollection = <
     memoizedTypedRef.current = typedRef
   }
 
-  const { data: _snap, error } = useFirestoreCollection(safeQuery, {
-    suspense: true,
-  })
+  const { data: _snap, error } = useFirestoreCollection(safeQuery, { suspense })
   useFirestoreErrorLogger(error)
 
   const { snap, data } = useQuerySnapData(typedRef, _snap, dataOptions)

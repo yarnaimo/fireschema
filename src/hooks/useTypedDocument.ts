@@ -28,7 +28,12 @@ const createUseTypedDocHook = (
 ) => {
   return <S extends STypes.RootOptions.All, L extends string, U, V = U>(
     typedRef: TypedDocumentRef<S, _web.Firestore, L, U>,
-    dataOptions: DocumentSnapDataOptions<S, _web.Firestore, L, U, V> = {},
+    {
+      suspense = true,
+      ...dataOptions
+    }: DocumentSnapDataOptions<S, _web.Firestore, L, U, V> & {
+      suspense?: boolean
+    } = {},
   ): UseTypedDoc<S, L, U, V> => {
     const { safeRef, refChanged } = useSafeRef(typedRef.raw)
 
@@ -37,7 +42,7 @@ const createUseTypedDocHook = (
       memoizedTypedRef.current = typedRef
     }
 
-    const { data: _snap, error } = hook(safeRef, { suspense: true })
+    const { data: _snap, error } = hook(safeRef, { suspense })
     useFirestoreErrorLogger(error)
 
     const { snap, data } = useDocumentSnapData(typedRef, _snap, dataOptions)
