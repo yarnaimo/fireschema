@@ -1,10 +1,5 @@
 import { useMemo, useRef } from 'react'
-import {
-  ObservableStatus,
-  useFirestoreDoc,
-  useFirestoreDocOnce,
-} from 'reactfire'
-import { Except } from 'type-fest'
+import { useFirestoreDoc, useFirestoreDocOnce } from 'reactfire'
 
 import {
   DocumentSnapDataOptions,
@@ -25,7 +20,8 @@ export type UseTypedDoc<
   typedRef: TypedDocumentRef<S, _web.Firestore, L, U>
   snap: TypedDocumentSnap<S, _web.Firestore, L, U>
   data: V | undefined
-} & Except<ObservableStatus<unknown>, 'data'>
+  error: Error | undefined
+}
 
 const createUseTypedDocHook = (
   hook: typeof useFirestoreDoc | typeof useFirestoreDocOnce,
@@ -41,19 +37,15 @@ const createUseTypedDocHook = (
       memoizedTypedRef.current = typedRef
     }
 
-    const status = hook(safeRef, { suspense: true })
-    useFirestoreErrorLogger(status.error)
+    const { data: _snap, error } = hook(safeRef, { suspense: true })
+    useFirestoreErrorLogger(error)
 
-    const { snap, data } = useDocumentSnapData(
-      typedRef,
-      status.data,
-      dataOptions,
-    )
+    const { snap, data } = useDocumentSnapData(typedRef, _snap, dataOptions)
 
     return useMemo(() => {
       refChanged
-      return { ...status, typedRef: memoizedTypedRef.current!, snap, data }
-    }, [data, refChanged, snap, status])
+      return { typedRef: memoizedTypedRef.current!, snap, data, error }
+    }, [data, error, refChanged, snap])
   }
 }
 

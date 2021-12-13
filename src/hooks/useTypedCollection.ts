@@ -1,6 +1,5 @@
 import { useMemo, useRef } from 'react'
-import { ObservableStatus, useFirestoreCollection } from 'reactfire'
-import { Except } from 'type-fest'
+import { useFirestoreCollection } from 'reactfire'
 
 import {
   QueryDocumentSnapDataOptions,
@@ -22,7 +21,8 @@ export type UseTypedQuery<
   typedRef: TypedCollectionRef<S, _web.Firestore, L, U>
   snap: TypedQuerySnap<S, _web.Firestore, L, U>
   data: V[]
-} & Except<ObservableStatus<unknown>, 'data'>
+  error: Error | undefined
+}
 
 export const useTypedCollection = <
   S extends STypes.RootOptions.All,
@@ -46,13 +46,15 @@ export const useTypedCollection = <
     memoizedTypedRef.current = typedRef
   }
 
-  const status = useFirestoreCollection(safeQuery, { suspense: true })
-  useFirestoreErrorLogger(status.error)
+  const { data: _snap, error } = useFirestoreCollection(safeQuery, {
+    suspense: true,
+  })
+  useFirestoreErrorLogger(error)
 
-  const { snap, data } = useQuerySnapData(typedRef, status.data, dataOptions)
+  const { snap, data } = useQuerySnapData(typedRef, _snap, dataOptions)
 
   return useMemo(() => {
     refChanged
-    return { ...status, typedRef: memoizedTypedRef.current!, snap, data }
-  }, [data, refChanged, snap, status])
+    return { typedRef: memoizedTypedRef.current!, snap, data, error }
+  }, [data, error, refChanged, snap])
 }
