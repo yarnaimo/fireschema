@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import {
   ObservableStatus,
   useFirestoreDoc,
@@ -42,12 +42,19 @@ const createUseTypedDocHook = (
       memoizedTypedRef.current = typedRef
     }
 
-    const { data: _snap, error, ...status } = hook(safeRef, { suspense: true })
-    useFirestoreErrorLogger(error)
+    const status = hook(safeRef, { suspense: true })
+    useFirestoreErrorLogger(status.error)
 
-    const { snap, data } = useDocumentSnapData(typedRef, _snap, dataOptions)
+    const { snap, data } = useDocumentSnapData(
+      typedRef,
+      status.data,
+      dataOptions,
+    )
 
-    return { typedRef: memoizedTypedRef.current!, snap, data, error, ...status }
+    return useMemo(() => {
+      refChanged
+      return { ...status, typedRef: memoizedTypedRef.current!, snap, data }
+    }, [data, refChanged, snap, status])
   }
 }
 
