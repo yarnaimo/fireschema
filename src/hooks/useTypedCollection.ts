@@ -15,13 +15,12 @@ import { useFirestoreErrorLogger, useSafeRef } from './utils.js'
 
 export type UseTypedQuery<
   S extends STypes.RootOptions.All,
-  F extends _web.Firestore,
   L extends string,
-  U,
-  V,
+  U = STypes.DocDataAt<S, _web.Firestore, L>,
+  V = U,
 > = {
   typedRef: TypedCollectionRef<S, _web.Firestore, L, U>
-  snap: TypedQuerySnap<S, F, L, U>
+  snap: TypedQuerySnap<S, _web.Firestore, L, U>
   data: V[]
 } & Except<ObservableStatus<unknown>, 'data'>
 
@@ -38,7 +37,7 @@ export const useTypedCollection = <
       ) => TypedQueryRef<S, _web.Firestore, L, U>)
     | undefined,
   dataOptions: QueryDocumentSnapDataOptions<S, _web.Firestore, L, U, V> = {},
-): UseTypedQuery<S, _web.Firestore, L, U, V> => {
+): UseTypedQuery<S, L, U, V> => {
   const _typedQuery = selector?.(typedRef.select as any) ?? typedRef
   const { safeRef: safeQuery, refChanged } = useSafeRef(_typedQuery.raw)
 

@@ -18,13 +18,12 @@ import { useFirestoreErrorLogger, useSafeRef } from './utils.js'
 
 export type UseTypedDoc<
   S extends STypes.RootOptions.All,
-  F extends _web.Firestore,
   L extends string,
-  U,
-  V,
+  U = STypes.DocDataAt<S, _web.Firestore, L>,
+  V = U,
 > = {
   typedRef: TypedDocumentRef<S, _web.Firestore, L, U>
-  snap: TypedDocumentSnap<S, F, L, U>
+  snap: TypedDocumentSnap<S, _web.Firestore, L, U>
   data: V | undefined
 } & Except<ObservableStatus<unknown>, 'data'>
 
@@ -34,7 +33,7 @@ const createUseTypedDocHook = (
   return <S extends STypes.RootOptions.All, L extends string, U, V = U>(
     typedRef: TypedDocumentRef<S, _web.Firestore, L, U>,
     dataOptions: DocumentSnapDataOptions<S, _web.Firestore, L, U, V> = {},
-  ): UseTypedDoc<S, _web.Firestore, L, U, V> => {
+  ): UseTypedDoc<S, L, U, V> => {
     const { safeRef, refChanged } = useSafeRef(typedRef.raw)
 
     const memoizedTypedRef = useRef<typeof typedRef>()
