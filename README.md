@@ -59,6 +59,7 @@ yarn add -D typescript ts-node
 | `z.number().min(5)`                  | `(data.key is int && data.key >= 5)`                                   |
 | `z.number().max(20)`                 | `(data.key is int && data.key <= 20)`                                  |
 | `timestampType()`                    | `data.key is timestamp`                                                |
+| `z.record(z.string())`               | `data.key is map`                                                      |
 | `z.tuple([z.string(), z.number()])`  | `(data.key is list && data.key[0] is string && data.key[1] is number)` |
 | `z.string().array()`                 | `data.key is list`                                                     |
 | `z.string().array().min(5)`          | `(data.key is list && data.key.size() >= 5)`                           |
@@ -352,6 +353,17 @@ await typedFirestore.runTransaction(async (tt) => {
 ```
 
 <!-- AUTO-GENERATED-CONTENT:END -->
+
+#### Write methods of Fireschema's document reference
+
+- **`create()`** - Create a document. (`_createdAt` / `_updatedAt` fields are added)
+  - **Web** - Call JS SDK's `set()` internally.
+    It fails if the document already exists because overwriting \_createdAt is denied by the automatically generated security rules.
+  - **Admin** - Call Admin SDK's `create()` internally. It fails if the document already exists.
+- **`setMerge()`** - Call `set(data, { merge: true })` internally. (`_updatedAt` field is updated)
+- **`update()`** - Call `update()` internally. (`_updatedAt` field is updated)
+
+> `set()` is not implemented on fireschema because it cannot determine whether `_createdAt` should be included in update fields without specifying it is a new creation or an overwrite.
 
 <br>
 
