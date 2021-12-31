@@ -36,7 +36,7 @@ export const withRefTransformer = <
 >(
   data: U,
   snap: TypedDocumentSnap<S, F, L, U>,
-) => ({ ...data, ref: snap.typedRef })
+) => ({ ...data, ref: snap.ref })
 
 export type DocumentSnapDataOptions<
   S extends STypes.RootOptions.All,
@@ -66,7 +66,7 @@ export class TypedDocumentSnap<
   L extends string,
   U = STypes.DocDataAt<S, F, L>,
 > {
-  readonly typedRef: TypedDocumentRef<S, F, L, U>
+  readonly ref: TypedDocumentRef<S, F, L, U>
   readonly id: string
 
   constructor(
@@ -74,7 +74,7 @@ export class TypedDocumentSnap<
     readonly raw: FTypes.DocumentSnap<U, F>,
   ) {
     this.id = raw.id
-    this.typedRef = new TypedDocumentRef<S, F, L, U>(
+    this.ref = new TypedDocumentRef<S, F, L, U>(
       this.options,
       raw.ref as FTypes.DocumentRef<U, F>,
     )

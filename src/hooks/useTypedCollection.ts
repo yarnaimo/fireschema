@@ -18,7 +18,7 @@ export type UseTypedQuery<
   U = STypes.DocDataAt<S, _web.Firestore, L>,
   V = U,
 > = {
-  typedRef: TypedCollectionRef<S, _web.Firestore, L, U>
+  ref: TypedCollectionRef<S, _web.Firestore, L, U>
   snap: TypedQuerySnap<S, _web.Firestore, L, U>
   data: V[]
   error: Error | undefined
@@ -58,6 +58,6 @@ export const useTypedCollection = <
 
   return useMemo(() => {
     refChanged
-    return { typedRef: memoizedTypedRef.current!, snap, data, error }
+    return { ref: memoizedTypedRef.current!, snap, data, error }
   }, [data, error, refChanged, snap])
 }

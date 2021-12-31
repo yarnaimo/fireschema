@@ -39,7 +39,7 @@ await techPostsQuery.get() // QuerySnapshot<PostA | PostB>
  * Get child collection of retrived document snapshot
  */
 const snap = await usersRef.get()
-const firstUserRef = snap.docs[0]!.typedRef
+const firstUserRef = snap.docs[0]!.ref
 
 await firstUserRef.collection('posts').get()
 

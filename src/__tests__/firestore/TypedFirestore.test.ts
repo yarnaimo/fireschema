@@ -439,14 +439,14 @@ for (const env of ['web', 'admin'] as const) {
       {
         get: async () => {
           const usersSnap = await r.users.get()
-          const userRef = usersSnap.docs[0]!.typedRef
+          const userRef = usersSnap.docs[0]!.ref
           return userRef.collection('posts').get()
         },
         getData: typeExtends<
           TypedQueryRef<S, F, 'versions.users.posts'>['getData']
         >()(async (options) => {
           const usersSnap = await r.users.get()
-          const userRef = usersSnap.docs[0]!.typedRef
+          const userRef = usersSnap.docs[0]!.ref
           return userRef.collection('posts').getData(options)
         }),
       },
@@ -721,15 +721,15 @@ for (const env of ['web', 'admin'] as const) {
           })
           expect(result.all.length).toBe(2)
 
-          const typedRef1 = result.current.typedRef
+          const typedRef1 = result.current.ref
           rerender()
-          expect(typedRef1 === result.current.typedRef).toBe(true)
+          expect(typedRef1 === result.current.ref).toBe(true)
 
-          const typedRef2 = result.current.typedRef
+          const typedRef2 = result.current.ref
           updateRef()
           rerender()
           await sleep(100)
-          expect(typedRef2 === result.current.typedRef).toBe(false)
+          expect(typedRef2 === result.current.ref).toBe(false)
 
           const consoleMock = jest.spyOn(console, 'error').mockImplementation()
           for (const i of R.range(0, 8)) {
@@ -757,9 +757,9 @@ for (const env of ['web', 'admin'] as const) {
               snap: expect.any(TypedDocumentSnap),
               data: { ...userDataBase, timestamp: expect.any(String) },
             })
-            expect(
-              refEqualUniv(result.current!.snap.typedRef.raw, r.user.raw),
-            ).toBe(true)
+            expect(refEqualUniv(result.current!.snap.ref.raw, r.user.raw)).toBe(
+              true,
+            )
 
             expectType<UserU>(result.current!.data!)
             // @ts-expect-error: wrong data type
@@ -787,9 +787,9 @@ for (const env of ['web', 'admin'] as const) {
               snap: expect.any(TypedDocumentSnap),
               data: userDataBase.name,
             })
-            expect(
-              refEqualUniv(result.current!.snap.typedRef.raw, r.user.raw),
-            ).toBe(true)
+            expect(refEqualUniv(result.current!.snap.ref.raw, r.user.raw)).toBe(
+              true,
+            )
 
             expectType<string>(result.current!.data!)
             // @ts-expect-error: wrong data type
@@ -819,9 +819,9 @@ for (const env of ['web', 'admin'] as const) {
           })
           expect(result.all.length).toBe(2)
 
-          const typedRef1 = result.current.typedRef
+          const typedRef1 = result.current.ref
           rerender()
-          expect(typedRef1 === result.current.typedRef).toBe(true)
+          expect(typedRef1 === result.current.ref).toBe(true)
 
           const consoleMock = jest.spyOn(console, 'error').mockImplementation()
           for (const i of R.range(0, 8)) {
@@ -850,10 +850,7 @@ for (const env of ['web', 'admin'] as const) {
               data: [{ ...userDataBase, timestamp: expect.any(String) }],
             })
             expect(
-              refEqualUniv(
-                result.current!.snap.docs[0]!.typedRef.raw,
-                r.user.raw,
-              ),
+              refEqualUniv(result.current!.snap.docs[0]!.ref.raw, r.user.raw),
             ).toBe(true)
 
             expectType<UserU>(result.current!.data[0]!)
@@ -885,10 +882,7 @@ for (const env of ['web', 'admin'] as const) {
               data: [userDataBase.name],
             })
             expect(
-              refEqualUniv(
-                result.current!.snap.docs[0]!.typedRef.raw,
-                r.user.raw,
-              ),
+              refEqualUniv(result.current!.snap.docs[0]!.ref.raw, r.user.raw),
             ).toBe(true)
 
             expectType<string>(result.current!.data[0]!)

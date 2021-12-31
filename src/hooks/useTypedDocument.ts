@@ -17,7 +17,7 @@ export type UseTypedDoc<
   U = STypes.DocDataAt<S, _web.Firestore, L>,
   V = U,
 > = {
-  typedRef: TypedDocumentRef<S, _web.Firestore, L, U>
+  ref: TypedDocumentRef<S, _web.Firestore, L, U>
   snap: TypedDocumentSnap<S, _web.Firestore, L, U>
   data: V | undefined
   error: Error | undefined
@@ -49,7 +49,7 @@ const createUseTypedDocHook = (
 
     return useMemo(() => {
       refChanged
-      return { typedRef: memoizedTypedRef.current!, snap, data, error }
+      return { ref: memoizedTypedRef.current!, snap, data, error }
     }, [data, error, refChanged, snap])
   }
 }
