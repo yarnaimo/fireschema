@@ -292,13 +292,14 @@ const postsRef = userRef.collection('posts')
 const postRef = postsRef.doc('123')
 const techPostsQuery = postsRef.select.byTag('tech') // selector defined in schema
 
-await userRef.get() // DocumentSnapshot<User>
-await userRef.getData() // User
+await userRef.get() // TypedDocumentSnap<User>
+await userRef.getData() // User | undefined
+await userRef.getDataOrThrow() // User
 
-await postRef.get() // DocumentSnapshot<PostA | PostB>
-await postsRef.get() // QuerySnapshot<PostA | PostB>
+await postRef.get() // TypedDocumentSnap<PostA | PostB>
+await postsRef.get() // TypedQuerySnap<PostA | PostB>
 await postsRef.getData() // (PostA | PostB)[]
-await techPostsQuery.get() // QuerySnapshot<PostA | PostB>
+await techPostsQuery.get() // TypedQuerySnap<PostA | PostB>
 
 /**
  * Get child collection of retrived document snapshot
@@ -320,8 +321,8 @@ const _userRef = postsRef.parentDocument()
 const postsGroup = typedFirestore.collectionGroup('posts')
 const techPostsGroup = postsGroup.select.byTag('tech')
 
-await postsGroup.get() // QuerySnapshot<PostA | PostB>
-await techPostsGroup.get() // QuerySnapshot<PostA | PostB>
+await postsGroup.get() // TypedQuerySnap<PostA | PostB>
+await techPostsGroup.get() // TypedQuerySnap<PostA | PostB>
 
 /**
  * Write data
