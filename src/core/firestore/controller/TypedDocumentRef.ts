@@ -12,6 +12,8 @@ import {
 } from './_universal.js'
 import { DataOrFn, DocDataHelper } from './_utils.js'
 
+export class DocumentNotExistsError extends Error {}
+
 export type DocumentSnapTransformer<
   S extends STypes.RootOptions.All,
   F extends FTypes.FirestoreApp,
@@ -170,6 +172,18 @@ export class TypedDocumentRef<
   } & DocumentSnapDataOptions<S, F, L, U, V> = {}): Promise<V | undefined> {
     const typedSnap = await this.get({ from })
     return typedSnap.data(dataOptions)
+  }
+
+  async getDataOrThrow<V = U>(
+    options: {
+      from?: GetSource
+    } & DocumentSnapDataOptions<S, F, L, U, V> = {},
+  ): Promise<V> {
+    const data = await this.getData(options)
+    if (!data) {
+      throw new DocumentNotExistsError(`Document ${this.path} not exists`)
+    }
+    return data
   }
 
   async create(dataOrFn: DataOrFn<STypes.WriteData<S, F, L>>) {
