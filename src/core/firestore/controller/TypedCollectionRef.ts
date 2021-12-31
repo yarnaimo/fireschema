@@ -5,7 +5,7 @@ import {
   getSchemaOptionsByLoc,
   omitLastSegment,
 } from '../../utils/_object.js'
-import { TypedConstructorOptions } from './ConstructorOptions'
+import { TypedConstructorOptions } from './ConstructorOptions.js'
 import {
   QueryDocumentSnapDataOptions,
   TypedDocumentRef,
@@ -26,13 +26,13 @@ export class TypedQuerySnap<
   L extends string,
   U = STypes.DocDataAt<S, F, L>,
 > {
-  readonly typedDocs: TypedQueryDocumentSnap<S, F, L, U>[]
+  readonly docs: TypedQueryDocumentSnap<S, F, L, U>[]
 
   constructor(
     readonly options: TypedConstructorOptions<S, F, L>,
     readonly raw: FTypes.QuerySnap<U, F>,
   ) {
-    this.typedDocs = raw.docs.map((rawDocSnap) => {
+    this.docs = raw.docs.map((rawDocSnap) => {
       return new TypedQueryDocumentSnap<S, F, L, U>(
         options,
         rawDocSnap as FTypes.QueryDocumentSnap<U, F>,
@@ -84,7 +84,7 @@ export class TypedQueryRef<
     from?: GetSource
   } & QueryDocumentSnapDataOptions<S, F, L, U, V> = {}): Promise<V[]> {
     const typedSnap = await this.get({ from })
-    return typedSnap.typedDocs.map<V>((snap) => snap.data(dataOptions))
+    return typedSnap.docs.map<V>((snap) => snap.data(dataOptions))
   }
 }
 

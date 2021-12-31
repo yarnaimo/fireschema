@@ -67,7 +67,7 @@ export const useQuerySnapData = <
 
   const data = useMemo(
     () =>
-      snap.typedDocs.map((docSnap) =>
+      snap.docs.map((docSnap) =>
         docSnap.data({
           transformer,
           snapshotOptions: {

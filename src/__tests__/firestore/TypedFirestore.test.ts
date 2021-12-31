@@ -373,13 +373,13 @@ for (const env of ['web', 'admin'] as const) {
       async (ref) => {
         const snap = await ref.get()
         const [get, getR, getData, getDataR] = [
-          snap.typedDocs[0]!.data(),
-          snap.typedDocs[0]!.data({ transformer })!,
+          snap.docs[0]!.data(),
+          snap.docs[0]!.data({ transformer })!,
           (await ref.getData({}))[0]!,
           (await ref.getData({ transformer }))[0]!,
         ]
 
-        expect(snap.typedDocs).toHaveLength(1)
+        expect(snap.docs).toHaveLength(1)
 
         for (const data of [get, getR, getData, getDataR]) {
           // @ts-expect-error: ref not exists
@@ -389,7 +389,7 @@ for (const env of ['web', 'admin'] as const) {
           expect<UserU>(data).toMatchObject({
             ...userDataBase,
             timestamp: expect.any(String),
-            id: snap.typedDocs[0].id,
+            id: snap.docs[0].id,
           })
         }
 
@@ -407,13 +407,13 @@ for (const env of ['web', 'admin'] as const) {
       async (query) => {
         const snap = await query.get()
         const [get, getR, getData, getDataR] = [
-          snap.typedDocs[0]!.data(),
-          snap.typedDocs[0]!.data({ transformer })!,
+          snap.docs[0]!.data(),
+          snap.docs[0]!.data({ transformer })!,
           (await query.getData({}))[0]!,
           (await query.getData({ transformer }))[0]!,
         ]
 
-        expect(snap.typedDocs).toHaveLength(1)
+        expect(snap.docs).toHaveLength(1)
 
         for (const data of [get, getR, getData, getDataR]) {
           // @ts-expect-error: ref not exists
@@ -423,7 +423,7 @@ for (const env of ['web', 'admin'] as const) {
           expect<UserU>(data).toMatchObject({
             ...userDataBase,
             timestamp: expect.any(String),
-            id: snap.typedDocs[0].id,
+            id: snap.docs[0].id,
           })
         }
 
@@ -439,14 +439,14 @@ for (const env of ['web', 'admin'] as const) {
       {
         get: async () => {
           const usersSnap = await r.users.get()
-          const userRef = usersSnap.typedDocs[0]!.typedRef
+          const userRef = usersSnap.docs[0]!.typedRef
           return userRef.collection('posts').get()
         },
         getData: typeExtends<
           TypedQueryRef<S, F, 'versions.users.posts'>['getData']
         >()(async (options) => {
           const usersSnap = await r.users.get()
-          const userRef = usersSnap.typedDocs[0]!.typedRef
+          const userRef = usersSnap.docs[0]!.typedRef
           return userRef.collection('posts').getData(options)
         }),
       },
@@ -455,13 +455,13 @@ for (const env of ['web', 'admin'] as const) {
     ])('get collection - posts %#', async (ref) => {
       const snap = await ref.get()
       const [get, getR, getData, getDataR] = [
-        snap.typedDocs[0]!.data(),
-        snap.typedDocs[0]!.data({ transformer })!,
+        snap.docs[0]!.data(),
+        snap.docs[0]!.data({ transformer })!,
         (await ref.getData({}))[0]!,
         (await ref.getData({ transformer }))[0]!,
       ]
 
-      expect(snap.typedDocs).toHaveLength(1)
+      expect(snap.docs).toHaveLength(1)
 
       for (const data of [get, getR, getData, getDataR]) {
         // @ts-expect-error: ref not exists
@@ -470,7 +470,7 @@ for (const env of ['web', 'admin'] as const) {
         expectType<UserU>(data)
         expect<PostU>(data).toMatchObject({
           ...postAData,
-          id: snap.typedDocs[0].id,
+          id: snap.docs[0].id,
         })
       }
 
@@ -851,7 +851,7 @@ for (const env of ['web', 'admin'] as const) {
             })
             expect(
               refEqualUniv(
-                result.current!.snap.typedDocs[0]!.typedRef.raw,
+                result.current!.snap.docs[0]!.typedRef.raw,
                 r.user.raw,
               ),
             ).toBe(true)
@@ -886,7 +886,7 @@ for (const env of ['web', 'admin'] as const) {
             })
             expect(
               refEqualUniv(
-                result.current!.snap.typedDocs[0]!.typedRef.raw,
+                result.current!.snap.docs[0]!.typedRef.raw,
                 r.user.raw,
               ),
             ).toBe(true)
