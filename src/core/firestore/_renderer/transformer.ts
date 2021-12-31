@@ -10,6 +10,7 @@ import {
   ZodNumber,
   ZodObject,
   ZodOptional,
+  ZodRecord,
   ZodString,
   ZodTuple,
   ZodTypeAny,
@@ -57,6 +58,7 @@ export const _schemaToRule =
     if (t instanceof ZodBoolean) return `${name} is bool`
     if (t instanceof ZodLiteral) return `${name} == ${JSON.stringify(t.value)}`
     if (t instanceof ZodTimestamp) return `${name} is timestamp`
+    if (t instanceof ZodRecord) return `${name} is map`
 
     if (t instanceof ZodString) {
       return rules.and(

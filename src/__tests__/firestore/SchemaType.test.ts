@@ -52,6 +52,7 @@ test.each([
   [z.number().int().min(5).max(20), '(data is int && data >= 5 && data <= 20)'],
   [timestampType(), 'data is timestamp'],
   [z.string().array(), 'data is list'],
+  [z.record(z.string()), 'data is map'],
   [
     z.string().array().min(5).max(20),
     '(data is list && data.size() >= 5 && data.size() <= 20)',
