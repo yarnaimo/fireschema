@@ -1,13 +1,13 @@
 import React, { Suspense } from 'react'
 
 import { useTypedCollection, useTypedDoc } from '../hooks/index.js'
-import { typedFirestore } from './1-3-typed-firestore.js'
+import { $web } from './1-3-typed-firestore.js'
 
 /**
  * Get realtime updates of collection/query
  */
 export const PostsComponent = () => {
-  const userRef = typedFirestore.collection('users').doc('user1')
+  const userRef = $web.collection('users').doc('user1')
 
   const posts = useTypedCollection(userRef.collection('posts'))
   const techPosts = useTypedCollection(userRef.collection('posts'), (select) =>
@@ -29,7 +29,7 @@ export const PostsComponent = () => {
  * Get realtime updates of document
  */
 export const UserComponent = ({ id }: { id: string }) => {
-  const user = useTypedDoc(typedFirestore.collection('users').doc(id))
+  const user = useTypedDoc($web.collection('users').doc(id))
 
   return (
     <Suspense fallback={'Loading...'}>

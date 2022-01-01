@@ -14,13 +14,13 @@ const firestoreApp = initializeFirestore(app, {
 /**
  * Initialize TypedFirestore
  */
-export const typedFirestore: TypedFirestoreWeb<typeof firestoreModel> =
+export const $web: TypedFirestoreWeb<typeof firestoreModel> =
   new TypedFirestoreWeb(firestoreModel, firestoreApp)
 
 /**
  * Reference collections/documents and get snapshot
  */
-const usersRef = typedFirestore.collection('users') // TypedCollectionRef instance
+const usersRef = $web.collection('users') // TypedCollectionRef instance
 const userRef = usersRef.doc('userId') // TypedDocumentRef instance
 
 const postsRef = userRef.collection('posts')
@@ -53,7 +53,7 @@ const _userRef = postsRef.parentDocument()
 /**
  * Reference collections groups and get snapshot
  */
-const postsGroup = typedFirestore.collectionGroup('posts')
+const postsGroup = $web.collectionGroup('posts')
 const techPostsGroup = postsGroup.select.byTag('tech')
 
 await postsGroup.get() // TypedQuerySnap<PostA | PostB>
@@ -80,7 +80,7 @@ await userRef.delete()
 /**
  * Transaction
  */
-await typedFirestore.runTransaction(async (tt) => {
+await $web.runTransaction(async (tt) => {
   const snap = await tt.get(userRef)
   tt.update(userRef, {
     age: snap.data()!.age + 1,

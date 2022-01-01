@@ -281,13 +281,13 @@ const firestoreApp = initializeFirestore(app, {
 /**
  * Initialize TypedFirestore
  */
-export const typedFirestore: TypedFirestoreWeb<typeof firestoreModel> =
+export const $web: TypedFirestoreWeb<typeof firestoreModel> =
   new TypedFirestoreWeb(firestoreModel, firestoreApp)
 
 /**
  * Reference collections/documents and get snapshot
  */
-const usersRef = typedFirestore.collection('users') // TypedCollectionRef instance
+const usersRef = $web.collection('users') // TypedCollectionRef instance
 const userRef = usersRef.doc('userId') // TypedDocumentRef instance
 
 const postsRef = userRef.collection('posts')
@@ -320,7 +320,7 @@ const _userRef = postsRef.parentDocument()
 /**
  * Reference collections groups and get snapshot
  */
-const postsGroup = typedFirestore.collectionGroup('posts')
+const postsGroup = $web.collectionGroup('posts')
 const techPostsGroup = postsGroup.select.byTag('tech')
 
 await postsGroup.get() // TypedQuerySnap<PostA | PostB>
@@ -347,7 +347,7 @@ await userRef.delete()
 /**
  * Transaction
  */
-await typedFirestore.runTransaction(async (tt) => {
+await $web.runTransaction(async (tt) => {
   const snap = await tt.get(userRef)
   tt.update(userRef, {
     age: snap.data()!.age + 1,
@@ -379,13 +379,13 @@ await typedFirestore.runTransaction(async (tt) => {
 import React, { Suspense } from 'react'
 
 import { useTypedCollection, useTypedDoc } from 'fireschema/hooks'
-import { typedFirestore } from './1-3-typed-firestore.js'
+import { $web } from './1-3-typed-firestore.js'
 
 /**
  * Get realtime updates of collection/query
  */
 export const PostsComponent = () => {
-  const userRef = typedFirestore.collection('users').doc('user1')
+  const userRef = $web.collection('users').doc('user1')
 
   const posts = useTypedCollection(userRef.collection('posts'))
   const techPosts = useTypedCollection(userRef.collection('posts'), (select) =>
@@ -407,7 +407,7 @@ export const PostsComponent = () => {
  * Get realtime updates of document
  */
 export const UserComponent = ({ id }: { id: string }) => {
-  const user = useTypedDoc(typedFirestore.collection('users').doc(id))
+  const user = useTypedDoc($web.collection('users').doc(id))
 
   return (
     <Suspense fallback={'Loading...'}>
