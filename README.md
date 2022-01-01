@@ -168,6 +168,8 @@ export default firestoreModel
 
 <!-- AUTO-GENERATED-CONTENT:END -->
 
+Write rules are **combined** with the rules automatically generated from zod schema.
+
 <br>
 
 ### 2. Generate firestore.rules
