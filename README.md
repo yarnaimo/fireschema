@@ -386,11 +386,10 @@ import { $web } from './1-3-typed-firestore.js'
  */
 export const PostsComponent = () => {
   const userRef = $web.collection('users').doc('user1')
+  const postsRef = userRef.collection('posts')
 
-  const posts = useTypedCollection(userRef.collection('posts'))
-  const techPosts = useTypedCollection(userRef.collection('posts'), (select) =>
-    select.byTag('tech'),
-  )
+  const posts = useTypedCollection(postsRef)
+  const techPosts = useTypedCollection(postsRef.select.byTag('tech'))
 
   return (
     <Suspense fallback={'Loading...'}>

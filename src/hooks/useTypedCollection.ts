@@ -4,7 +4,6 @@ import { useFirestoreCollection } from 'reactfire'
 import {
   QueryDocumentSnapDataOptions,
   STypes,
-  TypedCollectionRef,
   TypedQueryRef,
   TypedQuerySnap,
 } from '../core/index.js'
@@ -18,7 +17,7 @@ export type UseTypedQuery<
   U = STypes.DocDataAt<S, _web.Firestore, L>,
   V = U,
 > = {
-  ref: TypedCollectionRef<S, _web.Firestore, L, U>
+  ref: TypedQueryRef<S, _web.Firestore, L, U>
   snap: TypedQuerySnap<S, _web.Firestore, L, U>
   data: V[]
   error: Error | undefined
@@ -30,12 +29,7 @@ export const useTypedCollection = <
   U,
   V = U,
 >(
-  typedRef: TypedCollectionRef<S, _web.Firestore, L, U>,
-  selector?:
-    | ((
-        select: STypes.MappedSelectors<S, _web.Firestore, L, U>,
-      ) => TypedQueryRef<S, _web.Firestore, L, U>)
-    | undefined,
+  typedRef: TypedQueryRef<S, _web.Firestore, L, U>,
   {
     suspense = true,
     ...dataOptions
@@ -43,8 +37,7 @@ export const useTypedCollection = <
     suspense?: boolean
   } = {},
 ): UseTypedQuery<S, L, U, V> => {
-  const _typedQuery = selector?.(typedRef.select as any) ?? typedRef
-  const { safeRef: safeQuery, refChanged } = useSafeRef(_typedQuery.raw)
+  const { safeRef: safeQuery, refChanged } = useSafeRef(typedRef.raw)
 
   const memoizedTypedRef = useRef<typeof typedRef>()
   if (refChanged) {

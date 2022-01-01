@@ -808,7 +808,7 @@ for (const env of ['web', 'admin'] as const) {
           updateRef()
 
           const { result, rerender, waitForNextUpdate, unmount } = renderHook(
-            () => useTypedCollection(r.users, (select) => select._teen(random)),
+            () => useTypedCollection(r.users.select._teen(random)),
           )
           expect(result.current).toBe(undefined)
 
@@ -839,7 +839,7 @@ for (const env of ['web', 'admin'] as const) {
           'without transformer %#',
           async (hook) => {
             const { result, waitForNextUpdate, unmount } = renderHook(() =>
-              hook(r.users, (select) => select.teen()),
+              hook(r.users.select.teen()),
             )
             expect(result.current).toBe(undefined)
 
@@ -864,7 +864,7 @@ for (const env of ['web', 'admin'] as const) {
           'with transformer %#',
           async (hook) => {
             const { result, waitForNextUpdate, unmount } = renderHook(() =>
-              hook(r.users, (select) => select.teen(), {
+              hook(r.users.select.teen(), {
                 transformer: (data, snap) => {
                   expectType<TypedQueryDocumentSnap<S, F, 'versions.users'>>(
                     snap,
