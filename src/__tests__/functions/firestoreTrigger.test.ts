@@ -1,15 +1,20 @@
 import { firestore } from 'firebase-admin'
 import functionsTest from 'firebase-functions-test'
-import { postAData, userData } from '../_fixtures/data'
-import { decodeUser } from '../_fixtures/firestore-schema'
-import { firestoreTrigger } from '../_infrastructure/functions-server'
+
+import { firestoreStaticWeb } from '../../core/firestore/controller/_static.js'
+import { createUserData, postAData } from '../_fixtures/data.js'
+import { decodeUser } from '../_fixtures/firestore-schema.js'
+import { firestoreTrigger } from '../_services/functions-server.js'
 
 const ftest = functionsTest()
 const userPath = 'versions/v1/users/user'
 const postPath = 'versions/v1/users/user/posts/post'
 
-const timestamp = firestore.Timestamp.fromDate(new Date())
-const userDataWithTs = { ...userData, timestamp }
+const userData = createUserData(firestoreStaticWeb)
+const userDataWithTs = {
+  ...userData,
+  timestamp: firestore.Timestamp.fromDate(new Date()),
+}
 const userDataWithTsUpdated = { ...userDataWithTs, age: userDataWithTs.age + 1 }
 
 test('onPostCreate', async () => {

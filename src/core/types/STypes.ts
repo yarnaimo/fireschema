@@ -1,13 +1,20 @@
-import { Type } from '../../lib/type'
+import { Merge } from 'type-fest'
+
+import { Type } from '../../lib/type.js'
 import {
-  $allow,
-  $collectionGroups,
-  $docLabel,
-  $functions,
-  $schema,
-} from '../constants'
-import { FTypes } from './FTypes'
-import { GetByLoc } from './_object'
+  QueryBuilder,
+  QueryConstraintUniv,
+} from '../firestore/controller/_query.js'
+import { FirestoreStatic } from '../firestore/controller/_static.js'
+import {
+  DataModel,
+  InferDataModelSL,
+  InferDataModelT,
+  InferDataModelU,
+  TypedQueryRef,
+} from '../firestore/index.js'
+import { FTypes } from './FTypes.js'
+import { GetSchemaOptionsByLoc, PlainLoc } from './_object.js'
 
 export const allowOptions = {
   read: {
@@ -25,88 +32,79 @@ export const allowOptions = {
 
 export declare namespace STypes {
   export type InferDocT<
-    D extends FTypes.FirestoreApp | FTypes.DocumentRef<unknown>
+    D extends FTypes.FirestoreApp | FTypes.DocumentRef<unknown>,
   > = D extends FTypes.DocumentRef<infer T> ? T : never
 
-  export type InferCollectionT<
-    C extends FTypes.CollectionRef<unknown>
-  > = C extends FTypes.CollectionRef<infer T> ? T : never
+  export type InferCollectionT<C extends FTypes.CollectionRef<unknown>> =
+    C extends FTypes.CollectionRef<infer T> ? T : never
 
-  export type GetSchemaU<_C> = EnsureOptions<_C>[typeof $schema]['__U__']
+  export type GetModelU<_C> = InferDataModelU<EnsureOptions<_C>['model']>
 
-  export type GetSchemaT<_C> = EnsureOptions<_C>[typeof $schema]['__T__']
+  export type GetModelT<_C> = InferDataModelT<EnsureOptions<_C>['model']>
 
   export type EnsureOptions<_C> = _C extends CollectionOptions.Meta ? _C : never
 
-  export type GetSL<
-    _C
-  > = EnsureOptions<_C>[typeof $schema] extends CollectionSchema<any, any, any>
-    ? EnsureOptions<_C>[typeof $schema]['__SL__']
-    : {}
+  export type GetSL<_C> = InferDataModelSL<EnsureOptions<_C>['model']>
 
   export type DocDataAt<
     S extends RootOptions.All,
     F extends FTypes.FirestoreApp,
-    L extends string
-  > = DocData<F, GetSchemaU<GetByLoc<S, L>>, L, GetSchemaT<GetByLoc<S, L>>>
+    L extends string,
+  > = DocData<
+    F,
+    GetModelU<GetSchemaOptionsByLoc<S, L>>,
+    L,
+    GetModelT<GetSchemaOptionsByLoc<S, L>>
+  >
 
   export type FTDocDataAt<
     S extends RootOptions.All,
     F extends FTypes.FirestoreApp,
-    L extends string
-  > = DocData<F, GetSchemaT<GetByLoc<S, L>>, L, GetSchemaT<GetByLoc<S, L>>>
+    L extends string,
+  > = DocData<
+    F,
+    GetModelT<GetSchemaOptionsByLoc<S, L>>,
+    L,
+    GetModelT<GetSchemaOptionsByLoc<S, L>>
+  >
 
   export type DocData<
     F extends FTypes.FirestoreApp,
     U,
     L extends string,
-    T
+    T,
   > = DocumentMeta<F> & U & HasLoc<L> & HasT<T> & HasId
 
   export type ConditionExp = string | boolean
 
   export type FunctionsOptions = {
+    [key: `function ${string}`]: string
+  }
+  export type FunctionsRenderOptions = {
     [key: string]: string
   }
 
   export namespace RootOptions {
-    export type Meta = {
-      [$functions]: FunctionsOptions
-      [$collectionGroups]: CollectionOptions.Children
-    }
-    export type Children = {
-      [K in string]: CollectionOptions.All
+    export type Meta = FunctionsOptions & {
+      collectionGroups: CollectionOptions.GroupChildren
     }
 
-    export type All = Meta & Children
-  }
-
-  export type Decoder<T, U> = (
-    data: T,
-    snapshot: FTypes.QueryDocumentSnap<T>,
-  ) => U
-
-  export type CollectionSchema<T, U, HasDecoder extends boolean, SL = {}> = {
-    __T__: T
-    __U__: U
-    __SL__: SL
-    schema: string
-    decoder: HasDecoder extends true ? Decoder<T, U> : undefined
-    selectors: (
-      q: FTypes.Query<U>,
-      firestoreStatic: FTypes.FirestoreStatic<FTypes.FirestoreApp>,
-    ) => SL
+    export type All = Meta & CollectionOptions.Children
   }
 
   export namespace CollectionOptions {
-    export type Meta = {
-      [$docLabel]: string
-      [$schema]: CollectionSchema<any, any, any>
+    export type Meta = FunctionsOptions & {
+      model: DataModel<any, any, STypes.Model.SelectorsConstraint>
       // [$collectionGroup]?: boolean
-      [$allow]: AllowOptions
+      allow: AllowOptions
     }
+    export type GroupMeta = Merge<Meta, { model?: never }>
+
     export type Children = {
-      [K in string]: Meta & Children
+      [K in `/${string}/{${string}}`]: All
+    }
+    export type GroupChildren = {
+      [K in `/${string}/{${string}}`]: GroupMeta
     }
 
     export type All = Meta & Children
@@ -117,27 +115,34 @@ export declare namespace STypes {
       typeof allowOptions.write)]+?: ConditionExp
   }
 
-  export type Selector<
-    S extends RootOptions.All,
+  export namespace Model {
+    export type Decoder<T, U> = (
+      data: T,
+      snapshot: FTypes.QueryDocumentSnap<T>,
+    ) => U
+
+    export type Selectors<T, SL extends SelectorsConstraint> = (
+      q: QueryBuilder<FieldPath<T>>,
+      firestoreStatic: FirestoreStatic<FTypes.FirestoreApp>,
+    ) => SL
+
+    export type SelectorsConstraint = {
+      [key: string]: (...args: any[]) => QueryConstraintUniv[]
+    }
+  }
+
+  export type FieldPath<T> = PlainLoc<T> | keyof DocumentMeta
+
+  export type MappedSelectors<
+    S extends STypes.RootOptions.All,
     F extends FTypes.FirestoreApp,
     L extends string,
-    // P extends Utils.Parent,
-    // N extends Extract<keyof PC, string>,
-    // PC,
-    _C = GetByLoc<S, L>
-  > = (
-    q: SelectorOptions<GetSchemaT<_C>, L, GetSL<_C>, F>,
-  ) => FTypes.Query<DocDataAt<S, F, L>, F>
-
-  export type SelectorOptions<
-    T,
-    L extends string | null,
-    SL,
-    F extends FTypes.FirestoreApp
+    U = STypes.DocDataAt<S, F, L>,
+    SL = STypes.GetSL<GetSchemaOptionsByLoc<S, L>>,
   > = {
-    [K in keyof SL]: SL[K] extends (...args: infer A) => FTypes.Query<infer U>
-      ? (...args: A) => FTypes.Query<DocData<F, U, NonNullable<L>, T>, F>
-      : SL[K]
+    [K in keyof SL]: SL[K] extends (...args: infer A) => any
+      ? (...args: A) => TypedQueryRef<S, F, L, U>
+      : never
   }
 
   export type HasLoc<L extends string> = {
@@ -151,7 +156,7 @@ export declare namespace STypes {
   }
 
   export type DocumentMeta<
-    F extends FTypes.FirestoreApp = FTypes.FirestoreApp
+    F extends FTypes.FirestoreApp = FTypes.FirestoreApp,
   > = {
     _createdAt: FTypes.Timestamp<F>
     _updatedAt: FTypes.Timestamp<F>
@@ -164,7 +169,7 @@ export declare namespace STypes {
 
   type WriteDataField<
     T,
-    F extends FTypes.FirestoreApp = FTypes.FirestoreApp
+    F extends FTypes.FirestoreApp = FTypes.FirestoreApp,
   > = T extends FTypes.Timestamp ? FTypes.Timestamp<F> : T
 
   export type WriteData<
@@ -172,7 +177,7 @@ export declare namespace STypes {
     F extends FTypes.FirestoreApp,
     L extends string,
     T = DocDataAt<S, F, L>['__T__'],
-    _T = WithoutMeta<WithoutLoc<T>>
+    _T = WithoutMeta<WithoutLoc<T>>,
   > = {
     [K in keyof _T]: WriteDataField<_T[K], F> | FTypes.FieldValue<F>
   }

@@ -1,3 +1,1 @@
-export * from './JsonSchema'
-export * from './TypedFirestoreTrigger'
-export * from './TypedFunctions'
+export * from './TypedFirestoreTrigger.js'

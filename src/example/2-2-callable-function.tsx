@@ -1,13 +1,15 @@
-import firebase from 'firebase/app'
+import { initializeApp } from 'firebase/app'
+import { getFunctions } from 'firebase/functions'
 import React from 'react'
-import { TypedCaller } from '..'
 
-type FunctionsModule = typeof import('./2-1-typed-functions')
+import { TypedCaller } from '../index.js'
 
-const app: firebase.app.App = firebase.initializeApp({
+type FunctionsModule = typeof import('./2-1-typed-functions.js')
+
+const app = initializeApp({
   // ...
 })
-const functionsApp = app.functions('asia-northeast1')
+const functionsApp = getFunctions(app, 'asia-northeast1')
 
 export const typedCaller = new TypedCaller<FunctionsModule>(functionsApp)
 
@@ -28,5 +30,5 @@ const Component = () => {
     console.log(result.data)
   }
 
-  return <button onClick={createUser}></button>
+  return <button onClick={createUser} />
 }

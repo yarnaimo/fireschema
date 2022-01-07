@@ -1,19 +1,20 @@
 {
   "emulators": {
     "firestore": {
-      "port": "8080"
+      "port": 8080
     },
     "functions": {
-      "port": "5001"
+      "port": 5001
     },
     "pubsub": {
-      "port": "8085"
+      "port": 8085
     }
   },
   "firestore": {
     "rules": "firestore.rules"
   },
   "functions": {
+    "runtime": "nodejs14",
     "source": ".",
     "ignore": [".git", "node_modules", "tmp"],
     "predeploy": "yarn build"

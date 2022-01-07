@@ -1,16 +1,17 @@
 import { EntriesStrict, P } from 'lifts'
-import { R } from '../../../lib/fp'
-import { STypes } from '../../types'
-import { _ } from '../../utils/_string'
+
+import { R } from '../../../lib/fp.js'
+import { STypes } from '../../types/index.js'
+import { _ } from '../../utils/_string.js'
 
 export const renderFunctions = (
-  $functions: STypes.FunctionsOptions,
+  functions: STypes.FunctionsRenderOptions,
   pIndent: number,
 ) => {
   const indent = pIndent + 2
 
   return P(
-    $functions,
+    functions,
     EntriesStrict,
     R.map(([key, value]) =>
       [

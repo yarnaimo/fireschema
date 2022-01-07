@@ -1,22 +1,26 @@
-import React from 'react'
-import { useTypedDocument, useTypedQuery } from '../hooks'
-import { typedFirestore } from './1-3-typed-firestore'
+import React, { Suspense } from 'react'
+
+import { useTypedCollection, useTypedDoc } from '../hooks/index.js'
+import { $web } from './1-3-typed-firestore.js'
 
 /**
  * Get realtime updates of collection/query
  */
-export const UsersComponent = () => {
-  const users = useTypedQuery(typedFirestore.collection('users'))
-  if (!users.data) {
-    return <span>{'Loading...'}</span>
-  }
+export const PostsComponent = () => {
+  const userRef = $web.collection('users').doc('user1')
+  const postsRef = userRef.collection('posts')
+
+  const posts = useTypedCollection(postsRef)
+  const techPosts = useTypedCollection(postsRef.select.byTag('tech'))
 
   return (
-    <ul>
-      {users.data.map((user, i) => (
-        <li key={i}>{user.displayName}</li>
-      ))}
-    </ul>
+    <Suspense fallback={'Loading...'}>
+      <ul>
+        {posts.data.map((post, i) => (
+          <li key={i}>{post.text}</li>
+        ))}
+      </ul>
+    </Suspense>
   )
 }
 
@@ -24,10 +28,11 @@ export const UsersComponent = () => {
  * Get realtime updates of document
  */
 export const UserComponent = ({ id }: { id: string }) => {
-  const user = useTypedDocument(typedFirestore.collection('users').doc(id))
-  if (!user.data) {
-    return <span>{'Loading...'}</span>
-  }
+  const user = useTypedDoc($web.collection('users').doc(id))
 
-  return <span>{user.data.displayName}</span>
+  return (
+    <Suspense fallback={'Loading...'}>
+      <span>{user.data?.displayName}</span>
+    </Suspense>
+  )
 }

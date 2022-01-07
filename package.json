@@ -1,79 +1,103 @@
 {
   "name": "fireschema",
-  "version": "4.0.4",
+  "version": "5.0.0-36",
   "repository": "github:yarnaimo/fireschema",
   "license": "MIT",
   "author": "yamaimo <yarnaimo@gmail.com>",
-  "main": "dist/index.js",
-  "module": "esm/index.js",
-  "bin": "dist/bin/cli.js",
+  "type": "module",
+  "exports": {
+    ".": {
+      "node": {
+        "import": "./esm/src/index.js",
+        "require": "./dist/src/index.js"
+      },
+      "default": "./esm/src/index.js"
+    },
+    "./admin": {
+      "node": {
+        "import": "./esm/src/admin/index.js",
+        "require": "./dist/src/admin/index.js"
+      },
+      "default": "./esm/src/admin/index.js"
+    },
+    "./hooks": {
+      "node": {
+        "import": "./esm/src/hooks/index.js",
+        "require": "./dist/src/hooks/index.js"
+      },
+      "default": "./esm/src/hooks/index.js"
+    }
+  },
+  "main": "./dist/src/index.js",
+  "types": "./esm/src/index.d.ts",
+  "bin": "./esm/src/bin/main.js",
   "scripts": {
-    "build": "ttsc && cp src/lib/*.d.ts dist/lib/ && chmod +x dist/bin/cli.js",
-    "build:esm": "ttsc -P tsconfig.esm.json && cp src/lib/*.d.ts esm/lib/",
+    "build": "tsc -P tsconfig.cjs.json && cp src/lib/*.d.ts dist/src/lib/ && echo '{ \"type\": \"commonjs\" }' > dist/package.json",
+    "build:esm": "tsc && cp src/lib/*.d.ts esm/src/lib/ && ./scripts/after-build-esm.sh",
     "debug": "node --inspect -r ts-node/register",
-    "dev": "yarn ts-node src/index.ts",
-    "docs": "md-magic && sed -i -e \"s/ from '\\.\\./ from 'fireschema/g\" README.md && prettier --write README.md",
-    "firestore:rules": "./dist/bin/cli.js src/example/1-1-schema.ts",
+    "docs": "./scripts/update-docs.sh",
+    "firestore:rules": "./esm/src/bin/main.js rules esm/src/example/1-1-schema.js",
+    "functions:export": "./esm/src/bin/main.js export src/__tests__/_functions",
     "lint": "eslint --ignore-path .gitignore '**/*.{js,jsx,ts,tsx}'",
-    "prepare": "./append-emulator-proxyer.sh",
+    "prepare": "./scripts/append-emulator-proxyer.sh",
     "serve": "yarn build && firebase emulators:start --only firestore,functions,pubsub",
-    "start": "NODE_ENV=production node dist/index.js",
-    "test": "NODE_ENV=test jest --no-cache",
-    "test:main": "firebase emulators:exec --only firestore 'yarn test --testPathIgnorePatterns /node_modules/ /dist/ /esm/ /functions/'",
-    "test:functions": "firebase emulators:exec --only firestore,functions,pubsub 'yarn test /functions/'",
+    "test": "NODE_ENV=test jest --coverage false",
     "test:all": "yarn test:main && yarn test:functions",
-    "ts-node": "ts-node --compiler ttypescript",
+    "test:functions": "yarn build:esm && firebase emulators:exec --only firestore,functions,pubsub 'yarn test /functions/'",
+    "test:main": "firebase emulators:exec --only firestore 'yarn test --testPathIgnorePatterns /node_modules/ /dist/ /esm/ /functions/'",
+    "ts-node": "ts-node -P tsconfig.cjs.json",
+    "ts-node:esm": "node --loader ts-node/esm --experimental-repl-await",
     "version": "rm -rf dist esm && yarn build && yarn build:esm"
   },
-  "resolutions": {
-    "ts-morph/**/typescript": "^4.2.3"
-  },
   "dependencies": {
-    "@sindresorhus/is": "^4.0.0",
-    "dayjs": "^1.10.4",
+    "@sindresorhus/is": "^4.2.0",
+    "@yarnaimo/type-extends": "^0.0.1",
+    "dayjs": "^1.10.7",
+    "getopts": "^2.3.0",
     "lifts": "^0.1.4",
-    "react-firebase-hooks": "^3.0.3",
-    "remeda": "^0.0.27",
-    "runtypes": "^5.1.0",
-    "ts-morph": "^10.0.2",
-    "ttypescript": "^1.5.12",
-    "type-fest": "^1.0.1"
+    "reactfire": "^4.2.1",
+    "read-pkg-up": "^9.0.0",
+    "remeda": "^0.0.30",
+    "type-fest": "^2.5.4"
   },
   "devDependencies": {
-    "@arkweid/lefthook": "^0.7.2",
-    "@firebase/rules-unit-testing": "^1.2.5",
-    "@google-cloud/pubsub": "^2.10.0",
-    "@sindresorhus/tsconfig": "^1.0.1",
-    "@testing-library/react-hooks": "^5.1.1",
-    "@types/express": "4.17.3",
-    "@types/jest": "^26.0.22",
-    "@types/prettier": "^2.2.3",
-    "@types/react": "^17.0.3",
-    "@types/testing-library__react-hooks": "^3.4.1",
-    "@yarnaimo/eslint-config": "^0.1.6",
+    "@arkweid/lefthook": "^0.7.7",
+    "@google-cloud/pubsub": "^2.18.3",
+    "@sindresorhus/tsconfig": "^2.0.0",
+    "@swc/core": "^1.2.111",
+    "@swc/jest": "^0.2.5",
+    "@testing-library/react-hooks": "^7.0.2",
+    "@types/express": "4.17.13",
+    "@types/jest": "^27.0.3",
+    "@types/prettier": "^2.4.2",
+    "@types/react": "^17.0.36",
+    "@types/testing-library__react-hooks": "^4.0.0",
+    "@yarnaimo/eslint-config": "^0.4.3",
+    "@yarnaimo/jest-esm-resolver": "^0.0.2",
     "express": "^4.17.1",
-    "firebase": "^8.3.1",
-    "firebase-admin": "^9.6.0",
-    "firebase-functions": "^3.13.2",
-    "firebase-functions-test": "^0.2.3",
-    "firebase-tools": "^9.9.0",
-    "got": "^11.8.2",
-    "jest": "^26.6.3",
-    "markdown-magic": "^2.0.0",
-    "prettier": "^2.2.1",
+    "firebase": "^9.5.0",
+    "firebase-admin": "^10.0.0",
+    "firebase-functions": "^3.16.0",
+    "firebase-functions-test": "^0.3.3",
+    "firebase-tools": "^9.23.0",
+    "got": "^11.8.3",
+    "jest": "^27.3.1",
+    "markdown-magic": "^2.5.2",
+    "prettier": "^2.4.1",
     "react": "^17.0.2",
     "react-test-renderer": "^17.0.2",
-    "sort-package-json": "^1.49.0",
-    "ts-jest": "^26.5.4",
-    "ts-node": "^9.1.1",
-    "tsd": "^0.14.0",
-    "typescript": "^4.2.3"
+    "sort-package-json": "^1.53.1",
+    "ts-node": "^10.4.0",
+    "tsd": "^0.19.0",
+    "typescript": "^4.5.2",
+    "zod": "^3.11.6"
   },
   "peerDependencies": {
-    "@google-cloud/pubsub": "^2.10.0",
-    "firebase": "^8.3.1",
-    "firebase-admin": "^9.6.0",
-    "firebase-functions": "^3.13.2"
+    "@google-cloud/pubsub": "^2.18.3",
+    "firebase": "^9.5.0",
+    "firebase-admin": "^10.0.0",
+    "firebase-functions": "^3.16.0",
+    "zod": "^3.11.6"
   },
   "engines": {
     "node": ">=12"

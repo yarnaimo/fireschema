@@ -1,11 +1,20 @@
 import got from 'got'
-import { emulatorOrigin, projectId, region } from '../_infrastructure/_config'
+
+import {
+  emulators,
+  localhost,
+  projectId,
+  region,
+} from '../_services/emulator.js'
 
 test('http', async () => {
   const resp = await got
-    .post(`${emulatorOrigin.functions}/${projectId}/${region}/http-getKeys`, {
-      json: { a: 0, b: '' },
-    })
+    .post(
+      `http://${localhost}:${emulators.functions.port}/${projectId}/${region}/http-getKeys`,
+      {
+        json: { a: 0, b: '' },
+      },
+    )
     .json()
 
   expect(resp).toEqual(['a', 'b'])

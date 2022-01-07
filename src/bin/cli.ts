@@ -1,38 +1,45 @@
-#!/usr/bin/env node
+import getopts from 'getopts'
 
-import { writeFileSync } from 'fs'
-import { relative, resolve } from 'path'
-import { register } from 'ts-node'
+import { exportFunctions } from './commands/export.js'
+import { generateRules } from './commands/rules.js'
 
-register({
-  project: process.env['TS_NODE_PROJECT'],
-  compiler: 'ttypescript',
-})
+const help = `Usage:
+fireschema rules <schema-path>          generate firestore.rules
+fireschema export <functions-dir-path>  create functions entrypoint file`
 
-const rulesPath = 'firestore.rules'
-const relativePath = relative(process.cwd(), __dirname)
-const isInsideNodeModules = relativePath.startsWith('node_modules/')
+export const cli = async () => {
+  const {
+    _: [command, ...args],
+    esm,
+    output,
+  } = getopts(process.argv.slice(2), {
+    alias: { output: 'o' },
+    boolean: ['esm'],
+  })
 
-const main = () => {
-  const [, , path] = process.argv
+  switch (command) {
+    case 'rules':
+      if (!args[0]) {
+        console.error('Schema path must be specified')
+        process.exit(1)
+      }
+      void generateRules(args[0])
+      break
 
-  if (!path) {
-    console.error('Schema path must be specified')
-    process.exit(1)
+    case 'export':
+      if (!args[0]) {
+        console.error('A target directory must be specified')
+        process.exit(1)
+      }
+      void exportFunctions(args[0], esm, output)
+      break
+
+    case '--help':
+      console.log(help)
+      break
+
+    default:
+      console.log(help)
+      process.exit(1)
   }
-
-  const schemaPath = resolve(path)
-  const schemaModule = require(schemaPath) // eslint-disable-line
-
-  const rendererPath = isInsideNodeModules
-    ? '../../dist/core/firestore/_renderer/root'
-    : '../../src/core/firestore/_renderer/root'
-  const rendererModule = require(rendererPath) // eslint-disable-line
-
-  const rendered = rendererModule.renderSchema(schemaModule.firestoreSchema)
-
-  writeFileSync(rulesPath, rendered)
-  console.log('🎉 Generated firestore.rules')
 }
-
-main()

@@ -1,91 +1,87 @@
 import { Merge } from 'type-fest'
-import {
-  $allow,
-  $collectionGroups,
-  $collectionSchema,
-  $docLabel,
-  $functions,
-  $or,
-  $schema,
-  createFirestoreSchema,
-  FTypes,
-} from '..'
+import { z } from 'zod'
 
-// user
-export type User = {
+import { DataModel, FirestoreModel, rules, timestampType } from '../index.js'
+
+export const UserType = z.object({
+  name: z.string(),
+  displayName: z.union([z.string(), z.null()]),
+  age: z.number().int(),
+  timestamp: timestampType(),
+  options: z.object({ a: z.boolean() }).optional(),
+})
+
+type User = z.infer<typeof UserType>
+/* => {
   name: string
   displayName: string | null
   age: number
   timestamp: FTypes.Timestamp
-  options: { a: boolean } | undefined
-}
-export type UserDecoded = Merge<User, { timestamp: Date }>
+  options?: { a: boolean } | undefined
+} */
 
-const UserSchema = $collectionSchema<User, UserDecoded>()({
-  decoder: (data) => ({
+type UserDecoded = Merge<User, { timestamp: Date }>
+
+const UserModel = new DataModel({
+  schema: UserType,
+  decoder: (data: User): UserDecoded => ({
     ...data,
     timestamp: data.timestamp.toDate(),
   }),
 })
 
-// post
-type PostA = {
-  type: 'a'
-  tags: { id: number; name: string }[]
-  text: string
-}
-type PostB = {
-  type: 'b'
-  tags: { id: number; name: string }[]
-  texts: string[]
-}
-const PostSchema = $collectionSchema<PostA | PostB>()({
+const PostType = z.object({
+  authorUid: z.string(),
+  text: z.string(),
+  tags: z.object({ id: z.number().int(), name: z.string() }).array(),
+})
+
+const PostModel = new DataModel({
+  schema: PostType,
   selectors: (q) => ({
-    byTag: (tag: string) => q.where('tags', 'array-contains', tag),
+    byTag: (tag: string) => [
+      q.where('tags', 'array-contains', tag),
+      q.limit(20),
+    ],
   }),
 })
 
-export const firestoreSchema = createFirestoreSchema({
-  [$functions]: {
-    // whether /admins/<uid> exists
-    ['isAdmin()']: `
-      return exists(/databases/$(database)/documents/admins/$(request.auth.uid));
-    `,
+export const firestoreModel = new FirestoreModel({
+  'function isAdmin()': `
+    return exists(${rules.basePath}/admins/$(request.auth.uid));
+  `,
 
-    // whether uid matches
-    ['matchesUser(uid)']: `
-      return request.auth.uid == uid;
-    `,
-  },
+  'function requestUserIs(uid)': `
+    return request.auth.uid == uid;
+  `,
 
-  [$collectionGroups]: {
-    posts: {
-      [$docLabel]: 'postId',
-      [$schema]: PostSchema,
-      [$allow]: {
+  collectionGroups: {
+    '/posts/{postId}': {
+      allow: {
         read: true,
       },
     },
   },
 
-  // /users/{uid}
-  users: {
-    [$docLabel]: 'uid', // {uid}
-    [$schema]: UserSchema, // collectionSchema
-    [$allow]: {
-      // access control
-      read: true, // all user
-      write: $or(['matchesUser(uid)', 'isAdmin()']), // only users matching {uid} or admins
+  '/users/{uid}': {
+    model: UserModel,
+    allow: {
+      read: true, // open access
+      write: rules.or('requestUserIs(uid)', 'isAdmin()'),
     },
 
-    // /users/{uid}/posts/{postId}
-    posts: {
-      [$docLabel]: 'postId',
-      [$schema]: PostSchema,
-      [$allow]: {
+    '/posts/{postId}': {
+      'function authorUidMatches()': `
+        return request.resource.data.authorUid == uid;
+      `,
+
+      model: PostModel,
+      allow: {
         read: true,
-        write: 'matchesUser(uid)',
+        write: rules.and('requestUserIs(uid)', 'authorUidMatches()'),
       },
     },
   },
 })
+
+export default firestoreModel

@@ -1,2 +1,2 @@
-export type { firestore as _admin } from 'firebase-admin'
-export type { default as _web } from './_firestore-web'
+export type * as _admin from 'firebase-admin/firestore'
+export type * as _web from 'firebase/firestore'

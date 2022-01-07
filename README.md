@@ -19,14 +19,14 @@
 
 ## Requirement
 
-- **TypeScript** (>= 4.2)
+- **TypeScript** (>= 4.4)
 
 <br />
 
 ## Install
 
 ```sh
-yarn add fireschema
+yarn add fireschema firebase firebase-admin firebase-functions zod
 yarn add -D typescript ts-node
 ```
 
@@ -34,180 +34,151 @@ yarn add -D typescript ts-node
 
 ## Setup
 
-### Custom Transformer
+> 🎉 Since Fireschema v5, you no longer need to compile codes via custom transformer.
 
-To generate Firestore security rules or embedding type validation code into Callable Function, you need to compile codes via **Fireschema's custom transformer** that retrives type information from TypeScript AST.
+<br />
 
-Currently official TypeScript package doesn't support custom transformers, and you need to use **[ttypescript](https://github.com/cevek/ttypescript)** that wraps TypeScript compiler.
+## Usage - Firestore
 
-Add following options to your **`tsconfig.json`**,
+### Schema Transformation
 
-```json
-{
-  "compilerOptions": {
-    "plugins": [
-      {
-        "transform": "fireschema/transformer"
-      }
-    ]
-  }
-}
-```
-
-and replace the commands.
-
-|            | before    | after                                  |
-| ---------- | --------- | -------------------------------------- |
-| typescript | `tsc`     | `ttsc` (ttypescript's compile command) |
-| ts-node    | `ts-node` | `ts-node --compiler ttypescript`       |
-
-> `ttsc` and `ts-node` supports specifying `tsconfig.json` by using environment variable `TS_NODE_PROJECT`.
-
-If you use ts-jest, add following options to jest config.
-
-```js
-module.exports = {
-  globals: {
-    'ts-jest': {
-      tsconfig: 'tsconfig.json',
-      compiler: 'ttypescript',
-    },
-  },
-}
-```
-
-<br>
-
----
-
-<br>
-
-## Example - Firestore
-
-> **Do not use following variable names except importing from fireschema**.
->
-> - `$collectionSchema`
-> - `__$__`
-
-#### Data structure of examples
-
-- `users/{uid}` - `User`
-- `users/{uid}/posts/{postId}` - `PostA | PostB`
+| Zod Schema                           | Security Rules Output                                                  |
+| ------------------------------------ | ---------------------------------------------------------------------- |
+| `z.any()`                            | `true`                                                                 |
+| `z.unknown()`                        | `true`                                                                 |
+| `z.undefined()`                      | `!("key" in data)`                                                     |
+| `z.null()`                           | `data.key == null`                                                     |
+| `z.boolean()`                        | `data.key is bool`                                                     |
+| `z.literal('a')`                     | `data.key == "a"`                                                      |
+| `z.string()`                         | `data.key is string`                                                   |
+| `z.string().min(5)`                  | `(data.key is string && data.key.size >= 5)`                           |
+| `z.string().min(5).max(20)`          | `(data.key is string && data.key.size >= 5 && data.key.size <= 20)`    |
+| `z.string().regex(/@example\.com$/)` | `(data.key is string && data.key.matches("@example\\.com$"))`          |
+| `z.number()`                         | `data.key is number`                                                   |
+| `z.number().int()`                   | `data.key is int`                                                      |
+| `z.number().min(5)`                  | `(data.key is int && data.key >= 5)`                                   |
+| `z.number().max(20)`                 | `(data.key is int && data.key <= 20)`                                  |
+| `timestampType()`                    | `data.key is timestamp`                                                |
+| `z.record(z.string())`               | `data.key is map`                                                      |
+| `z.tuple([z.string(), z.number()])`  | `(data.key is list && data.key[0] is string && data.key[1] is number)` |
+| `z.string().array()`                 | `data.key is list`                                                     |
+| `z.string().array().min(5)`          | `(data.key is list && data.key.size() >= 5)`                           |
+| `z.string().array().max(20)`         | `(data.key is list && data.key.size() <= 20)`                          |
+| `z.string().optional()`              | `(data.key is string \|\| !("key" in data))`                           |
+| `z.union([z.string(), z.null()])`    | `(data.key is string \|\| data.key == null)`                           |
 
 <br>
 
 ### 1. Define schema
 
-The schema definition must be named exported as **`firestoreSchema`**.
+The schema definition must be default exported.
 
 <!-- AUTO-GENERATED-CONTENT:START (CODE:src=./src/example/1-1-schema.ts) -->
 <!-- The below code snippet is automatically added from ./src/example/1-1-schema.ts -->
 
 ```ts
 import { Merge } from 'type-fest'
-import {
-  $allow,
-  $collectionGroups,
-  $collectionSchema,
-  $docLabel,
-  $functions,
-  $or,
-  $schema,
-  createFirestoreSchema,
-  FTypes,
-} from 'fireschema'
+import { z } from 'zod'
 
-// user
-export type User = {
+import { DataModel, FirestoreModel, rules, timestampType } from 'fireschema'
+
+export const UserType = z.object({
+  name: z.string(),
+  displayName: z.union([z.string(), z.null()]),
+  age: z.number().int(),
+  timestamp: timestampType(),
+  options: z.object({ a: z.boolean() }).optional(),
+})
+
+type User = z.infer<typeof UserType>
+/* => {
   name: string
   displayName: string | null
   age: number
   timestamp: FTypes.Timestamp
-  options: { a: boolean } | undefined
-}
-export type UserDecoded = Merge<User, { timestamp: Date }>
+  options?: { a: boolean } | undefined
+} */
 
-const UserSchema = $collectionSchema<User, UserDecoded>()({
-  decoder: (data) => ({
+type UserDecoded = Merge<User, { timestamp: Date }>
+
+const UserModel = new DataModel({
+  schema: UserType,
+  decoder: (data: User): UserDecoded => ({
     ...data,
     timestamp: data.timestamp.toDate(),
   }),
 })
 
-// post
-type PostA = {
-  type: 'a'
-  tags: { id: number; name: string }[]
-  text: string
-}
-type PostB = {
-  type: 'b'
-  tags: { id: number; name: string }[]
-  texts: string[]
-}
-const PostSchema = $collectionSchema<PostA | PostB>()({
+const PostType = z.object({
+  authorUid: z.string(),
+  text: z.string(),
+  tags: z.object({ id: z.number().int(), name: z.string() }).array(),
+})
+
+const PostModel = new DataModel({
+  schema: PostType,
   selectors: (q) => ({
-    byTag: (tag: string) => q.where('tags', 'array-contains', tag),
+    byTag: (tag: string) => [
+      q.where('tags', 'array-contains', tag),
+      q.limit(20),
+    ],
   }),
 })
 
-export const firestoreSchema = createFirestoreSchema({
-  [$functions]: {
-    // whether /admins/<uid> exists
-    ['isAdmin()']: `
-      return exists(/databases/$(database)/documents/admins/$(request.auth.uid));
-    `,
+export const firestoreModel = new FirestoreModel({
+  'function isAdmin()': `
+    return exists(${rules.basePath}/admins/$(request.auth.uid));
+  `,
 
-    // whether uid matches
-    ['matchesUser(uid)']: `
-      return request.auth.uid == uid;
-    `,
-  },
+  'function requestUserIs(uid)': `
+    return request.auth.uid == uid;
+  `,
 
-  [$collectionGroups]: {
-    posts: {
-      [$docLabel]: 'postId',
-      [$schema]: PostSchema,
-      [$allow]: {
+  collectionGroups: {
+    '/posts/{postId}': {
+      allow: {
         read: true,
       },
     },
   },
 
-  // /users/{uid}
-  users: {
-    [$docLabel]: 'uid', // {uid}
-    [$schema]: UserSchema, // collectionSchema
-    [$allow]: {
-      // access control
-      read: true, // all user
-      write: $or(['matchesUser(uid)', 'isAdmin()']), // only users matching {uid} or admins
+  '/users/{uid}': {
+    model: UserModel,
+    allow: {
+      read: true, // open access
+      write: rules.or('requestUserIs(uid)', 'isAdmin()'),
     },
 
-    // /users/{uid}/posts/{postId}
-    posts: {
-      [$docLabel]: 'postId',
-      [$schema]: PostSchema,
-      [$allow]: {
+    '/posts/{postId}': {
+      'function authorUidMatches()': `
+        return request.resource.data.authorUid == uid;
+      `,
+
+      model: PostModel,
+      allow: {
         read: true,
-        write: 'matchesUser(uid)',
+        write: rules.and('requestUserIs(uid)', 'authorUidMatches()'),
       },
     },
   },
 })
+
+export default firestoreModel
 ```
 
 <!-- AUTO-GENERATED-CONTENT:END -->
+
+Write rules are **combined** with the rules automatically generated from zod schema.
 
 <br>
 
 ### 2. Generate firestore.rules
 
 ```sh
-yarn fireschema <path-to-schema>.ts
+yarn fireschema rules <path-to-schema>.ts
 ```
 
-> Environment variable `TS_NODE_PROJECT` is supported similarly to `ttsc` and `ts-node`.
+> Environment variable `TS_NODE_PROJECT` is supported.
 
 <details>
   <summary>Example of generated firestore.rules</summary>
@@ -220,11 +191,22 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    function __validator_meta__(data) {
+      return (
+        (request.method == "create" && data._createdAt == request.time && data._updatedAt == request.time)
+          || (request.method == "update" && data._createdAt == resource.data._createdAt && data._updatedAt == request.time)
+      );
+    }
+
+    function __validator_keys__(data, keys) {
+      return data.keys().removeAll(['_createdAt', '_updatedAt']).hasOnly(keys);
+    }
+
     function isAdmin() {
       return exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
-    function matchesUser(uid) {
+    function requestUserIs(uid) {
       return request.auth.uid == uid;
     }
 
@@ -234,39 +216,35 @@ service cloud.firestore {
 
     match /users/{uid} {
       function __validator_0__(data) {
-        return (
-          (!("_createdAt" in data) || data._createdAt == request.time)
-            && (!("_updatedAt" in data) || data._updatedAt == request.time)
+        return (__validator_meta__(data) && (
+          __validator_keys__(data, ['name', 'displayName', 'age', 'timestamp', 'options'])
             && data.name is string
-            && (data.displayName == null || data.displayName is string)
-            && (data.age is int || data.age is float)
+            && (data.displayName is string || data.displayName == null)
+            && data.age is int
             && data.timestamp is timestamp
-            && (!("options" in data) || data.options.a is bool)
-        );
+            && (data.options.a is bool || !("options" in data))
+        ));
       }
 
       allow read: if true;
-      allow write: if ((matchesUser(uid) || isAdmin()) && __validator_0__(request.resource.data));
+      allow write: if ((requestUserIs(uid) || isAdmin()) && __validator_0__(request.resource.data));
 
       match /posts/{postId} {
+        function authorUidMatches() {
+          return request.resource.data.authorUid == uid;
+        }
+
         function __validator_1__(data) {
-          return ((
-            (!("_createdAt" in data) || data._createdAt == request.time)
-              && (!("_updatedAt" in data) || data._updatedAt == request.time)
-              && data.type == "a"
-              && (data.tags.size() == 0 || ((data.tags[0].id is int || data.tags[0].id is float) && data.tags[0].name is string))
+          return (__validator_meta__(data) && (
+            __validator_keys__(data, ['authorUid', 'text', 'tags'])
+              && data.authorUid is string
               && data.text is string
-          ) || (
-            (!("_createdAt" in data) || data._createdAt == request.time)
-              && (!("_updatedAt" in data) || data._updatedAt == request.time)
-              && data.type == "b"
-              && (data.tags.size() == 0 || ((data.tags[0].id is int || data.tags[0].id is float) && data.tags[0].name is string))
-              && (data.texts.size() == 0 || data.texts[0] is string)
+              && data.tags is list
           ));
         }
 
         allow read: if true;
-        allow write: if (matchesUser(uid) && __validator_1__(request.resource.data));
+        allow write: if ((requestUserIs(uid) && authorUidMatches()) && __validator_1__(request.resource.data));
       }
     }
   }
@@ -287,113 +265,108 @@ The Firestore interface of Fireschema supports both **Web SDK and Admin SDK**.
 <!-- The below code snippet is automatically added from ./src/example/1-3-typed-firestore.ts -->
 
 ```ts
-import firebase from 'firebase/app' // or firebase-admin
-import { TypedFirestore } from 'fireschema'
-import { firestoreSchema } from './1-1-schema'
+import { initializeApp } from 'firebase/app' // or firebase-admin
+import { initializeFirestore } from 'firebase/firestore'
 
-const app: firebase.app.App = firebase.initializeApp({
+import { TypedFirestoreWeb } from 'fireschema'
+import { firestoreModel } from './1-1-schema.js'
+
+const app = initializeApp({
   // ...
 })
-const firestoreApp = app.firestore()
-firestoreApp.settings({ ignoreUndefinedProperties: true })
+const firestoreApp = initializeFirestore(app, {
+  ignoreUndefinedProperties: true,
+})
 
 /**
  * Initialize TypedFirestore
  */
-export const typedFirestore: TypedFirestore<
-  typeof firestoreSchema,
-  firebase.firestore.Firestore
-> = new TypedFirestore(firestoreSchema, firebase.firestore, firestoreApp)
+export const $web: TypedFirestoreWeb<typeof firestoreModel> =
+  new TypedFirestoreWeb(firestoreModel, firestoreApp)
 
 /**
  * Reference collections/documents and get snapshot
  */
-const users = typedFirestore.collection('users') // TypedCollectionRef instance
-const user = users.doc('userId') // TypedDocumentRef instance
+const usersRef = $web.collection('users') // TypedCollectionRef instance
+const userRef = usersRef.doc('userId') // TypedDocumentRef instance
 
-const posts = user.collection('posts')
-const post = posts.doc('123')
-const techPosts = user.collectionQuery(
-  'posts',
-  (q) => q.byTag('tech'), // selector defined in schema
-)
+const postsRef = userRef.collection('posts')
+const postRef = postsRef.doc('123')
+const techPostsQuery = postsRef.select.byTag('tech') // selector defined in schema
 
-!(async () => {
-  await user.get() // DocumentSnapshot<User>
+await userRef.get() // TypedDocumentSnap<User>
+await userRef.getData() // User | undefined
+await userRef.getDataOrThrow() // User
 
-  await post.get() // DocumentSnapshot<PostA | PostB>
-  await posts.get() // QuerySnapshot<PostA | PostB>
-  await techPosts.get() // QuerySnapshot<PostA | PostB>
-})
+await postRef.get() // TypedDocumentSnap<PostA | PostB>
+await postsRef.get() // TypedQuerySnap<PostA | PostB>
+await postsRef.getData() // (PostA | PostB)[]
+await techPostsQuery.get() // TypedQuerySnap<PostA | PostB>
 
 /**
  * Get child collection of retrived document snapshot
  */
-!(async () => {
-  const snap = await users.get()
-  const firstUserRef = snap.docs[0]!.ref
+const snap = await usersRef.get()
+const firstUserRef = snap.docs[0]!.ref
 
-  await typedFirestore.wrapDocument(firstUserRef).collection('posts').get()
-})
+await firstUserRef.collection('posts').get()
 
 /**
  * Reference parent collection/document
  */
-const _posts = post.parentCollection()
-const _user = posts.parentDocument()
+const _postsRef = postRef.parentCollection()
+const _userRef = postsRef.parentDocument()
 
 /**
  * Reference collections groups and get snapshot
  */
-const postsGroup = typedFirestore.collectionGroup(
-  'posts', // collection name: passed to original collectionGroup method
-  'users.posts', // to get schema options
-)
-const techPostsGroup = typedFirestore.collectionGroupQuery(
-  'posts',
-  'users.posts',
-  (q) => q.byTag('tech'),
-)
+const postsGroup = $web.collectionGroup('posts')
+const techPostsGroup = postsGroup.select.byTag('tech')
 
-!(async () => {
-  await postsGroup.get() // QuerySnapshot<PostA | PostB>
-  await techPostsGroup.get() // QuerySnapshot<PostA | PostB>
-})
+await postsGroup.get() // TypedQuerySnap<PostA | PostB>
+await techPostsGroup.get() // TypedQuerySnap<PostA | PostB>
 
 /**
  * Write data
  */
-!(async () => {
-  await user.create({
-    name: 'test',
-    displayName: 'Test',
-    age: 20,
-    timestamp: typedFirestore.firestoreStatic.FieldValue.serverTimestamp(),
-    options: { a: true },
-  })
-  await user.setMerge({
-    age: 21,
-  })
-  await user.update({
-    age: 21,
-  })
-  await user.delete()
+await userRef.create(({ serverTimestamp }) => ({
+  name: 'test',
+  displayName: 'Test',
+  age: 20,
+  timestamp: serverTimestamp(),
+  options: { a: true },
+}))
+await userRef.setMerge({
+  age: 21,
 })
+await userRef.update({
+  age: 21,
+})
+await userRef.delete()
 
 /**
  * Transaction
  */
-!(async () => {
-  await typedFirestore.runTransaction(async (tt) => {
-    const snap = await tt.get(user)
-    tt.update(user, {
-      age: snap.data()!.age + 1,
-    })
+await $web.runTransaction(async (tt) => {
+  const snap = await tt.get(userRef)
+  tt.update(userRef, {
+    age: snap.data()!.age + 1,
   })
 })
 ```
 
 <!-- AUTO-GENERATED-CONTENT:END -->
+
+#### Write methods of Fireschema's document reference
+
+- **`create()`** - Create a document. (`_createdAt` / `_updatedAt` fields are added)
+  - **Web** - Call JS SDK's `set()` internally.
+    It fails if the document already exists because overwriting \_createdAt is denied by the automatically generated security rules.
+  - **Admin** - Call Admin SDK's `create()` internally. It fails if the document already exists.
+- **`setMerge()`** - Call `set(data, { merge: true })` internally. (`_updatedAt` field is updated)
+- **`update()`** - Call `update()` internally. (`_updatedAt` field is updated)
+
+> `set()` is not implemented on fireschema because it cannot determine whether `_createdAt` should be included in update fields without specifying it is a new creation or an overwrite.
 
 <br>
 
@@ -403,25 +376,29 @@ const techPostsGroup = typedFirestore.collectionGroupQuery(
 <!-- The below code snippet is automatically added from ./src/example/1-4-react-hooks.tsx -->
 
 ```tsx
-import React from 'react'
-import { useTypedDocument, useTypedQuery } from 'fireschema/hooks'
-import { typedFirestore } from './1-3-typed-firestore'
+import React, { Suspense } from 'react'
+
+import { useTypedCollection, useTypedDoc } from 'fireschema/hooks'
+import { $web } from './1-3-typed-firestore.js'
 
 /**
  * Get realtime updates of collection/query
  */
-export const UsersComponent = () => {
-  const users = useTypedQuery(typedFirestore.collection('users'))
-  if (!users.data) {
-    return <span>{'Loading...'}</span>
-  }
+export const PostsComponent = () => {
+  const userRef = $web.collection('users').doc('user1')
+  const postsRef = userRef.collection('posts')
+
+  const posts = useTypedCollection(postsRef)
+  const techPosts = useTypedCollection(postsRef.select.byTag('tech'))
 
   return (
-    <ul>
-      {users.data.map((user, i) => (
-        <li key={i}>{user.displayName}</li>
-      ))}
-    </ul>
+    <Suspense fallback={'Loading...'}>
+      <ul>
+        {posts.data.map((post, i) => (
+          <li key={i}>{post.text}</li>
+        ))}
+      </ul>
+    </Suspense>
   )
 }
 
@@ -429,12 +406,13 @@ export const UsersComponent = () => {
  * Get realtime updates of document
  */
 export const UserComponent = ({ id }: { id: string }) => {
-  const user = useTypedDocument(typedFirestore.collection('users').doc(id))
-  if (!user.data) {
-    return <span>{'Loading...'}</span>
-  }
+  const user = useTypedDoc($web.collection('users').doc(id))
 
-  return <span>{user.data.displayName}</span>
+  return (
+    <Suspense fallback={'Loading...'}>
+      <span>{user.data?.displayName}</span>
+    </Suspense>
+  )
 }
 ```
 
@@ -446,7 +424,7 @@ export const UserComponent = ({ id }: { id: string }) => {
 
 <br>
 
-## Example - Cloud Functions
+## Usage - Cloud Functions
 
 ### 1. Create functions
 
@@ -454,34 +432,29 @@ export const UserComponent = ({ id }: { id: string }) => {
 <!-- The below code snippet is automatically added from ./src/example/2-1-typed-functions.ts -->
 
 ```ts
-import { firestore } from 'firebase-admin'
 import * as functions from 'firebase-functions'
-import { Merge } from 'type-fest'
-import { $jsonSchema, TypedFunctions } from 'fireschema'
-import { firestoreSchema, User } from './1-1-schema'
+import { z } from 'zod'
+
+import { TypedFunctions } from 'fireschema/admin'
+import { UserType, firestoreModel } from './1-1-schema.js'
 
 /**
  * Initialize TypedFunctions
  */
 const timezone = 'Asia/Tokyo'
-const typedFunctions = new TypedFunctions(
-  firestoreSchema,
-  firestore,
-  functions,
-  timezone,
-)
+const typedFunctions = new TypedFunctions(firestoreModel, timezone)
 const builder = functions.region('asia-northeast1')
 
 /**
  * functions/index.ts file
  */
-export type UserJson = Merge<User, { timestamp: string }>
+export const UserJsonType = UserType.extend({ timestamp: z.string() })
 export const callable = {
   createUser: typedFunctions.callable({
-    schema: [
-      $jsonSchema<UserJson>(), // schema of request data (automatically validate on request)
-      $jsonSchema<{ result: boolean }>(), // schema of response data
-    ],
+    schema: {
+      input: UserJsonType, // schema of request data (automatically validate on request)
+      output: z.object({ result: z.boolean() }), // schema of response data
+    },
     builder,
     handler: async (data, context) => {
       console.log(data) // UserJson
@@ -517,7 +490,7 @@ export const http = {
 
 export const topic = {
   publishMessage: typedFunctions.topic('publish_message', {
-    schema: $jsonSchema<{ text: string }>(),
+    schema: z.object({ text: z.string() }),
     builder,
     handler: async (data) => {
       data // { text: string }
@@ -548,16 +521,18 @@ Automatically provide types to request/response data based on passed functions m
 <!-- The below code snippet is automatically added from ./src/example/2-2-callable-function.tsx -->
 
 ```tsx
-import firebase from 'firebase/app'
+import { initializeApp } from 'firebase/app'
+import { getFunctions } from 'firebase/functions'
 import React from 'react'
+
 import { TypedCaller } from 'fireschema'
 
-type FunctionsModule = typeof import('./2-1-typed-functions')
+type FunctionsModule = typeof import('./2-1-typed-functions.js')
 
-const app: firebase.app.App = firebase.initializeApp({
+const app = initializeApp({
   // ...
 })
-const functionsApp = app.functions('asia-northeast1')
+const functionsApp = getFunctions(app, 'asia-northeast1')
 
 export const typedCaller = new TypedCaller<FunctionsModule>(functionsApp)
 
@@ -578,7 +553,7 @@ const Component = () => {
     console.log(result.data)
   }
 
-  return <button onClick={createUser}></button>
+  return <button onClick={createUser} />
 }
 ```
 

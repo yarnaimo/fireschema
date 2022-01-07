@@ -1,70 +1,64 @@
 import dayjs, { Dayjs } from 'dayjs'
+import {
+  CollectionReference,
+  DocumentReference,
+  Query,
+  queryEqual,
+  refEqual,
+} from 'firebase/firestore'
 import { useEffect, useRef } from 'react'
-import { HasIsEqual } from 'react-firebase-hooks/firestore/dist/util'
 
-type RefHook<T> = {
-  current: T
+type RefOrQuery = DocumentReference | CollectionReference | Query
+
+const queryOrRefEqual = <T extends RefOrQuery>(left: T, right: T) => {
+  return left instanceof Query
+    ? queryEqual(left, right as any)
+    : refEqual(left, right as any)
 }
 
-// export const useComparatorRef = <T>(
-//   value: T | null | undefined,
-//   isEqual: (v1: T | null | undefined, v2: T | null | undefined) => boolean,
-//   onChange?: () => void,
-// ): RefHook<T | null | undefined> => {
-//   const ref = useRef(value)
-//   useEffect(() => {
-//     if (!isEqual(value, ref.current)) {
-//       ref.current = value
-//       if (onChange) {
-//         onChange()
-//       }
-//     }
-//   })
-//   return ref
-// }
-
-const isEqual = <T extends HasIsEqual<T>>(
-  v1: T | null | undefined,
-  v2: T | null | undefined,
+const isEqual = <T extends RefOrQuery>(
+  left: T | null | undefined,
+  right: T | null | undefined,
 ): boolean => {
-  const bothNull: boolean = !v1 && !v2
-  const equal: boolean = !!v1 && !!v2 && v1.isEqual(v2)
+  const bothNull: boolean = !left && !right
+  const equal: boolean = !!left && !!right && queryOrRefEqual(left, right)
 
   return bothNull || equal
 }
 
-// export const useIsEqualRef = <T extends HasIsEqual<T>>(
-//   value: T | null | undefined,
-//   onChange?: () => void,
-// ): RefHook<T | null | undefined> => {
-//   return useComparatorRef(value, isEqual, onChange)
-// }
-
-export const useRefChangeLimitExceeded = (
-  fref: HasIsEqual<any> | null | undefined,
-) => {
+export const useSafeRef = <T extends RefOrQuery>(ref: T) => {
   const timestampsRef = useRef<Dayjs[]>([])
 
-  const frefRef = useRef<HasIsEqual<any> | null | undefined>(null)
-  useEffect(() => {
-    if (!isEqual(fref, frefRef.current)) {
-      frefRef.current = fref
-      timestampsRef.current = [dayjs(), ...timestampsRef.current]
-    }
-  })
+  const memoizedRef = useRef<T>()
+  const refChanged = !isEqual(memoizedRef.current, ref)
 
-  const exceeded = () => {
-    const a = !!timestampsRef.current[3]?.isAfter(dayjs().subtract(3, 'second'))
-    const b = !!timestampsRef.current[5]?.isAfter(dayjs().subtract(5, 'second'))
-    return a || b
+  if (refChanged) {
+    memoizedRef.current = ref
+    timestampsRef.current = [dayjs(), ...timestampsRef.current]
   }
 
-  if (exceeded()) {
+  const exceeded = useRef(false)
+  const a = !!timestampsRef.current[3]?.isAfter(dayjs().subtract(3, 'second'))
+  const b = !!timestampsRef.current[5]?.isAfter(dayjs().subtract(5, 'second'))
+  exceeded.current ||= a || b
+
+  const safeRef = exceeded.current ? undefined : memoizedRef.current
+
+  if (!safeRef) {
     console.error(
       '%cRef change limit exceeded!!!',
       'font-weight: bold; font-size: large; color: red;',
     )
+    throw new Promise(() => {})
   }
 
-  return { exceeded, timestamps: timestampsRef }
+  return { safeRef, refChanged, timestamps: timestampsRef }
+}
+
+export const useFirestoreErrorLogger = (error: Error | undefined) => {
+  useEffect(() => {
+    if (error) {
+      console.error(error)
+    }
+  }, [error])
 }

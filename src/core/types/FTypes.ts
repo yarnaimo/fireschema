@@ -1,4 +1,4 @@
-import { _admin, _web } from '../../lib/firestore-types'
+import { _admin, _web } from '../../lib/firestore-types.js'
 
 export declare namespace FTypes {
   export type Env<F, W, A> = F extends _web.Firestore ? W : A
@@ -15,11 +15,6 @@ export declare namespace FTypes {
 
   export type DocumentObject = { [key: string]: DocumentValue }
 
-  export type FirestoreStatic<F extends FirestoreApp> = Env<
-    F,
-    typeof _web,
-    typeof _admin
-  >
   export type FirestoreApp = _web.Firestore | _admin.Firestore
 
   export type FieldValue<F extends FirestoreApp = FirestoreApp> = Env<
@@ -58,7 +53,7 @@ export declare namespace FTypes {
   >
   export type FirestoreDataConverter<
     T,
-    F extends FirestoreApp = FirestoreApp
+    F extends FirestoreApp = FirestoreApp,
   > = Env<
     F,
     _web.FirestoreDataConverter<T>,
@@ -88,7 +83,7 @@ export declare namespace FTypes {
   export type SnapshotOptions<F extends FirestoreApp = FirestoreApp> = Env<
     F,
     _web.SnapshotOptions,
-    undefined
+    {} | undefined
   >
 
   export type Transaction<F extends FirestoreApp> = Env<
@@ -102,9 +97,14 @@ export declare namespace FTypes {
     _admin.WriteBatch
   >
 
-  export type SetResult<F extends FirestoreApp> = Env<
+  export type WriteResult<F extends FirestoreApp> = Env<
     F,
-    ReturnType<_web.DocumentReference['set']>,
-    ReturnType<_admin.DocumentReference['set']>
+    void,
+    _admin.WriteResult
+  >
+  export type WriteResultArray<F extends FirestoreApp> = Env<
+    F,
+    void,
+    _admin.WriteResult[]
   >
 }

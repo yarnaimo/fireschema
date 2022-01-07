@@ -1,12 +1,5 @@
-import { EntriesStrict, P } from 'lifts'
-import { R } from '../../lib/fp'
-import { is } from '../../lib/type'
-import {
-  GetDeepByKey,
-  JoinLoc,
-  OmitLastSegment,
-  ParseLocString,
-} from '../types/_object'
+import { STypes } from '../index.js'
+import { JoinLoc, OmitLastSegment, ParseLocString } from '../types/_object.js'
 
 export const getDeep = (object: object, paths: string[]) => {
   return paths.reduce(
@@ -15,32 +8,63 @@ export const getDeep = (object: object, paths: string[]) => {
   ) as unknown
 }
 
-export const getDeepByKey = <T extends object, Key extends string>(
-  obj: T,
-  targetKey: Key,
-): GetDeepByKey<T, Key>[] => {
-  return P(
-    obj,
-    EntriesStrict,
-    R.flatMap(([key, value]): any => {
-      if (!is.object(value)) {
-        return []
-      }
-      const children = getDeepByKey(value, targetKey)
-      if (key === (targetKey as any)) {
-        return [value, ...(children as any)]
-      } else {
-        return children
-      }
-    }),
-  ) as any
-}
+// export const getDeepByKey = <T extends object, Key extends string>(
+//   obj: T,
+//   targetKey: Key,
+// ): GetDeepByKey<T, Key>[] => {
+//   return P(
+//     obj,
+//     EntriesStrict,
+//     R.flatMap(([key, value]): any => {
+//       if (!is.object(value)) {
+//         return []
+//       }
+//       const children = getDeepByKey(value, targetKey)
+//       if (key === (targetKey as any)) {
+//         return [value, ...(children as any)]
+//       } else {
+//         return children
+//       }
+//     }),
+//   ) as any
+// }
 
 export const parseLocString = <L extends string>(loc: L) =>
   (loc === '' ? [] : loc.split('.')) as ParseLocString<L>
 
-export const getByLoc = (object: object, loc: string) =>
-  getDeep(object, parseLocString(loc))
+export const getSchemaOptionsByLoc = (
+  schemaOptions: STypes.RootOptions.All,
+  loc: string,
+) => {
+  const result = parseLocString(loc).reduce((parent, segment) => {
+    const foundKey = Object.keys(parent).find((key) =>
+      key.startsWith(`/${segment}/{`),
+    )!
+    return parent[foundKey] as any
+  }, schemaOptions as any)
+
+  return result as STypes.CollectionOptions.Meta
+}
+
+export const getCollectionOptionsByName = (
+  options: STypes.CollectionOptions.Children,
+  targetCollectionName: string,
+  _loc = '',
+): { loc: string; options: STypes.CollectionOptions.Meta }[] => {
+  return Object.entries(options).flatMap(([key, value]) => {
+    const collectionName = key.match(/^\/(.+)\/\{.+\}$/)?.[1]
+    if (!collectionName) {
+      return []
+    }
+    const loc = joinLoc(_loc, collectionName)
+    return [
+      ...(collectionName === targetCollectionName
+        ? [{ loc, options: value }]
+        : []),
+      ...getCollectionOptionsByName(value, targetCollectionName, loc),
+    ]
+  })
+}
 
 export const joinLoc = <T extends string, U extends string>(
   t: T,

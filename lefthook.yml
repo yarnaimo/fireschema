@@ -4,6 +4,8 @@ pre-commit:
     package-json:
       glob: 'package.json'
       run: yarn sort-package-json {staged_files} && git add {staged_files}
+    docs:
+      run: yarn firestore:rules && yarn docs && git add firestore.rules README.md
     js:
       glob: '*.{js,jsx,ts,tsx}'
       run: yarn prettier --write {staged_files} && yarn eslint {staged_files} && git add {staged_files}

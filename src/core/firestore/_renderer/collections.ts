@@ -1,44 +1,41 @@
 import { EntriesStrict, P } from 'lifts'
-import { R } from '../../../lib/fp'
-import { $allow, $docLabel, $schema } from '../../constants'
-import { STypes } from '../../types'
-import { join, _ } from '../../utils/_string'
-import { renderRules } from './rules'
 
-const renderFromArray = (pIndent: number) => (
-  array: (readonly [
-    string,
-    STypes.CollectionOptions.Meta & STypes.CollectionOptions.Children,
-  ])[],
-) => {
-  const indent = pIndent + 2
+import { R } from '../../../lib/fp.js'
+import { STypes } from '../../types/index.js'
+import { _, join } from '../../utils/_string.js'
+import { parseSchemaOptions } from './_utils.js'
+import { renderFunctions } from './functions.js'
+import { renderRules } from './rules.js'
 
-  return P(
-    array,
-    R.map(
-      ([
-        collectionPath,
-        {
-          [$schema]: schema,
-          [$docLabel]: docLabel,
-          [$allow]: allow,
-          ...collections
-        },
-      ]) => {
+const renderFromArray =
+  (pIndent: number) =>
+  (
+    array: (readonly [
+      string,
+      STypes.CollectionOptions.All | STypes.CollectionOptions.GroupMeta,
+    ])[],
+  ) => {
+    const indent = pIndent + 2
+
+    return P(
+      array,
+      R.map(([collectionNameWithDocLabel, { model, allow, ...options }]) => {
+        const { functions, collections } = parseSchemaOptions(options)
+
         const body = join('\n\n')([
-          renderRules(allow, schema, indent),
+          functions ? renderFunctions(functions, indent) : null,
+          renderRules(allow, model, indent),
           renderCollections(collections, indent),
         ])
         return join('\n')([
-          `${_(indent)}match /${collectionPath}/{${docLabel}} {`,
+          `${_(indent)}match ${collectionNameWithDocLabel} {`,
           body,
           `${_(indent)}}`,
         ])
-      },
-    ),
-    join('\n\n'),
-  )
-}
+      }),
+      join('\n\n'),
+    )
+  }
 
 export const renderCollections = (
   collections: STypes.CollectionOptions.Children,
@@ -48,7 +45,7 @@ export const renderCollections = (
 }
 
 export const renderCollectionGroups = (
-  collections: STypes.CollectionOptions.Children,
+  collections: STypes.CollectionOptions.GroupChildren,
   pIndent: number,
 ): string | null => {
   return P(
@@ -56,7 +53,7 @@ export const renderCollectionGroups = (
     EntriesStrict,
     R.map(
       ([collectionPath, options]) =>
-        [`{path=**}/${collectionPath}`, options] as const,
+        [`/{path=**}${collectionPath}`, options] as const,
     ),
     renderFromArray(pIndent),
   )

@@ -1,7 +1,8 @@
 import { expectType } from 'tsd'
-import { messages } from '../../core'
-import { userDataJson } from '../_fixtures/data'
-import { typedCaller } from '../_infrastructure/functions-client'
+
+import { messages } from '../../core/index.js'
+import { userDataJson } from '../_fixtures/data.js'
+import { typedCaller } from '../_services/functions-client.js'
 
 !(async () => {
   await typedCaller.call(
@@ -28,7 +29,9 @@ test('call - nested', async () => {
   expect(result).toEqual({
     data: { result: 'TEXT' },
   })
-  if (!result.error) {
+  if (result.error) {
+    expectType<typeof result.error.code>('functions/failed-precondition')
+  } else {
     expectType<{ result: string }>(result.data)
   }
 })
@@ -42,8 +45,8 @@ test('call - invalid-argument', async () => {
 
   expect(result).toEqual({
     error: expect.objectContaining({
-      message: messages.invalidRequest,
-      code: 'invalid-argument',
+      message: messages.validationFailed,
+      code: 'functions/invalid-argument',
     }),
   })
 })
@@ -57,7 +60,7 @@ test('call - out-of-range', async () => {
   expect(result).toEqual({
     error: expect.objectContaining({
       message: expect.any(String),
-      code: 'out-of-range',
+      code: 'functions/out-of-range',
     }),
   })
 })
@@ -71,7 +74,7 @@ test('call - internal', async () => {
   expect(result).toEqual({
     error: expect.objectContaining({
       message: messages.unknown,
-      code: 'internal',
+      code: 'functions/internal',
     }),
   })
 })

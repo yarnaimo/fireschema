@@ -1,5 +1,4 @@
-import { FTypes, STypes } from '../types'
-import { getByLoc } from './_object'
+import { FTypes, STypes } from '../types/index.js'
 
 export const firestorePathToLoc = (path: string) =>
   path
@@ -7,13 +6,8 @@ export const firestorePathToLoc = (path: string) =>
     .filter((_, i) => i % 2 === 0)
     .join('.')
 
-export const getCollectionOptions = (
-  schemaOptions: STypes.RootOptions.All,
-  loc: string,
-) => getByLoc(schemaOptions, loc) as STypes.CollectionOptions.Meta
-
 export const createConverter = (
-  decoder: STypes.Decoder<any, any> | undefined,
+  decoder: STypes.Model.Decoder<any, any> | undefined,
 ) => ({
   fromFirestore: (
     snap: FTypes.QueryDocumentSnap<any>,

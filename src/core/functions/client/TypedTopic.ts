@@ -1,15 +1,17 @@
+import { z } from 'zod'
+
+import { ExtractTopicNames, GetTopicMeta } from '../../types/_functions.js'
+import { FunTypes } from '../../types/index.js'
+
 import type { Attributes, PubSub } from '@google-cloud/pubsub'
-import { $input } from '../../constants'
-import { FunTypes } from '../../types'
-import { ExtractTopicNames, GetTopicMeta } from '../../types/_functions'
 
 export class TypedTopic<M extends FunTypes.FunctionsModule> {
   constructor(readonly pubSubClient: PubSub) {}
 
   async publish<
     TN extends ExtractTopicNames<M['topic']>,
-    C extends GetTopicMeta<M['topic'], TN> = GetTopicMeta<M['topic'], TN>
-  >(topicName: TN, data: C[typeof $input], attributes?: Attributes) {
+    C extends GetTopicMeta<M['topic'], TN> = GetTopicMeta<M['topic'], TN>,
+  >(topicName: TN, data: z.infer<C['input']>, attributes?: Attributes) {
     const messageId = await this.pubSubClient
       .topic(topicName)
       .publishJSON(data as object, attributes)

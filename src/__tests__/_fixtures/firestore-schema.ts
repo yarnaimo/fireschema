@@ -1,30 +1,44 @@
-import {
-  $adapter,
-  $allow,
-  $collectionGroups,
-  $collectionSchema,
-  $docLabel,
-  $functions,
-  $or,
-  $schema,
-  createFirestoreSchema,
-} from '../..'
-import { FTypes } from '../../core/types'
-import { Type } from '../../lib/type'
+import { expectType } from 'tsd'
+import { z } from 'zod'
 
-export type IVersion = {}
+import { FirestoreModel, rules, timestampType } from '../../core/index.js'
+import { DataModel, FTypes } from '../../index.js'
+import { Type } from '../../lib/type.js'
 
+const VersionType = z.object({})
+
+export const UserType = z.object({
+  name: z.string(),
+  displayName: z.union([z.string(), z.null()]),
+  age: z.number().int(),
+  tags: z.object({ id: z.number().int(), name: z.string() }).array(),
+  timestamp: timestampType(),
+  options: z.object({ a: z.boolean(), b: z.string() }).optional(),
+})
 export type IUser = {
   name: string
   displayName: string | null
   age: number
   tags: { id: number; name: string }[]
   timestamp: FTypes.Timestamp
-  options: { a: boolean; b: string } | undefined
+  options?: { a: boolean; b: string } | undefined
 }
+type InferredUser = z.infer<typeof UserType>
+
+expectType<IUser>({} as InferredUser)
 export type IUserLocal = Type.Merge<IUser, { timestamp: string }>
 export type IUserJson = Type.Merge<IUser, { timestamp: string }>
+export const UserJsonType = UserType.extend({ timestamp: z.string() })
 
+const PostAType = z.object({
+  type: z.literal('a'),
+  text: z.string(),
+})
+const PostBType = z.object({
+  type: z.literal('b'),
+  texts: z.string().array(),
+})
+const PostType = z.union([PostAType, PostBType])
 export type IPostA = {
   type: 'a'
   text: string
@@ -33,14 +47,16 @@ export type IPostB = {
   type: 'b'
   texts: string[]
 }
+export type IPost = IPostA | IPostB
+expectType<IPost>({} as z.infer<typeof PostType>)
 
-const VersionSchema = $collectionSchema<IVersion>()({})
-void (() => {
-  const VersionSchemaError = $collectionSchema<IVersion>()({
-    // @ts-expect-error decoder without U type
-    decoder: (data) => data,
-  })
-})
+const VersionModel = new DataModel({ schema: VersionType })
+// void (() => {
+//   const VersionSchemaError = $collectionSchema<IVersion>()({
+//     // @ts-expect-error decoder without U type
+//     decoder: (data) => data,
+//   })
+// })
 
 export const decodeUser = (data: IUser) => ({
   ...data,
@@ -48,84 +64,87 @@ export const decodeUser = (data: IUser) => ({
   id: undefined, // decode -> id追加 の順に行われるのを確認する用
 })
 
-export const UserSchema = $collectionSchema<IUser, IUserLocal>()({
+export const UserModel = new DataModel({
+  schema: UserType,
   decoder: (data: IUser, snap: FTypes.QueryDocumentSnap<IUser>): IUserLocal =>
     decodeUser(data),
+
   selectors: (q, firestoreStatic) => ({
-    teen: () => q.where('age', '>=', 10).where('age', '<', 20),
-    orderById: () => q.orderBy(firestoreStatic.FieldPath.documentId()),
+    _: () => [
+      // @ts-expect-error wrong field path
+      q.where('age_', '>=', 10),
+    ],
+    teen: () => [q.where('age', '>=', 10), q.where('age', '<', 20)],
+    _teen: (random: number) => [
+      q.where('age', '>=', 10),
+      q.where('age', '<', 20 + random),
+    ],
+    orderById: () => [q.orderBy(firestoreStatic.documentId())],
   }),
 })
-void (() => {
-  const UserSchemaError = $collectionSchema<IUser, IUserLocal>()({
-    // @ts-expect-error decoder not specified
-    decoder: undefined,
-  })
-})
+// void (() => {
+//   const UserSchemaError = $collectionSchema<IUser, IUserLocal>()({
+//     // @ts-expect-error decoder not specified
+//     decoder: undefined,
+//   })
+// })
 
-export const PostSchema = $collectionSchema<IPostA | IPostB>()({})
-export const PostASchema = $collectionSchema<IPostA>()({})
+export const PostModel = new DataModel({ schema: PostType })
+export const PostAModel = new DataModel({ schema: PostAType })
 
-const getCurrentAuthUser = () => `getCurrentAuthUser()`
-const isAdmin = () => `isAdmin()`
-const isUserScope = (arg: string) => `isUserScope(${arg})`
+export const firestoreModel = new FirestoreModel({
+  'function getCurrentAuthUserDoc()': `
+    return get(${rules.basePath}/authUsers/$(request.auth.uid));
+  `,
+  'function isAdmin()': `
+    return getCurrentAuthUserDoc().data.isAdmin == true;
+  `,
+  'function requestUserIs(uid)': `
+    return request.auth.uid == uid;
+  `,
 
-export const firestoreSchema = createFirestoreSchema({
-  [$functions]: {
-    // [getCurrentAuthUser()]: `
-    //   return get(/databases/$(database)/documents/authUsers/$(request.auth.uid));
-    // `,
-    [isAdmin()]: `
-      return ${getCurrentAuthUser()}.data.isAdmin == true;
-    `,
-    [isUserScope('uid')]: `
-      return request.auth.uid == uid;
-    `,
-  },
-
-  [$collectionGroups]: {
-    users: {
-      [$docLabel]: 'uid',
-      [$schema]: UserSchema,
-      [$allow]: {
+  collectionGroups: {
+    '/users/{uid}': {
+      allow: {
         read: true,
       },
     },
   },
 
-  versions: {
-    [$docLabel]: 'version',
-    [$schema]: VersionSchema,
-    [$adapter]: null,
-    [$allow]: {},
+  '/versions/{version}': {
+    model: VersionModel,
+    allow: {},
 
-    users: {
-      [$docLabel]: 'uid',
-      [$schema]: UserSchema,
-      [$allow]: {
+    '/users/{uid}': {
+      model: UserModel,
+      allow: {
         read: true,
-        write: $or([isUserScope('uid')]),
-        delete: isUserScope('uid'),
+        write: rules.or('requestUserIs(uid)'),
+        delete: 'requestUserIs(uid)',
       },
 
-      posts: {
-        [$docLabel]: 'postId',
-        [$schema]: PostSchema,
-        [$allow]: {
+      '/posts/{postId}': {
+        'function test()': `
+          return true;
+        `,
+
+        model: PostModel,
+        allow: {
           read: true,
-          write: $or([isUserScope('uid')]),
-          delete: isUserScope('uid'),
+          write: rules.or('requestUserIs(uid)'),
+          delete: 'requestUserIs(uid)',
         },
       },
 
-      privatePosts: {
-        [$docLabel]: 'postId',
-        [$schema]: PostASchema,
-        [$allow]: {
-          read: $or(['isAdmin()', 'isUserScope(uid)']),
-          write: $or(['isUserScope(uid)']),
+      '/privatePosts/{postId}': {
+        model: PostAModel,
+        allow: {
+          read: rules.or('isAdmin()', 'requestUserIs(uid)'),
+          write: rules.or('requestUserIs(uid)'),
         },
       },
     },
   },
 })
+
+export default firestoreModel

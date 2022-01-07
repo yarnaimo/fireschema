@@ -1,4 +1,7 @@
-import { FTypes } from '../../types'
+import { FTypes } from '../../types/index.js'
+import { createConverter } from '../../utils/_firestore.js'
+import { DataModel } from '../model.js'
+import { queryEqualUniv } from './_universal.js'
 
 type CachedQuery = {
   raw: FTypes.Query<any>
@@ -14,7 +17,7 @@ export const findCachedQuery = (
   rawQuery: FTypes.Query<any>,
 ) => {
   const queries = queryCache[collectionName]
-  return queries?.find((q) => q.raw.isEqual(rawQuery as any))?.converted
+  return queries?.find((q) => queryEqualUniv(q.raw, rawQuery))?.converted
 }
 
 export const addQueryCache = (
@@ -28,4 +31,25 @@ export const addQueryCache = (
     { raw: rawQuery, converted: convertedQuery },
   ]
   queryCache[collectionName] = newQueries
+}
+
+export const withDecoder = <F extends FTypes.FirestoreApp>(
+  rawQuery: FTypes.Query<any, F>,
+  model: DataModel<any, any, any>,
+  collectionName: string,
+) => {
+  const { decoder } = model
+
+  const cachedQuery = findCachedQuery(collectionName, rawQuery)
+  if (cachedQuery) {
+    return cachedQuery as FTypes.Query<any, F>
+  }
+
+  const convertedQuery = (rawQuery.withConverter as any)(
+    createConverter(decoder),
+  ) as FTypes.Query<any, F>
+
+  addQueryCache(collectionName, rawQuery, convertedQuery)
+
+  return convertedQuery
 }

@@ -1,7 +1,6 @@
-import { _fadmin } from '../../lib/functions-types'
-import { $topicName } from '../constants'
-import { FunTypes } from '../types'
-import { Subtract } from './_object'
+import { _fadmin } from '../../lib/functions-types.js'
+import { FunTypes } from '../types/index.js'
+import { Subtract } from './_object.js'
 
 export type ParseFP<P extends string> = P extends `${infer P1}-${infer P2}`
   ? [P1, ...ParseFP<P2>]
@@ -9,7 +8,7 @@ export type ParseFP<P extends string> = P extends `${infer P1}-${infer P2}`
 
 export type ExtractFP<
   S extends FunTypes.NestedFunctions | undefined,
-  D extends number = 5
+  D extends number = 5,
 > = [D] extends [never]
   ? never
   : {
@@ -23,7 +22,7 @@ export type ExtractFP<
 export type GetTopicMeta<
   S extends FunTypes.NestedFunctions | undefined,
   TN extends string,
-  D extends number = 5
+  D extends number = 5,
 > = [D] extends [never]
   ? never
   : {
@@ -38,12 +37,12 @@ export type GetTopicMeta<
 
 export type ExtractTopicNames<
   S extends FunTypes.NestedFunctions | undefined,
-  D extends number = 5
+  D extends number = 5,
 > = [D] extends [never]
   ? never
   : {
       [K in keyof S & string]: S[K] extends FunTypes.Topic.Meta<any, any>
-        ? S[K][typeof $topicName]
+        ? S[K]['topicName']
         : // : S[K] extends FunTypes.NestedFunctions
           // ? ExtractTopicNames<S[K], Prev[D]>
           never

@@ -1,12 +1,9 @@
-import { _admin } from '../../../lib/firestore-types'
-import { _fadmin } from '../../../lib/functions-types'
-import { $schema } from '../../constants'
-import { FunTypes, STypes } from '../../types'
-import { ParseDocumentPath } from '../../types/_firestore'
-import {
-  firestorePathToLoc,
-  getCollectionOptions,
-} from '../../utils/_firestore'
+import { _admin } from '../../../lib/firestore-types.js'
+import { _fadmin } from '../../../lib/functions-types.js'
+import { ParseDocumentPath } from '../../types/_firestore.js'
+import { FunTypes, STypes } from '../../types/index.js'
+import { firestorePathToLoc } from '../../utils/_firestore.js'
+import { getSchemaOptionsByLoc } from '../../utils/_object.js'
 
 type F = _admin.Firestore
 
@@ -19,8 +16,8 @@ export class TypedFirestoreTrigger<S extends STypes.RootOptions.All> {
 
   private buildDecoder(path: string) {
     const loc = firestorePathToLoc(path)
-    const collectionOptions = getCollectionOptions(this.firestoreSchema, loc)
-    const { decoder } = collectionOptions[$schema]
+    const collectionOptions = getSchemaOptionsByLoc(this.firestoreSchema, loc)
+    const { decoder } = collectionOptions.model
 
     return (snap: _admin.QueryDocumentSnapshot<any>) => {
       const data = snap.data()
@@ -51,7 +48,7 @@ export class TypedFirestoreTrigger<S extends STypes.RootOptions.All> {
   }): _fadmin.CloudFunction<_admin.QueryDocumentSnapshot> {
     const decode = this.buildDecoder(path)
 
-    return builder.firestore.document(path).onCreate((snap, context) => {
+    return builder.firestore.document(path).onCreate(async (snap, context) => {
       const decodedData = decode(snap)
       return handler(decodedData, snap as any, context)
     })
@@ -71,7 +68,7 @@ export class TypedFirestoreTrigger<S extends STypes.RootOptions.All> {
   }): _fadmin.CloudFunction<_admin.QueryDocumentSnapshot> {
     const decode = this.buildDecoder(path)
 
-    return builder.firestore.document(path).onDelete((snap, context) => {
+    return builder.firestore.document(path).onDelete(async (snap, context) => {
       const decodedData = decode(snap)
       return handler(decodedData, snap as any, context)
     })
@@ -91,13 +88,15 @@ export class TypedFirestoreTrigger<S extends STypes.RootOptions.All> {
   }): _fadmin.CloudFunction<_fadmin.Change<_admin.QueryDocumentSnapshot>> {
     const decode = this.buildDecoder(path)
 
-    return builder.firestore.document(path).onUpdate((change, context) => {
-      const decodedData = new this.functions.Change(
-        decode(change.before),
-        decode(change.after),
-      )
-      return handler(decodedData, change as any, context)
-    })
+    return builder.firestore
+      .document(path)
+      .onUpdate(async (change, context) => {
+        const decodedData = new this.functions.Change(
+          decode(change.before),
+          decode(change.after),
+        )
+        return handler(decodedData, change as any, context)
+      })
   }
 
   onWrite<DP extends string, L extends string = ParseDocumentPath<DP>>({
@@ -114,7 +113,7 @@ export class TypedFirestoreTrigger<S extends STypes.RootOptions.All> {
   }): _fadmin.CloudFunction<_fadmin.Change<_admin.DocumentSnapshot>> {
     const decode = this.buildSnapDecoder(path)
 
-    return builder.firestore.document(path).onWrite((change, context) => {
+    return builder.firestore.document(path).onWrite(async (change, context) => {
       const decodedData = new this.functions.Change(
         decode(change.before),
         decode(change.after),

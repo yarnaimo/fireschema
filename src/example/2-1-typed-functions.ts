@@ -1,31 +1,26 @@
-import { firestore } from 'firebase-admin'
 import * as functions from 'firebase-functions'
-import { Merge } from 'type-fest'
-import { $jsonSchema, TypedFunctions } from '..'
-import { firestoreSchema, User } from './1-1-schema'
+import { z } from 'zod'
+
+import { TypedFunctions } from '../admin/index.js'
+import { UserType, firestoreModel } from './1-1-schema.js'
 
 /**
  * Initialize TypedFunctions
  */
 const timezone = 'Asia/Tokyo'
-const typedFunctions = new TypedFunctions(
-  firestoreSchema,
-  firestore,
-  functions,
-  timezone,
-)
+const typedFunctions = new TypedFunctions(firestoreModel, timezone)
 const builder = functions.region('asia-northeast1')
 
 /**
  * functions/index.ts file
  */
-export type UserJson = Merge<User, { timestamp: string }>
+export const UserJsonType = UserType.extend({ timestamp: z.string() })
 export const callable = {
   createUser: typedFunctions.callable({
-    schema: [
-      $jsonSchema<UserJson>(), // schema of request data (automatically validate on request)
-      $jsonSchema<{ result: boolean }>(), // schema of response data
-    ],
+    schema: {
+      input: UserJsonType, // schema of request data (automatically validate on request)
+      output: z.object({ result: z.boolean() }), // schema of response data
+    },
     builder,
     handler: async (data, context) => {
       console.log(data) // UserJson
@@ -61,7 +56,7 @@ export const http = {
 
 export const topic = {
   publishMessage: typedFunctions.topic('publish_message', {
-    schema: $jsonSchema<{ text: string }>(),
+    schema: z.object({ text: z.string() }),
     builder,
     handler: async (data) => {
       data // { text: string }
