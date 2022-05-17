@@ -51,8 +51,8 @@ yarn add -D typescript ts-node
 | `z.boolean()`                        | `data.key is bool`                                                     |
 | `z.literal('a')`                     | `data.key == "a"`                                                      |
 | `z.string()`                         | `data.key is string`                                                   |
-| `z.string().min(5)`                  | `(data.key is string && data.key.size >= 5)`                           |
-| `z.string().min(5).max(20)`          | `(data.key is string && data.key.size >= 5 && data.key.size <= 20)`    |
+| `z.string().min(5)`                  | `(data.key is string && data.key.size() >= 5)`                           |
+| `z.string().min(5).max(20)`          | `(data.key is string && data.key.size() >= 5 && data.key.size() <= 20)`    |
 | `z.string().regex(/@example\.com$/)` | `(data.key is string && data.key.matches("@example\\.com$"))`          |
 | `z.number()`                         | `data.key is number`                                                   |
 | `z.number().int()`                   | `data.key is int`                                                      |
