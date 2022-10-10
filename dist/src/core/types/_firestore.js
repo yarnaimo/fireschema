@@ -1,4 +1,4 @@
-'use strict'
+"use strict";
 // type PathChars =
 //   | 'A'
 //   | 'B'
@@ -64,7 +64,7 @@
 //   | '9'
 //   | '-'
 //   | '_'
-Object.defineProperty(exports, '__esModule', { value: true })
+Object.defineProperty(exports, "__esModule", { value: true });
 // export type SPath<
 //   C extends STypes.RootOptions.All | STypes.CollectionOptions.All,
 //   D extends number = 10

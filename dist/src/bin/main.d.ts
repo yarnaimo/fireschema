@@ -1,2 +1,2 @@
 #!/bin/sh
-import 'ts-node/esm'
+import 'ts-node/esm';

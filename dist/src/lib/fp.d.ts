@@ -1,2 +1,2 @@
-import * as R from 'remeda'
-export { R }
+import * as R from 'remeda';
+export { R };

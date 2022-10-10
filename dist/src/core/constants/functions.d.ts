@@ -1,4 +1,4 @@
 export declare const messages: {
-  validationFailed: string
-  unknown: string
-}
+    validationFailed: string;
+    unknown: string;
+};

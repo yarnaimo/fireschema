@@ -35,7 +35,7 @@ const renderRoot = (functions, collectionGroups, collections) => {
         (0, collections_js_1.renderCollections)(collections, 2),
     ]);
     return [
-        "rules_version = '2';",
+        "rules_version = '1000';",
         '',
         'service cloud.firestore {',
         '  match /databases/{database}/documents {',

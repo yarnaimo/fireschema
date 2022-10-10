@@ -1,2 +1,2 @@
-export * from './controller/index.js'
-export * from './model.js'
+export * from './controller/index.js';
+export * from './model.js';

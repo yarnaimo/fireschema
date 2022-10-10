@@ -1,8 +1,9 @@
+/* eslint-disable import/extensions */
 import getopts from 'getopts'
 
+import { generateDart } from './commands/dart'
 import { exportFunctions } from './commands/export.js'
 import { generateRules } from './commands/rules.js'
-import { generateDart } from './commands/dart'
 
 const help = `Usage:
 fireschema rules <schema-path>          generate firestore.rules

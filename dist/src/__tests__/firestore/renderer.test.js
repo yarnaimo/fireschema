@@ -1,7 +1,7 @@
-'use strict'
-Object.defineProperty(exports, '__esModule', { value: true })
-const root_js_1 = require('../../core/firestore/_renderer/root.js')
-const firestore_schema_js_1 = require('../_fixtures/firestore-schema.js')
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const root_js_1 = require("../../core/firestore/_renderer/root.js");
+const firestore_schema_js_1 = require("../_fixtures/firestore-schema.js");
 const expected = `
 rules_version = '2';
 
@@ -89,10 +89,8 @@ service cloud.firestore {
       }
     }
   }
-}`.trim()
+}`.trim();
 test('render', () => {
-  const result = (0, root_js_1.renderSchema)(
-    firestore_schema_js_1.firestoreModel,
-  )
-  expect(result).toBe(expected)
-})
+    const result = (0, root_js_1.renderSchema)(firestore_schema_js_1.firestoreModel);
+    expect(result).toBe(expected);
+});

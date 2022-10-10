@@ -1,1 +1,1 @@
-export declare const wrapSuspendable: <T>(fn: () => T) => T | null
+export declare const wrapSuspendable: <T>(fn: () => T) => T | null;
