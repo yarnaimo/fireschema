@@ -1,6 +1,6 @@
 {
   "name": "fireschema",
-  "version": "5.0.0-36",
+  "version": "5.0.0-37",
   "repository": "github:yarnaimo/fireschema",
   "license": "MIT",
   "author": "yamaimo <yarnaimo@gmail.com>",
@@ -36,6 +36,7 @@
     "build:esm": "tsc && cp src/lib/*.d.ts esm/src/lib/ && ./scripts/after-build-esm.sh",
     "debug": "node --inspect -r ts-node/register",
     "docs": "./scripts/update-docs.sh",
+    "firestore:dart": "./esm/src/bin/main.js dart esm/src/example/1-1-schema.js",
     "firestore:rules": "./esm/src/bin/main.js rules esm/src/example/1-1-schema.js",
     "functions:export": "./esm/src/bin/main.js export src/__tests__/_functions",
     "lint": "eslint --ignore-path .gitignore '**/*.{js,jsx,ts,tsx}'",

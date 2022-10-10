@@ -2,6 +2,7 @@ import getopts from 'getopts'
 
 import { exportFunctions } from './commands/export.js'
 import { generateRules } from './commands/rules.js'
+import { generateDart } from './commands/dart'
 
 const help = `Usage:
 fireschema rules <schema-path>          generate firestore.rules
@@ -32,6 +33,14 @@ export const cli = async () => {
         process.exit(1)
       }
       void exportFunctions(args[0], esm, output)
+      break
+
+    case 'dart':
+      if (!args[0]) {
+        console.error('A target directory must be specified')
+        process.exit(1)
+      }
+      void generateDart(args[0])
       break
 
     case '--help':

@@ -63,7 +63,7 @@
 //   | '9'
 //   | '-'
 //   | '_'
-export {}
+export {};
 // export type SPath<
 //   C extends STypes.RootOptions.All | STypes.CollectionOptions.All,
 //   D extends number = 10

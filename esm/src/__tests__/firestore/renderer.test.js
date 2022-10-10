@@ -1,5 +1,5 @@
-import { renderSchema } from '../../core/firestore/_renderer/root.js'
-import { firestoreModel } from '../_fixtures/firestore-schema.js'
+import { renderSchema } from '../../core/firestore/_renderer/root.js';
+import { firestoreModel } from '../_fixtures/firestore-schema.js';
 const expected = `
 rules_version = '2';
 
@@ -87,8 +87,8 @@ service cloud.firestore {
       }
     }
   }
-}`.trim()
+}`.trim();
 test('render', () => {
-  const result = renderSchema(firestoreModel)
-  expect(result).toBe(expected)
-})
+    const result = renderSchema(firestoreModel);
+    expect(result).toBe(expected);
+});

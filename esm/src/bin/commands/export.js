@@ -1,109 +1,89 @@
-import { readdirSync, writeFileSync } from 'fs'
-import { join, parse, relative } from 'path'
-process.env.GCLOUD_PROJECT = '__GCLOUD_PROJECT__'
-const dirPattern = /^(?!_).+$/
-const filePattern = /^(?!_).+(?<!\.(test|spec))\.(js|ts)$/
-const functionName = (dirname, name) => `'${dirname}-${name}'`
-const mpath = (dirname, name, esm) =>
-  `'./${dirname}/${name}${esm ? '.js' : ''}'`
-const vname = (dirname, name) => `__${dirname}_${name}__`
+import { dirname as __getDirname__ } from 'path';
+import { fileURLToPath as __fileURLToPath__ } from 'url';
+const __dirname = __getDirname__(__fileURLToPath__(import.meta.url));
+import { readdirSync, writeFileSync } from 'fs';
+import { join, parse, relative } from 'path';
+process.env.GCLOUD_PROJECT = '__GCLOUD_PROJECT__';
+const dirPattern = /^(?!_).+$/;
+const filePattern = /^(?!_).+(?<!\.(test|spec))\.(js|ts)$/;
+const functionName = (dirname, name) => `'${dirname}-${name}'`;
+const mpath = (dirname, name, esm) => `'./${dirname}/${name}${esm ? '.js' : ''}'`;
+const vname = (dirname, name) => `__${dirname}_${name}__`;
 const importModuleFunction = (esm) => [
-  `const importModule = (functionNames: string[], modulePath: string) => {
+    `const importModule = (functionNames: string[], modulePath: string) => {
   return !process.env['FUNCTION_NAME'] || functionNames.includes(process.env['FUNCTION_NAME'])
     ? ${esm ? 'import' : 'require'}(modulePath)
     : undefined
 }`,
-]
+];
 export const buildFunctionExportContent = async (baseDir, esm, outputPath) => {
-  const subdirs = readdirSync(baseDir, {
-    withFileTypes: true,
-  }).flatMap((subdir) => {
-    if (!subdir.isDirectory() || !dirPattern.test(subdir.name)) {
-      return []
-    }
-    const files = readdirSync(join(baseDir, subdir.name))
-      .filter((filename) => filePattern.test(filename))
-      .map((filename) => parse(filename).name)
-    if (!files.length) {
-      return []
-    }
-    return [{ dirname: subdir.name, files }]
-  })
-  const typeImports = subdirs.flatMap(({ dirname, files }) =>
-    files.map(
-      (filename) =>
-        `import type * as ${vname(dirname, filename)} from ${mpath(
-          dirname,
-          filename,
-          esm,
-        )}`,
-    ),
-  )
-  const functionImports = await Promise.all(
-    subdirs.map(async ({ dirname, files }) => {
-      const imports = await Promise.all(
-        files.map(async (filename) => {
-          const modPath = join(relative(__dirname, baseDir), dirname, filename)
-          const _mod = await import(modPath)
-          const _modKeys = Object.keys(_mod)
-          const mod =
-            _modKeys.length === 1 && _modKeys[0] === 'default'
-              ? _mod.default
-              : _mod
-          const functions = Object.entries(mod).filter(
-            ([, value]) =>
-              typeof value === 'function' &&
-              value.__trigger &&
-              typeof value.__trigger === 'object',
-          )
-          const functionNamesArg = functions
-            .map(([key]) => functionName(dirname, key))
-            .join(', ')
-          const importCall = `importModule([${functionNamesArg}], ${mpath(
-            dirname,
-            filename,
-            esm,
-          )})`
-          return esm ? `  ...(await ${importCall}),` : `  ...${importCall},`
+    const subdirs = readdirSync(baseDir, {
+        withFileTypes: true,
+    }).flatMap((subdir) => {
+        if (!subdir.isDirectory() || !dirPattern.test(subdir.name)) {
+            return [];
+        }
+        const files = readdirSync(join(baseDir, subdir.name))
+            .filter((filename) => filePattern.test(filename))
+            .map((filename) => parse(filename).name);
+        if (!files.length) {
+            return [];
+        }
+        return [{ dirname: subdir.name, files }];
+    });
+    const typeImports = subdirs.flatMap(({ dirname, files }) => files.map((filename) => `import type * as ${vname(dirname, filename)} from ${mpath(dirname, filename, esm)}`));
+    const functionImports = await Promise.all(subdirs.map(async ({ dirname, files }) => {
+        const imports = await Promise.all(files.map(async (filename) => {
+            const modPath = join(relative(__dirname, baseDir), dirname, filename);
+            const _mod = await import(modPath);
+            const _modKeys = Object.keys(_mod);
+            const mod = _modKeys.length === 1 && _modKeys[0] === 'default'
+                ? _mod.default
+                : _mod;
+            const functions = Object.entries(mod).filter(([, value]) => typeof value === 'function' &&
+                value.__trigger &&
+                typeof value.__trigger === 'object');
+            const functionNamesArg = functions
+                .map(([key]) => functionName(dirname, key))
+                .join(', ');
+            const importCall = `importModule([${functionNamesArg}], ${mpath(dirname, filename, esm)})`;
+            return esm ? `  ...(await ${importCall}),` : `  ...${importCall},`;
+        }));
+        return [`export const ${dirname} = {`, ...imports, `}`].join('\n');
+    }));
+    const typeExports = [
+        `export type FunctionsModule = {`,
+        ...subdirs.map(({ dirname, files }) => {
+            const intersection = files
+                .map((name) => `typeof ${vname(dirname, name)}`)
+                .join(' & ');
+            return `  ${dirname}: ${intersection}`;
         }),
-      )
-      return [`export const ${dirname} = {`, ...imports, `}`].join('\n')
-    }),
-  )
-  const typeExports = [
-    `export type FunctionsModule = {`,
-    ...subdirs.map(({ dirname, files }) => {
-      const intersection = files
-        .map((name) => `typeof ${vname(dirname, name)}`)
-        .join(' & ')
-      return `  ${dirname}: ${intersection}`
-    }),
-    `}`,
-  ]
-  const content = [
-    ['/* Auto generated by fireschema */'],
-    importModuleFunction(esm),
-    typeImports,
-    functionImports,
-    typeExports,
-  ]
-    .map((sublines) => sublines.join('\n'))
-    .join('\n\n')
-  const prettier = await import('prettier').catch(() => undefined)
-  if (!prettier) {
-    return content
-  }
-  const config = await prettier.default.resolveConfig(outputPath)
-  const formattedContent = prettier.default.format(content, {
-    filepath: outputPath,
-    ...config,
-  })
-  return formattedContent
-}
+        `}`,
+    ];
+    const content = [
+        ['/* Auto generated by fireschema */'],
+        importModuleFunction(esm),
+        typeImports,
+        functionImports,
+        typeExports,
+    ]
+        .map((sublines) => sublines.join('\n'))
+        .join('\n\n');
+    const prettier = await import('prettier').catch(() => undefined);
+    if (!prettier) {
+        return content;
+    }
+    const config = await prettier.default.resolveConfig(outputPath);
+    const formattedContent = prettier.default.format(content, {
+        filepath: outputPath,
+        ...config,
+    });
+    return formattedContent;
+};
 export const exportFunctions = async (baseDir, esm, output) => {
-  const outputPath =
-    output !== null && output !== void 0 ? output : join(baseDir, 'main.ts')
-  const content = await buildFunctionExportContent(baseDir, esm, outputPath)
-  writeFileSync(outputPath, content)
-  console.log(`🎉 Created ${outputPath}`)
-}
+    const outputPath = output !== null && output !== void 0 ? output : join(baseDir, 'main.ts');
+    const content = await buildFunctionExportContent(baseDir, esm, outputPath);
+    writeFileSync(outputPath, content);
+    console.log(`🎉 Created ${outputPath}`);
+};

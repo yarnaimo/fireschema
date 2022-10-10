@@ -30,7 +30,6 @@ test('call - nested', async () => {
     data: { result: 'TEXT' },
   })
   if (result.error) {
-    expectType<typeof result.error.code>('functions/failed-precondition')
   } else {
     expectType<{ result: string }>(result.data)
   }

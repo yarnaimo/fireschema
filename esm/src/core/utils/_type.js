@@ -1,1 +1,1 @@
-export const withType = () => (value) => value
+export const withType = () => (value) => value;

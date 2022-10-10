@@ -1,2 +1,2 @@
-import * as R from 'remeda' // eslint-disable-line
-export { R }
+import * as R from 'remeda'; // eslint-disable-line
+export { R };
