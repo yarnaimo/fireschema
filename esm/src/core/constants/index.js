@@ -1,2 +1,2 @@
-export * from './firestore.js';
-export * from './functions.js';
+export * from './firestore.js'
+export * from './functions.js'

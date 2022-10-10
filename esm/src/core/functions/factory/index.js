@@ -1,1 +1,1 @@
-export * from './TypedFirestoreTrigger.js';
+export * from './TypedFirestoreTrigger.js'

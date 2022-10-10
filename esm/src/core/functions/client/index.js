@@ -1,2 +1,2 @@
-export * from './TypedCaller.js';
-export * from './TypedTopic.js';
+export * from './TypedCaller.js'
+export * from './TypedTopic.js'
