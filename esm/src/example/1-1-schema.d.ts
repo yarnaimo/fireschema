@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { DataModel, FirestoreModel } from '../index.js';
 export declare const UserType: z.ZodObject<{
     name: z.ZodString;
-    displayName: z.ZodUnion<[z.ZodString, z.ZodNull]>;
+    displayName: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     age: z.ZodNumber;
     timestamp: import("../index.js").ZodTimestamp;
     options: z.ZodOptional<z.ZodObject<{
@@ -17,16 +17,16 @@ export declare const UserType: z.ZodObject<{
     options?: {
         a: boolean;
     } | undefined;
+    displayName?: string | null | undefined;
     name: string;
-    displayName: string | null;
     age: number;
     timestamp: import("@firebase/firestore").Timestamp | FirebaseFirestore.Timestamp;
 }, {
     options?: {
         a: boolean;
     } | undefined;
+    displayName?: string | null | undefined;
     name: string;
-    displayName: string | null;
     age: number;
     timestamp: import("@firebase/firestore").Timestamp | FirebaseFirestore.Timestamp;
 }>;
@@ -47,7 +47,7 @@ export declare const firestoreModel: FirestoreModel<{
     '/users/{uid}': {
         model: DataModel<z.ZodObject<{
             name: z.ZodString;
-            displayName: z.ZodUnion<[z.ZodString, z.ZodNull]>;
+            displayName: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             age: z.ZodNumber;
             timestamp: import("../index.js").ZodTimestamp;
             options: z.ZodOptional<z.ZodObject<{
@@ -61,16 +61,16 @@ export declare const firestoreModel: FirestoreModel<{
             options?: {
                 a: boolean;
             } | undefined;
+            displayName?: string | null | undefined;
             name: string;
-            displayName: string | null;
             age: number;
             timestamp: import("@firebase/firestore").Timestamp | FirebaseFirestore.Timestamp;
         }, {
             options?: {
                 a: boolean;
             } | undefined;
+            displayName?: string | null | undefined;
             name: string;
-            displayName: string | null;
             age: number;
             timestamp: import("@firebase/firestore").Timestamp | FirebaseFirestore.Timestamp;
         }>, (data: User) => UserDecoded, {}>;

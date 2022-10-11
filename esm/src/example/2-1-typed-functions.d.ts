@@ -5,7 +5,7 @@ import { z } from 'zod';
  */
 export declare const UserJsonType: z.ZodObject<z.extendShape<{
     name: z.ZodString;
-    displayName: z.ZodUnion<[z.ZodString, z.ZodNull]>;
+    displayName: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     age: z.ZodNumber;
     timestamp: import("../index.js").ZodTimestamp;
     options: z.ZodOptional<z.ZodObject<{
@@ -21,23 +21,23 @@ export declare const UserJsonType: z.ZodObject<z.extendShape<{
     options?: {
         a: boolean;
     } | undefined;
+    displayName?: string | null | undefined;
     name: string;
-    displayName: string | null;
     age: number;
     timestamp: string;
 }, {
     options?: {
         a: boolean;
     } | undefined;
+    displayName?: string | null | undefined;
     name: string;
-    displayName: string | null;
     age: number;
     timestamp: string;
 }>;
 export declare const callable: {
     createUser: functions.HttpsFunction & functions.Runnable<any> & import("../index.js").FunTypes.Callable.Meta<z.ZodObject<z.extendShape<{
         name: z.ZodString;
-        displayName: z.ZodUnion<[z.ZodString, z.ZodNull]>;
+        displayName: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         age: z.ZodNumber;
         timestamp: import("../index.js").ZodTimestamp;
         options: z.ZodOptional<z.ZodObject<{
@@ -53,16 +53,16 @@ export declare const callable: {
         options?: {
             a: boolean;
         } | undefined;
+        displayName?: string | null | undefined;
         name: string;
-        displayName: string | null;
         age: number;
         timestamp: string;
     }, {
         options?: {
             a: boolean;
         } | undefined;
+        displayName?: string | null | undefined;
         name: string;
-        displayName: string | null;
         age: number;
         timestamp: string;
     }>, z.ZodObject<{

@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { DataModel, FirestoreModel, rules, timestampType } from '../index.js';
 export const UserType = z.object({
     name: z.string(),
-    displayName: z.union([z.string(), z.null()]),
+    displayName: z.string().optional().nullable(),
     age: z.number().int(),
     timestamp: timestampType(),
     options: z.object({ a: z.boolean() }).optional(),

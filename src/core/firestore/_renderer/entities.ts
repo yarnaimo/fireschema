@@ -1,13 +1,11 @@
-import { EntriesStrict, P } from 'lifts'
+import { EntriesStrict } from 'lifts'
 
-import { R } from '../../../lib/fp.js'
 import { STypes, allowOptions } from '../../types/index.js'
-import { _, join } from '../../utils/_string.js'
-import { rules } from '../../utils/index.js'
+import { join } from '../../utils/_string.js'
 import { DataModel } from '../model.js'
-import { addValidatorIndex, validatorCall, validatorDef } from './format.js'
-import { renderFunctions } from './functions.js'
-import { schemaToRuleWithMeta } from './transformer.js'
+import { renderClasses } from './class.js'
+import { addValidatorIndex, validatorDef } from './format_dart.js'
+import { schemaToFiledsWithMeta } from './transformer_dart.js'
 
 export const renderEntities = (
   $allow: STypes.AllowOptions,
@@ -17,8 +15,13 @@ export const renderEntities = (
   const indent = pIndent + 2
 
   const functions = model
-    ? renderFunctions(
-        validatorDef('data', schemaToRuleWithMeta(model.schema), indent),
+    ? renderClasses(
+        validatorDef(
+          'data',
+          schemaToFiledsWithMeta(model.schema),
+          indent,
+          'User',
+        ),
         pIndent,
       )
     : null
@@ -26,27 +29,10 @@ export const renderEntities = (
   const array = EntriesStrict($allow)
   const hasWriteRules = array.some(([op]) => op in allowOptions.write)
 
-  const rulesStr = P(
-    array,
-    R.map(([op, condition]) => {
-      if (op in allowOptions.write && op !== 'delete') {
-        return [
-          op,
-          rules.and(condition!, validatorCall('request.resource.data')),
-        ]
-      }
-      return [op, condition]
-    }),
-    R.map(([op, condition]) => {
-      return `${_(indent)}allow ${op}: if ${condition};`
-    }),
-    join('\n'),
-  )
-
   if (hasWriteRules) {
     addValidatorIndex()
-    return join('\n\n')([functions, rulesStr])
+    return join('\n\n')([functions])
   } else {
-    return rulesStr
+    return ''
   }
 }
