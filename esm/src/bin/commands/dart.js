@@ -14,7 +14,7 @@ export const generateDart = async (path) => {
     const srcDir = isEsm
         ? '../..' // esm/src/bin/commands to esm/src
         : '../../../../dist/src'; // esm/src/bin/commands to dist/src
-    const rendererPath = `${srcDir}/core/firestore/_renderer/dart.js`;
+    const rendererPath = `${srcDir}/core/firestore/_renderer/root_dart.js`;
     const rendererModule = await import(rendererPath);
     const rendered = rendererModule.renderSchema(schemaModule.default.default || schemaModule.default);
     createFile(rendered, dartsPath);

@@ -1,44 +1,27 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.renderSchema = exports.renderRoot = void 0;
-const index_js_1 = require("../../constants/index.js");
+exports.renderCollectionsForDart = void 0;
+const lifts_1 = require("lifts");
+const fp_js_1 = require("../../../lib/fp.js");
 const _string_js_1 = require("../../utils/_string.js");
 const _utils_js_1 = require("./_utils.js");
-const collections_js_1 = require("./collections.js");
-/**
- * - TypedDocumentRef.prototype.create() は内部で set() に渡すデータに _createdAt フィールドを自動で追加する
- * - create() でもドキュメントが既に存在する場合は method が update になる
- * - => id の衝突などで意図せず上書きされようとした場合、method は update で、_createdAt は書き込み前後で変化する
- * - => method が update の場合に _createdAt が変化していないのをチェックすると防げる
- *
- * **Rules**
- * - create
- *   - data._createdAt is server timestamp
- *   - data._updatedAt is server timestamp
- * - update
- *   - data._createdAt not changed
- *   - data._updatedAt is server timestamp
- */
-const keysRules = `data.keys().removeAll(['${index_js_1._createdAt}', '${index_js_1._updatedAt}']).hasOnly(keys)`;
-const renderRoot = (functions, collectionGroups, collections) => {
-    const body = (0, _string_js_1.join)('\n\n')([
-        (0, collections_js_1.renderCollectionGroups)(collectionGroups, 2),
-        (0, collections_js_1.renderCollections)(collections, 2),
-    ]);
-    return [
-        "rules_version = '1000';",
-        '',
-        'service cloud.firestore {',
-        '  match /databases/{database}/documents {',
-        body,
-        '  }',
-        '}',
-    ];
+const entities_js_1 = require("./entities.js");
+const renderFromArray = (pIndent) => (array) => {
+    const indent = pIndent + 2;
+    return (0, lifts_1.P)(array, fp_js_1.R.map(([collectionNameWithDocLabel, { model, allow, ...options }]) => {
+        const { functions, collections } = (0, _utils_js_1.parseSchemaOptions)(options);
+        const body = (0, _string_js_1.join)('\n\n')([
+            (0, entities_js_1.renderEntities)(allow, model, indent),
+            (0, exports.renderCollectionsForDart)(collections, indent),
+        ]);
+        return (0, _string_js_1.join)('\n')([
+            `${(0, _string_js_1._)(indent)}match ${collectionNameWithDocLabel} {`,
+            body,
+            `${(0, _string_js_1._)(indent)}}`,
+        ]);
+    }), (0, _string_js_1.join)('\n\n'));
 };
-exports.renderRoot = renderRoot;
-const renderSchema = ({ schemaOptions: { collectionGroups, ...options }, }) => {
-    const { functions, collections } = (0, _utils_js_1.parseSchemaOptions)(options);
-    const rendered = (0, exports.renderRoot)(functions, collectionGroups, collections).join('\n');
-    return rendered;
+const renderCollectionsForDart = (collections, pIndent) => {
+    return (0, lifts_1.P)(collections, lifts_1.EntriesStrict, renderFromArray(pIndent));
 };
-exports.renderSchema = renderSchema;
+exports.renderCollectionsForDart = renderCollectionsForDart;
