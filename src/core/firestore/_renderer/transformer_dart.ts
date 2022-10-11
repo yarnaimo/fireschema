@@ -34,7 +34,7 @@ export const _objectToClass = (
   objectNum: number,
   objects: [string, ZodObject<any>][],
 ): string => {
-  let result = `class ${className} {`
+  let result = `@immutable\nclass ${className} {`
   for (const [key, _t] of Object.entries(t.shape)) {
     const [filedName, objectNum_, objects_] = _fieldToDart(
       _t as any,
