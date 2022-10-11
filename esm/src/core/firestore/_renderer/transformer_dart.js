@@ -20,10 +20,20 @@ export const _objectToClass = (t, className, objectNum, objects) => {
 };
 export const _fieldToDart = (t, parentName, filedNameGen, objectNum, objects) => {
     if (t instanceof ZodOptional) {
-        return _fieldToDart(t.unwrap(), parentName, (name) => `${filedNameGen(name)}?`, objectNum, objects);
+        return _fieldToDart(t.unwrap(), parentName, (name) => {
+            const name_ = filedNameGen(name);
+            if (name_.slice(-1) == '?')
+                return name_;
+            return `${name_}?`;
+        }, objectNum, objects);
     }
     if (t instanceof ZodNullable) {
-        return _fieldToDart(t.unwrap(), parentName, (name) => `${filedNameGen(name)}?`, objectNum, objects);
+        return _fieldToDart(t.unwrap(), parentName, (name) => {
+            const name_ = filedNameGen(name);
+            if (name_.slice(-1) == '?')
+                return name_;
+            return `${name_}?`;
+        }, objectNum, objects);
     }
     if (t instanceof ZodAny)
         return [filedNameGen(`any`), objectNum, objects];

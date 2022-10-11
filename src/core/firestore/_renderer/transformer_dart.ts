@@ -66,7 +66,11 @@ export const _fieldToDart = (
     return _fieldToDart(
       t.unwrap(),
       parentName,
-      (name) => `${filedNameGen(name)}?`,
+      (name) => {
+        const name_ = filedNameGen(name)
+        if (name_.slice(-1) == '?') return name_
+        return `${name_}?`
+      },
       objectNum,
       objects,
     )
@@ -76,7 +80,11 @@ export const _fieldToDart = (
     return _fieldToDart(
       t.unwrap(),
       parentName,
-      (name) => `${filedNameGen(name)}?`,
+      (name) => {
+        const name_ = filedNameGen(name)
+        if (name_.slice(-1) == '?') return name_
+        return `${name_}?`
+      },
       objectNum,
       objects,
     )
