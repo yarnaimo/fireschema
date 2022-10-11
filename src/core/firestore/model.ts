@@ -30,6 +30,7 @@ export class DataModel<
   readonly schema: S
   readonly decoder: D
   readonly selectors: STypes.Model.Selectors<z.infer<S>, SL>
+  // readonly className: string
 
   constructor({
     schema,

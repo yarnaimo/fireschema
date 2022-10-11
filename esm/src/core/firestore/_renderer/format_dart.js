@@ -11,12 +11,12 @@ const format = (rulesString, indent) => {
             ? line
             : i === arr.length - 1 || line === ') || (' || line === ') && ('
                 ? `${_(indent + 2)}${line}`
-                : `${_(indent + 4)}${line}`;
+                : `${_(indent + 2)}${line}`;
     })
         .join('\n');
 };
-export const validatorDef = (arg, rulesString, indent, label) => ({
+export const validatorDef = (arg, rulesString, label) => ({
     [label]: `
-    ${format(rulesString, indent)};
+    ${format(rulesString, 0)};
   `,
 });

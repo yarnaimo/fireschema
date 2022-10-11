@@ -1,4 +1,5 @@
 export class DataModel {
+    // readonly className: string
     constructor({ schema, decoder, selectors = () => ({}), }) {
         Object.defineProperty(this, "schema", {
             enumerable: true,

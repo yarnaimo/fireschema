@@ -13,11 +13,13 @@ export declare const UserType: z.ZodObject<{
     }, {
         a: boolean;
     }>>;
+    op: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
     options?: {
         a: boolean;
     } | undefined;
     displayName?: string | null | undefined;
+    op?: string[] | undefined;
     name: string;
     age: number;
     timestamp: import("@firebase/firestore").Timestamp | FirebaseFirestore.Timestamp;
@@ -26,6 +28,7 @@ export declare const UserType: z.ZodObject<{
         a: boolean;
     } | undefined;
     displayName?: string | null | undefined;
+    op?: string[] | undefined;
     name: string;
     age: number;
     timestamp: import("@firebase/firestore").Timestamp | FirebaseFirestore.Timestamp;
@@ -57,11 +60,13 @@ export declare const firestoreModel: FirestoreModel<{
             }, {
                 a: boolean;
             }>>;
+            op: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
         }, "strip", z.ZodTypeAny, {
             options?: {
                 a: boolean;
             } | undefined;
             displayName?: string | null | undefined;
+            op?: string[] | undefined;
             name: string;
             age: number;
             timestamp: import("@firebase/firestore").Timestamp | FirebaseFirestore.Timestamp;
@@ -70,6 +75,7 @@ export declare const firestoreModel: FirestoreModel<{
                 a: boolean;
             } | undefined;
             displayName?: string | null | undefined;
+            op?: string[] | undefined;
             name: string;
             age: number;
             timestamp: import("@firebase/firestore").Timestamp | FirebaseFirestore.Timestamp;

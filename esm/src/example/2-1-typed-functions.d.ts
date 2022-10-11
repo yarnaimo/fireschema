@@ -15,6 +15,7 @@ export declare const UserJsonType: z.ZodObject<z.extendShape<{
     }, {
         a: boolean;
     }>>;
+    op: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, {
     timestamp: z.ZodString;
 }>, "strip", z.ZodTypeAny, {
@@ -22,6 +23,7 @@ export declare const UserJsonType: z.ZodObject<z.extendShape<{
         a: boolean;
     } | undefined;
     displayName?: string | null | undefined;
+    op?: string[] | undefined;
     name: string;
     age: number;
     timestamp: string;
@@ -30,6 +32,7 @@ export declare const UserJsonType: z.ZodObject<z.extendShape<{
         a: boolean;
     } | undefined;
     displayName?: string | null | undefined;
+    op?: string[] | undefined;
     name: string;
     age: number;
     timestamp: string;
@@ -47,6 +50,7 @@ export declare const callable: {
         }, {
             a: boolean;
         }>>;
+        op: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     }, {
         timestamp: z.ZodString;
     }>, "strip", z.ZodTypeAny, {
@@ -54,6 +58,7 @@ export declare const callable: {
             a: boolean;
         } | undefined;
         displayName?: string | null | undefined;
+        op?: string[] | undefined;
         name: string;
         age: number;
         timestamp: string;
@@ -62,6 +67,7 @@ export declare const callable: {
             a: boolean;
         } | undefined;
         displayName?: string | null | undefined;
+        op?: string[] | undefined;
         name: string;
         age: number;
         timestamp: string;

@@ -19,51 +19,108 @@ import {
 } from 'zod'
 
 import { ZodTimestamp } from '../../types/SchemaType.js'
+// eslint-disable-next-line import/extensions
 
-export const schemaToFiledsWithMeta = (t: ZodObject<any>): string => {
-  return Object.entries(t.shape)
-    .map(([key, _t]) => {
-      return `final ${_schemaToField(_t as any)} ${key};`
-    })
-    .join('\n')
+export const schemaToClassWithMeta = (
+  t: ZodObject<any>,
+  className: string,
+): string => {
+  return _objectToClass(t, className, 0, [])
 }
 
-export const _schemaToField = (t: ZodTypeAny): string => {
+export const _objectToClass = (
+  t: ZodObject<any>,
+  className: string,
+  objectNum: number,
+  objects: [string, ZodObject<any>][],
+): string => {
+  let result = `class ${className} {`
+  for (const [key, _t] of Object.entries(t.shape)) {
+    const [filedName, objectNum_, objects_] = _fieldToDart(
+      _t as any,
+      className,
+      (name) => name,
+      objectNum,
+      objects,
+    )
+    objectNum = objectNum_
+    objects = objects_
+    result = `${result}\n  final ${filedName} ${key};`
+  }
+
+  result = `${result}\n}`
+  for (const [name, obj] of objects) {
+    result = `${result}\n\n${_objectToClass(obj, name, 0, [])}`
+  }
+  return result
+}
+
+export const _fieldToDart = (
+  t: ZodTypeAny,
+  parentName: string,
+  filedNameGen: (name: string) => string,
+  objectNum: number,
+  objects: [string, ZodObject<any>][],
+): [string, number, [string, ZodObject<any>][]] => {
   if (t instanceof ZodOptional) {
-    return `${_schemaToField(t.unwrap()).replace('?', '')}?`
+    return _fieldToDart(
+      t.unwrap(),
+      parentName,
+      (name) => `${filedNameGen(name)}?`,
+      objectNum,
+      objects,
+    )
   }
 
   if (t instanceof ZodNullable) {
-    return `${_schemaToField(t.unwrap()).replace('?', '')}?`
+    return _fieldToDart(
+      t.unwrap(),
+      parentName,
+      (name) => `${filedNameGen(name)}?`,
+      objectNum,
+      objects,
+    )
   }
 
-  if (t instanceof ZodAny) return `any`
-  if (t instanceof ZodUnknown) return `any`
-  if (t instanceof ZodBoolean) return `bool`
-  if (t instanceof ZodTimestamp) return `Timestamp`
-  if (t instanceof ZodString) return `String`
+  if (t instanceof ZodAny) return [filedNameGen(`any`), objectNum, objects]
+  if (t instanceof ZodUnknown) return [filedNameGen(`any`), objectNum, objects]
+  if (t instanceof ZodBoolean) return [filedNameGen(`bool`), objectNum, objects]
+  if (t instanceof ZodTimestamp)
+    return [filedNameGen(`Timestamp`), objectNum, objects]
+  if (t instanceof ZodString)
+    return [filedNameGen(`String`), objectNum, objects]
 
-  if (t instanceof ZodRecord) return `error`
-  if (t instanceof ZodIntersection) return `error`
-  if (t instanceof ZodUndefined) return `error`
-  if (t instanceof ZodNull) return `error`
-  if (t instanceof ZodLiteral) return `error`
-  if (t instanceof ZodUnion) return `error`
-  if (t instanceof ZodTuple) return `error`
+  if (t instanceof ZodRecord) return [filedNameGen(`error`), objectNum, objects]
+  if (t instanceof ZodIntersection)
+    return [filedNameGen(`error`), objectNum, objects]
+  if (t instanceof ZodUndefined)
+    return [filedNameGen(`error`), objectNum, objects]
+  if (t instanceof ZodNull) return [filedNameGen(`error`), objectNum, objects]
+  if (t instanceof ZodLiteral)
+    return [filedNameGen(`error`), objectNum, objects]
+  if (t instanceof ZodUnion) return [filedNameGen(`error`), objectNum, objects]
+  if (t instanceof ZodTuple) return [filedNameGen(`error`), objectNum, objects]
 
   if (t instanceof ZodNumber) {
-    return t.isInt ? `int` : `double`
+    return [filedNameGen(t.isInt ? `int` : `double`), objectNum, objects]
   }
 
-  if (t instanceof ZodArray) return `List<dynamic>`
+  if (t instanceof ZodArray) {
+    return _fieldToDart(
+      t.element,
+      parentName,
+      (name) => filedNameGen(`List<${name}>`),
+      objectNum,
+      objects,
+    )
+  }
 
   if (t instanceof ZodObject) {
-    return ''
+    objectNum++
+    const subClassName = `${parentName}Sub${objectNum}`
+    objects.push([subClassName, t])
+    return [filedNameGen(subClassName), objectNum, objects]
   }
 
   throw new Error(`unhandled type ${t.constructor.name} at`)
-}
-
-export const _schemaToOptional = (t: ZodTypeAny): string => {
-  return ''
 }

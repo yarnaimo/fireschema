@@ -15,13 +15,13 @@ const format = (rulesString, indent) => {
             ? line
             : i === arr.length - 1 || line === ') || (' || line === ') && ('
                 ? `${(0, _string_js_1._)(indent + 2)}${line}`
-                : `${(0, _string_js_1._)(indent + 4)}${line}`;
+                : `${(0, _string_js_1._)(indent + 2)}${line}`;
     })
         .join('\n');
 };
-const validatorDef = (arg, rulesString, indent, label) => ({
+const validatorDef = (arg, rulesString, label) => ({
     [label]: `
-    ${format(rulesString, indent)};
+    ${format(rulesString, 0)};
   `,
 });
 exports.validatorDef = validatorDef;

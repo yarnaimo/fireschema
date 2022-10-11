@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FirestoreModel = exports.DataModel = void 0;
 class DataModel {
+    // readonly className: string
     constructor({ schema, decoder, selectors = () => ({}), }) {
         Object.defineProperty(this, "schema", {
             enumerable: true,
