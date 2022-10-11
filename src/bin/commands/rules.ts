@@ -1,9 +1,11 @@
-import { writeFileSync } from 'fs'
 import { dirname, resolve } from 'path'
 
 import { readPackageUp } from 'read-pkg-up'
 
-const rulesPath = 'firestore.rules'
+// eslint-disable-next-line import/extensions
+import { createFile } from './../../core/utils/_createFile'
+
+const rulesPath = './outputs/firestore.rules'
 
 export const generateRules = async (path: string) => {
   const pkg = await readPackageUp({ cwd: dirname(path) })
@@ -22,6 +24,6 @@ export const generateRules = async (path: string) => {
     schemaModule.default.default || schemaModule.default,
   )
 
-  writeFileSync(rulesPath, rendered)
+  createFile(rendered, rulesPath)
   console.log('🎉 Generated firestore.rules')
 }

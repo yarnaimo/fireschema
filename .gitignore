@@ -29,3 +29,4 @@ coverage
 node_modules
 public
 sw.*
+outputs/**/*

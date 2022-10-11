@@ -1,9 +1,11 @@
-import { writeFileSync } from 'fs'
 import { dirname, resolve } from 'path'
 
 import { readPackageUp } from 'read-pkg-up'
 
-const dartsPath = 'firestore.dart'
+// eslint-disable-next-line import/extensions
+import { createFile } from './../../core/utils/_createFile'
+
+const dartsPath = './outputs/fireschema.dart'
 
 export const generateDart = async (path: string) => {
   const pkg = await readPackageUp({ cwd: dirname(path) })
@@ -22,6 +24,6 @@ export const generateDart = async (path: string) => {
     schemaModule.default.default || schemaModule.default,
   )
 
-  writeFileSync(dartsPath, rendered)
+  createFile(rendered, dartsPath)
   console.log('🎉 Generated dart!')
 }
