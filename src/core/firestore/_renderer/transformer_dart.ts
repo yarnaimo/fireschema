@@ -25,32 +25,67 @@ export const schemaToClassWithMeta = (
   t: ZodObject<any>,
   className: string,
 ): string => {
-  return _objectToClass(t, className, 0, [])
+  return _objectToClass(t, className, 0, true, [])
 }
 
 export const _objectToClass = (
   t: ZodObject<any>,
   className: string,
   objectNum: number,
+  root: boolean,
   objects: [string, ZodObject<any>][],
 ): string => {
-  let result = `@immutable\nclass ${className} {`
+  let result = [
+    `@freezed`,
+    `class ${className} with _$${className} {`,
+    `  const factory ${className}({`,
+  ].join('\n')
   for (const [key, _t] of Object.entries(t.shape)) {
-    const [filedName, objectNum_, objects_] = _fieldToDart(
+    const [filedName, objectNum_, objects_, nullable_] = _fieldToDart(
       _t as any,
       className,
+      true,
+      false,
       (name) => name,
       objectNum,
       objects,
     )
     objectNum = objectNum_
     objects = objects_
-    result = `${result}\n  final ${filedName} ${key};`
+    if (nullable_) {
+      result = `${result}\n    @JsonKey() ${filedName} ${key},`
+    } else {
+      result = `${result}\n    @JsonKey() required ${filedName} ${key},`
+    }
   }
 
-  result = `${result}\n}`
+  result = [
+    `${result}`,
+    `  }) = _${className};`,
+    ``,
+    `  const ${className}._();`,
+    ``,
+    `  factory ${className}.fromJson(Map<String, dynamic> json) =>`,
+    `      _$${className}FromJson(json);`,
+    `}`,
+  ].join('\n')
+
+  if (root) {
+    result = [
+      `${result}`,
+      ``,
+      `class ${className}Serilizer implements FirestoreSerializer<${className}> {`,
+      `  @override`,
+      `  ${className} fromDoc(DocumentSnapshot doc) => ${className}.fromDoc(doc);`,
+      ``,
+      `  @override`,
+      `  Map<String, dynamic> toMap(${className} data) => data.toJson();`,
+      `}`,
+    ].join('\n')
+  }
+
   for (const [name, obj] of objects) {
-    result = `${result}\n\n${_objectToClass(obj, name, 0, [])}`
+    result = `${result}\n\n${_objectToClass(obj, name, 0, false, [])}`
   }
   return result
 }
@@ -58,14 +93,18 @@ export const _objectToClass = (
 export const _fieldToDart = (
   t: ZodTypeAny,
   parentName: string,
+  root: boolean,
+  nullableField: boolean,
   filedNameGen: (name: string) => string,
   objectNum: number,
   objects: [string, ZodObject<any>][],
-): [string, number, [string, ZodObject<any>][]] => {
+): [string, number, [string, ZodObject<any>][], boolean] => {
   if (t instanceof ZodOptional) {
     return _fieldToDart(
       t.unwrap(),
       parentName,
+      false,
+      root ? true : nullableField,
       (name) => {
         const name_ = filedNameGen(name)
         if (name_.slice(-1) == '?') return name_
@@ -80,6 +119,8 @@ export const _fieldToDart = (
     return _fieldToDart(
       t.unwrap(),
       parentName,
+      false,
+      root ? true : nullableField,
       (name) => {
         const name_ = filedNameGen(name)
         if (name_.slice(-1) == '?') return name_
@@ -90,33 +131,47 @@ export const _fieldToDart = (
     )
   }
 
-  if (t instanceof ZodAny) return [filedNameGen(`any`), objectNum, objects]
-  if (t instanceof ZodUnknown) return [filedNameGen(`any`), objectNum, objects]
-  if (t instanceof ZodBoolean) return [filedNameGen(`bool`), objectNum, objects]
+  if (t instanceof ZodAny)
+    return [filedNameGen(`any`), objectNum, objects, nullableField]
+  if (t instanceof ZodUnknown)
+    return [filedNameGen(`any`), objectNum, objects, nullableField]
+  if (t instanceof ZodBoolean)
+    return [filedNameGen(`bool`), objectNum, objects, nullableField]
   if (t instanceof ZodTimestamp)
-    return [filedNameGen(`Timestamp`), objectNum, objects]
+    return [filedNameGen(`Timestamp`), objectNum, objects, nullableField]
   if (t instanceof ZodString)
-    return [filedNameGen(`String`), objectNum, objects]
+    return [filedNameGen(`String`), objectNum, objects, nullableField]
 
-  if (t instanceof ZodRecord) return [filedNameGen(`error`), objectNum, objects]
+  if (t instanceof ZodRecord)
+    return [filedNameGen(`error`), objectNum, objects, nullableField]
   if (t instanceof ZodIntersection)
-    return [filedNameGen(`error`), objectNum, objects]
+    return [filedNameGen(`error`), objectNum, objects, nullableField]
   if (t instanceof ZodUndefined)
-    return [filedNameGen(`error`), objectNum, objects]
-  if (t instanceof ZodNull) return [filedNameGen(`error`), objectNum, objects]
+    return [filedNameGen(`error`), objectNum, objects, nullableField]
+  if (t instanceof ZodNull)
+    return [filedNameGen(`error`), objectNum, objects, nullableField]
   if (t instanceof ZodLiteral)
-    return [filedNameGen(`error`), objectNum, objects]
-  if (t instanceof ZodUnion) return [filedNameGen(`error`), objectNum, objects]
-  if (t instanceof ZodTuple) return [filedNameGen(`error`), objectNum, objects]
+    return [filedNameGen(`error`), objectNum, objects, nullableField]
+  if (t instanceof ZodUnion)
+    return [filedNameGen(`error`), objectNum, objects, nullableField]
+  if (t instanceof ZodTuple)
+    return [filedNameGen(`error`), objectNum, objects, nullableField]
 
   if (t instanceof ZodNumber) {
-    return [filedNameGen(t.isInt ? `int` : `double`), objectNum, objects]
+    return [
+      filedNameGen(t.isInt ? `int` : `double`),
+      objectNum,
+      objects,
+      nullableField,
+    ]
   }
 
   if (t instanceof ZodArray) {
     return _fieldToDart(
       t.element,
       parentName,
+      false,
+      nullableField,
       (name) => filedNameGen(`List<${name}>`),
       objectNum,
       objects,
@@ -127,7 +182,7 @@ export const _fieldToDart = (
     objectNum++
     const subClassName = `${parentName}Sub${objectNum}`
     objects.push([subClassName, t])
-    return [filedNameGen(subClassName), objectNum, objects]
+    return [filedNameGen(subClassName), objectNum, objects, nullableField]
   }
 
   throw new Error(`unhandled type ${t.constructor.name} at`)
