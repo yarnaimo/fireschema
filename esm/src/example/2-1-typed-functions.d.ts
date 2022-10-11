@@ -9,30 +9,30 @@ export declare const UserJsonType: z.ZodObject<z.extendShape<{
     age: z.ZodNumber;
     timestamp: import("../index.js").ZodTimestamp;
     options: z.ZodOptional<z.ZodObject<{
-        a: z.ZodBoolean;
+        a: z.ZodOptional<z.ZodBoolean>;
     }, "strip", z.ZodTypeAny, {
-        a: boolean;
+        a?: boolean | undefined;
     }, {
-        a: boolean;
+        a?: boolean | undefined;
     }>>;
-    op: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    arra: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, {
     timestamp: z.ZodString;
 }>, "strip", z.ZodTypeAny, {
     options?: {
-        a: boolean;
+        a?: boolean | undefined;
     } | undefined;
     displayName?: string | null | undefined;
-    op?: string[] | undefined;
+    arra?: string[] | undefined;
     name: string;
     age: number;
     timestamp: string;
 }, {
     options?: {
-        a: boolean;
+        a?: boolean | undefined;
     } | undefined;
     displayName?: string | null | undefined;
-    op?: string[] | undefined;
+    arra?: string[] | undefined;
     name: string;
     age: number;
     timestamp: string;
@@ -44,30 +44,30 @@ export declare const callable: {
         age: z.ZodNumber;
         timestamp: import("../index.js").ZodTimestamp;
         options: z.ZodOptional<z.ZodObject<{
-            a: z.ZodBoolean;
+            a: z.ZodOptional<z.ZodBoolean>;
         }, "strip", z.ZodTypeAny, {
-            a: boolean;
+            a?: boolean | undefined;
         }, {
-            a: boolean;
+            a?: boolean | undefined;
         }>>;
-        op: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+        arra: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     }, {
         timestamp: z.ZodString;
     }>, "strip", z.ZodTypeAny, {
         options?: {
-            a: boolean;
+            a?: boolean | undefined;
         } | undefined;
         displayName?: string | null | undefined;
-        op?: string[] | undefined;
+        arra?: string[] | undefined;
         name: string;
         age: number;
         timestamp: string;
     }, {
         options?: {
-            a: boolean;
+            a?: boolean | undefined;
         } | undefined;
         displayName?: string | null | undefined;
-        op?: string[] | undefined;
+        arra?: string[] | undefined;
         name: string;
         age: number;
         timestamp: string;

@@ -1,6 +1,5 @@
 export class DataModel {
-    // readonly className: string
-    constructor({ schema, decoder, selectors = () => ({}), }) {
+    constructor({ schema, decoder, modelName, selectors = () => ({}), }) {
         Object.defineProperty(this, "schema", {
             enumerable: true,
             configurable: true,
@@ -13,6 +12,12 @@ export class DataModel {
             writable: true,
             value: void 0
         });
+        Object.defineProperty(this, "modelName", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         Object.defineProperty(this, "selectors", {
             enumerable: true,
             configurable: true,
@@ -20,6 +25,7 @@ export class DataModel {
             value: void 0
         });
         this.schema = schema;
+        this.modelName = modelName;
         this.decoder = decoder;
         this.selectors = selectors;
     }

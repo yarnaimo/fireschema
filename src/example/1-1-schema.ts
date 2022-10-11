@@ -8,8 +8,8 @@ export const UserType = z.object({
   displayName: z.string().optional().nullable(),
   age: z.number().int(),
   timestamp: timestampType(),
-  options: z.object({ a: z.boolean() }).optional(),
-  op: z.array(z.string()).optional(),
+  options: z.object({ a: z.boolean().optional() }).optional(),
+  arra: z.array(z.string()).optional(),
 })
 
 type User = z.infer<typeof UserType>
@@ -29,6 +29,7 @@ const UserModel = new DataModel({
     ...data,
     timestamp: data.timestamp.toDate(),
   }),
+  modelName: 'User',
 })
 
 const PostType = z.object({
@@ -45,6 +46,7 @@ const PostModel = new DataModel({
       q.limit(20),
     ],
   }),
+  modelName: 'Post',
 })
 
 export const firestoreModel = new FirestoreModel({

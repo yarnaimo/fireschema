@@ -10,7 +10,9 @@ export const renderEntities = (
   $allow: STypes.AllowOptions,
   model: DataModel<any, any, any> | undefined,
 ) => {
-  const entities = model ? schemaToClassWithMeta(model.schema, 'User') : null
+  const entities = model
+    ? schemaToClassWithMeta(model.schema, model.modelName ?? 'UNDEFINED')
+    : null
 
   const array = EntriesStrict($allow)
   const hasWriteRules = array.some(([op]) => op in allowOptions.write)

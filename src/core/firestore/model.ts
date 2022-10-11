@@ -29,19 +29,22 @@ export class DataModel<
 > {
   readonly schema: S
   readonly decoder: D
+  readonly modelName: string | undefined
   readonly selectors: STypes.Model.Selectors<z.infer<S>, SL>
-  // readonly className: string
 
   constructor({
     schema,
     decoder,
+    modelName,
     selectors = () => ({} as SL),
   }: {
     schema: S
     decoder?: D
+    modelName?: string
     selectors?: STypes.Model.Selectors<z.infer<S>, SL>
   }) {
     this.schema = schema
+    this.modelName = modelName
     this.decoder = decoder as D
     this.selectors = selectors
   }

@@ -7,10 +7,12 @@ export declare type InferDataModelSL<M extends DataModel<any, any, any>> = Retur
 export declare class DataModel<S extends SchemaType._DocData, D extends STypes.Model.Decoder<z.infer<S>, any> | undefined = undefined, SL extends STypes.Model.SelectorsConstraint = {}> {
     readonly schema: S;
     readonly decoder: D;
+    readonly modelName: string | undefined;
     readonly selectors: STypes.Model.Selectors<z.infer<S>, SL>;
-    constructor({ schema, decoder, selectors, }: {
+    constructor({ schema, decoder, modelName, selectors, }: {
         schema: S;
         decoder?: D;
+        modelName?: string;
         selectors?: STypes.Model.Selectors<z.infer<S>, SL>;
     });
 }
