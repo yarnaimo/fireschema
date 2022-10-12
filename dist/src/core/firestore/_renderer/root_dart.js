@@ -4,14 +4,14 @@ exports.renderSchema = exports.renderRoot = void 0;
 const _utils_js_1 = require("./_utils.js");
 const dart_js_1 = require("./dart.js");
 const renderRoot = (functions, collectionGroups, collections) => {
-    const body = (0, dart_js_1.renderCollectionsForDart)(collections);
+    const body = (0, dart_js_1.renderCollectionsForDart)(collections, '');
     return [
-        "import 'package:cloud_firestore/cloud_firestore.dart';\n",
-        "import 'package:freezed_annotation/freezed_annotation.dart';\n",
-        "part 'fireschema.freezed.dart';\n",
-        "part 'fireschema.g.dart';\n\n",
+        "import 'fireschema_export.dart';",
+        '',
+        "part 'fireschema.freezed.dart';",
+        "part 'fireschema.g.dart';\n",
         body,
-    ].join('');
+    ].join('\n');
 };
 exports.renderRoot = renderRoot;
 const renderSchema = ({ schemaOptions: { collectionGroups, ...options }, }) => {

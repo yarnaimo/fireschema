@@ -9,9 +9,14 @@ import { schemaToClassWithMeta } from './transformer_dart.js'
 export const renderEntities = (
   $allow: STypes.AllowOptions,
   model: DataModel<any, any, any> | undefined,
+  collectionPath: string,
 ) => {
   const entities = model
-    ? schemaToClassWithMeta(model.schema, model.modelName ?? 'UNDEFINED')
+    ? schemaToClassWithMeta(
+        model.schema,
+        model.modelName ?? 'UNDEFINED',
+        collectionPath,
+      )
     : null
 
   const array = EntriesStrict($allow)

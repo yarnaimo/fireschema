@@ -14,7 +14,7 @@ const UserModel = new DataModel({
         ...data,
         timestamp: data.timestamp.toDate(),
     }),
-    modelName: 'User',
+    modelName: 'UserModel',
 });
 const PostType = z.object({
     authorUid: z.string(),
@@ -29,7 +29,7 @@ const PostModel = new DataModel({
             q.limit(20),
         ],
     }),
-    modelName: 'Post',
+    modelName: 'PostModel',
 });
 export const firestoreModel = new FirestoreModel({
     'function isAdmin()': `

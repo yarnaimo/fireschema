@@ -8,14 +8,14 @@ export const renderRoot = (
   collectionGroups: STypes.CollectionOptions.GroupChildren,
   collections: STypes.CollectionOptions.Children,
 ) => {
-  const body = renderCollectionsForDart(collections)
+  const body = renderCollectionsForDart(collections, '')
   return [
-    "import 'package:cloud_firestore/cloud_firestore.dart';\n",
-    "import 'package:freezed_annotation/freezed_annotation.dart';\n",
-    "part 'fireschema.freezed.dart';\n",
-    "part 'fireschema.g.dart';\n\n",
+    "import 'fireschema_export.dart';",
+    '',
+    "part 'fireschema.freezed.dart';",
+    "part 'fireschema.g.dart';\n",
     body,
-  ].join('')
+  ].join('\n')
 }
 
 export const renderSchema = <S extends STypes.RootOptions.All>({
