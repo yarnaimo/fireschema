@@ -226,13 +226,7 @@ export const _fieldToDart = (
     throw Error('Dart との兼ね合いの関係上, ZodTuple は使えません')
 
   if (t instanceof ZodNumber) {
-    return [
-      filedNameGen(t.isInt ? `num` : `double`),
-      objectNum,
-      objects,
-      nullableField,
-      isTime,
-    ]
+    return [filedNameGen(`num`), objectNum, objects, nullableField, isTime]
   }
 
   if (t instanceof ZodArray) {
