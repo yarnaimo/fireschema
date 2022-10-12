@@ -7,9 +7,10 @@ import { createFile } from './../../core/utils/_createFile'
 
 const dartsPath = './outputs/fireschema.dart'
 
-export const generateDart = async (path: string) => {
+export const generateDart = async (path: string, filePath: string) => {
   const pkg = await readPackageUp({ cwd: dirname(path) })
   const isEsm = pkg?.packageJson.type === 'module'
+  const dartsPath_ = filePath === undefined ? dartsPath : filePath
 
   const schemaPath = resolve(path)
   const schemaModule = await import(schemaPath)
@@ -24,6 +25,6 @@ export const generateDart = async (path: string) => {
     schemaModule.default.default || schemaModule.default,
   )
 
-  createFile(rendered, dartsPath)
+  createFile(rendered, dartsPath_)
   console.log('🎉 Generated dart!')
 }

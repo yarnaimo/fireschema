@@ -1,1 +1,1 @@
-export declare const generateRules: (path: string) => Promise<void>;
+export declare const generateRules: (path: string, filePath: string) => Promise<void>;

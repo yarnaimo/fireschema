@@ -7,9 +7,10 @@ import { createFile } from './../../core/utils/_createFile'
 
 const rulesPath = './outputs/firestore.rules'
 
-export const generateRules = async (path: string) => {
+export const generateRules = async (path: string, filePath: string) => {
   const pkg = await readPackageUp({ cwd: dirname(path) })
   const isEsm = pkg?.packageJson.type === 'module'
+  const rulesPath_ = filePath === undefined ? rulesPath : filePath
 
   const schemaPath = resolve(path)
   const schemaModule = await import(schemaPath)
@@ -24,6 +25,6 @@ export const generateRules = async (path: string) => {
     schemaModule.default.default || schemaModule.default,
   )
 
-  createFile(rendered, rulesPath)
+  createFile(rendered, rulesPath_)
   console.log('🎉 Generated firestore.rules')
 }

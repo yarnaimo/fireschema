@@ -17,7 +17,7 @@ export const cli = async () => {
                 console.error('Schema path must be specified');
                 process.exit(1);
             }
-            void generateRules(args[0]);
+            void generateRules(args[0], args[1]);
             break;
         case 'export':
             if (!args[0]) {
@@ -31,7 +31,7 @@ export const cli = async () => {
                 console.error('A target directory must be specified');
                 process.exit(1);
             }
-            void generateDart(args[0]);
+            void generateDart(args[0], args[1]);
             break;
         case '--help':
             console.log(help);
