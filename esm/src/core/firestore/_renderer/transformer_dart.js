@@ -121,7 +121,7 @@ export const _fieldToDart = (t, parentName, root, isTime, nullableField, filedNa
     if (t instanceof ZodUndefined)
         throw Error('Dart との兼ね合いの関係上, ZodUndefined は使えません。optional()の使用を検討してください');
     if (t instanceof ZodNull)
-        throw Error('Dart との兼ね合いの関係上, ZodUndefined は使えません。nullable()の使用を検討してください');
+        throw Error('Dart との兼ね合いの関係上, ZodNull は使えません。nullable()の使用を検討してください');
     if (t instanceof ZodLiteral)
         throw Error('Dart との兼ね合いの関係上, ZodLiteral は使えません');
     if (t instanceof ZodUnion)

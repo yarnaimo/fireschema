@@ -205,7 +205,7 @@ export const _fieldToDart = (
     )
   if (t instanceof ZodNull)
     throw Error(
-      'Dart との兼ね合いの関係上, ZodUndefined は使えません。nullable()の使用を検討してください',
+      'Dart との兼ね合いの関係上, ZodNull は使えません。nullable()の使用を検討してください',
     )
   if (t instanceof ZodLiteral)
     throw Error('Dart との兼ね合いの関係上, ZodLiteral は使えません')

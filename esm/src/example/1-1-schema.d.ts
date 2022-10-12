@@ -14,11 +14,11 @@ export declare const UserType: z.ZodObject<{
         a?: boolean | undefined;
     }>>;
     arra: z.ZodOptional<z.ZodObject<{
-        a: z.ZodUndefined;
+        a: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
-        a?: undefined;
+        a: number;
     }, {
-        a?: undefined;
+        a: number;
     }>>;
 }, "strip", z.ZodTypeAny, {
     options?: {
@@ -26,7 +26,7 @@ export declare const UserType: z.ZodObject<{
     } | undefined;
     displayName?: string | null | undefined;
     arra?: {
-        a?: undefined;
+        a: number;
     } | undefined;
     name: string;
     age: number;
@@ -37,7 +37,7 @@ export declare const UserType: z.ZodObject<{
     } | undefined;
     displayName?: string | null | undefined;
     arra?: {
-        a?: undefined;
+        a: number;
     } | undefined;
     name: string;
     age: number;
@@ -71,11 +71,11 @@ export declare const firestoreModel: FirestoreModel<{
                 a?: boolean | undefined;
             }>>;
             arra: z.ZodOptional<z.ZodObject<{
-                a: z.ZodUndefined;
+                a: z.ZodNumber;
             }, "strip", z.ZodTypeAny, {
-                a?: undefined;
+                a: number;
             }, {
-                a?: undefined;
+                a: number;
             }>>;
         }, "strip", z.ZodTypeAny, {
             options?: {
@@ -83,7 +83,7 @@ export declare const firestoreModel: FirestoreModel<{
             } | undefined;
             displayName?: string | null | undefined;
             arra?: {
-                a?: undefined;
+                a: number;
             } | undefined;
             name: string;
             age: number;
@@ -94,7 +94,7 @@ export declare const firestoreModel: FirestoreModel<{
             } | undefined;
             displayName?: string | null | undefined;
             arra?: {
-                a?: undefined;
+                a: number;
             } | undefined;
             name: string;
             age: number;

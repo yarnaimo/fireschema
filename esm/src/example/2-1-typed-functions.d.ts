@@ -16,11 +16,11 @@ export declare const UserJsonType: z.ZodObject<z.extendShape<{
         a?: boolean | undefined;
     }>>;
     arra: z.ZodOptional<z.ZodObject<{
-        a: z.ZodUndefined;
+        a: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
-        a?: undefined;
+        a: number;
     }, {
-        a?: undefined;
+        a: number;
     }>>;
 }, {
     timestamp: z.ZodString;
@@ -30,7 +30,7 @@ export declare const UserJsonType: z.ZodObject<z.extendShape<{
     } | undefined;
     displayName?: string | null | undefined;
     arra?: {
-        a?: undefined;
+        a: number;
     } | undefined;
     name: string;
     age: number;
@@ -41,7 +41,7 @@ export declare const UserJsonType: z.ZodObject<z.extendShape<{
     } | undefined;
     displayName?: string | null | undefined;
     arra?: {
-        a?: undefined;
+        a: number;
     } | undefined;
     name: string;
     age: number;
@@ -61,11 +61,11 @@ export declare const callable: {
             a?: boolean | undefined;
         }>>;
         arra: z.ZodOptional<z.ZodObject<{
-            a: z.ZodUndefined;
+            a: z.ZodNumber;
         }, "strip", z.ZodTypeAny, {
-            a?: undefined;
+            a: number;
         }, {
-            a?: undefined;
+            a: number;
         }>>;
     }, {
         timestamp: z.ZodString;
@@ -75,7 +75,7 @@ export declare const callable: {
         } | undefined;
         displayName?: string | null | undefined;
         arra?: {
-            a?: undefined;
+            a: number;
         } | undefined;
         name: string;
         age: number;
@@ -86,7 +86,7 @@ export declare const callable: {
         } | undefined;
         displayName?: string | null | undefined;
         arra?: {
-            a?: undefined;
+            a: number;
         } | undefined;
         name: string;
         age: number;
