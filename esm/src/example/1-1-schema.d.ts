@@ -13,13 +13,21 @@ export declare const UserType: z.ZodObject<{
     }, {
         a?: boolean | undefined;
     }>>;
-    arra: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    arra: z.ZodOptional<z.ZodObject<{
+        a: z.ZodUndefined;
+    }, "strip", z.ZodTypeAny, {
+        a?: undefined;
+    }, {
+        a?: undefined;
+    }>>;
 }, "strip", z.ZodTypeAny, {
     options?: {
         a?: boolean | undefined;
     } | undefined;
     displayName?: string | null | undefined;
-    arra?: string[] | undefined;
+    arra?: {
+        a?: undefined;
+    } | undefined;
     name: string;
     age: number;
     timestamp: import("@firebase/firestore").Timestamp | FirebaseFirestore.Timestamp;
@@ -28,7 +36,9 @@ export declare const UserType: z.ZodObject<{
         a?: boolean | undefined;
     } | undefined;
     displayName?: string | null | undefined;
-    arra?: string[] | undefined;
+    arra?: {
+        a?: undefined;
+    } | undefined;
     name: string;
     age: number;
     timestamp: import("@firebase/firestore").Timestamp | FirebaseFirestore.Timestamp;
@@ -60,13 +70,21 @@ export declare const firestoreModel: FirestoreModel<{
             }, {
                 a?: boolean | undefined;
             }>>;
-            arra: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+            arra: z.ZodOptional<z.ZodObject<{
+                a: z.ZodUndefined;
+            }, "strip", z.ZodTypeAny, {
+                a?: undefined;
+            }, {
+                a?: undefined;
+            }>>;
         }, "strip", z.ZodTypeAny, {
             options?: {
                 a?: boolean | undefined;
             } | undefined;
             displayName?: string | null | undefined;
-            arra?: string[] | undefined;
+            arra?: {
+                a?: undefined;
+            } | undefined;
             name: string;
             age: number;
             timestamp: import("@firebase/firestore").Timestamp | FirebaseFirestore.Timestamp;
@@ -75,7 +93,9 @@ export declare const firestoreModel: FirestoreModel<{
                 a?: boolean | undefined;
             } | undefined;
             displayName?: string | null | undefined;
-            arra?: string[] | undefined;
+            arra?: {
+                a?: undefined;
+            } | undefined;
             name: string;
             age: number;
             timestamp: import("@firebase/firestore").Timestamp | FirebaseFirestore.Timestamp;

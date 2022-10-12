@@ -15,7 +15,13 @@ export declare const UserJsonType: z.ZodObject<z.extendShape<{
     }, {
         a?: boolean | undefined;
     }>>;
-    arra: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    arra: z.ZodOptional<z.ZodObject<{
+        a: z.ZodUndefined;
+    }, "strip", z.ZodTypeAny, {
+        a?: undefined;
+    }, {
+        a?: undefined;
+    }>>;
 }, {
     timestamp: z.ZodString;
 }>, "strip", z.ZodTypeAny, {
@@ -23,7 +29,9 @@ export declare const UserJsonType: z.ZodObject<z.extendShape<{
         a?: boolean | undefined;
     } | undefined;
     displayName?: string | null | undefined;
-    arra?: string[] | undefined;
+    arra?: {
+        a?: undefined;
+    } | undefined;
     name: string;
     age: number;
     timestamp: string;
@@ -32,7 +40,9 @@ export declare const UserJsonType: z.ZodObject<z.extendShape<{
         a?: boolean | undefined;
     } | undefined;
     displayName?: string | null | undefined;
-    arra?: string[] | undefined;
+    arra?: {
+        a?: undefined;
+    } | undefined;
     name: string;
     age: number;
     timestamp: string;
@@ -50,7 +60,13 @@ export declare const callable: {
         }, {
             a?: boolean | undefined;
         }>>;
-        arra: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+        arra: z.ZodOptional<z.ZodObject<{
+            a: z.ZodUndefined;
+        }, "strip", z.ZodTypeAny, {
+            a?: undefined;
+        }, {
+            a?: undefined;
+        }>>;
     }, {
         timestamp: z.ZodString;
     }>, "strip", z.ZodTypeAny, {
@@ -58,7 +74,9 @@ export declare const callable: {
             a?: boolean | undefined;
         } | undefined;
         displayName?: string | null | undefined;
-        arra?: string[] | undefined;
+        arra?: {
+            a?: undefined;
+        } | undefined;
         name: string;
         age: number;
         timestamp: string;
@@ -67,7 +85,9 @@ export declare const callable: {
             a?: boolean | undefined;
         } | undefined;
         displayName?: string | null | undefined;
-        arra?: string[] | undefined;
+        arra?: {
+            a?: undefined;
+        } | undefined;
         name: string;
         age: number;
         timestamp: string;

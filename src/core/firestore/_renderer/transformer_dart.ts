@@ -196,19 +196,23 @@ export const _fieldToDart = (
     return [filedNameGen(`String`), objectNum, objects, nullableField, isTime]
 
   if (t instanceof ZodRecord)
-    return [filedNameGen(`error`), objectNum, objects, nullableField, isTime]
+    throw Error('Dart との兼ね合いの関係上, ZodRecord は使えません')
   if (t instanceof ZodIntersection)
-    return [filedNameGen(`error`), objectNum, objects, nullableField, isTime]
+    throw Error('Dart との兼ね合いの関係上, ZodIntersection は使えません')
   if (t instanceof ZodUndefined)
-    return [filedNameGen(`error`), objectNum, objects, nullableField, isTime]
+    throw Error(
+      'Dart との兼ね合いの関係上, ZodUndefined は使えません。optional()の使用を検討してください',
+    )
   if (t instanceof ZodNull)
-    return [filedNameGen(`error`), objectNum, objects, nullableField, isTime]
+    throw Error(
+      'Dart との兼ね合いの関係上, ZodUndefined は使えません。nullable()の使用を検討してください',
+    )
   if (t instanceof ZodLiteral)
-    return [filedNameGen(`error`), objectNum, objects, nullableField, isTime]
+    throw Error('Dart との兼ね合いの関係上, ZodLiteral は使えません')
   if (t instanceof ZodUnion)
-    return [filedNameGen(`error`), objectNum, objects, nullableField, isTime]
+    throw Error('Dart との兼ね合いの関係上, ZodUnion は使えません')
   if (t instanceof ZodTuple)
-    return [filedNameGen(`error`), objectNum, objects, nullableField, isTime]
+    throw Error('Dart との兼ね合いの関係上, ZodTuple は使えません')
 
   if (t instanceof ZodNumber) {
     return [
