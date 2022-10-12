@@ -13,21 +13,13 @@ export declare const UserType: z.ZodObject<{
     }, {
         a?: boolean | undefined;
     }>>;
-    arra: z.ZodOptional<z.ZodObject<{
-        a: z.ZodNumber;
-    }, "strip", z.ZodTypeAny, {
-        a: number;
-    }, {
-        a: number;
-    }>>;
+    arra: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
 }, "strip", z.ZodTypeAny, {
     options?: {
         a?: boolean | undefined;
     } | undefined;
     displayName?: string | null | undefined;
-    arra?: {
-        a: number;
-    } | undefined;
+    arra?: Record<string, string> | undefined;
     name: string;
     age: number;
     timestamp: import("@firebase/firestore").Timestamp | FirebaseFirestore.Timestamp;
@@ -36,9 +28,7 @@ export declare const UserType: z.ZodObject<{
         a?: boolean | undefined;
     } | undefined;
     displayName?: string | null | undefined;
-    arra?: {
-        a: number;
-    } | undefined;
+    arra?: Record<string, string> | undefined;
     name: string;
     age: number;
     timestamp: import("@firebase/firestore").Timestamp | FirebaseFirestore.Timestamp;
@@ -70,21 +60,13 @@ export declare const firestoreModel: FirestoreModel<{
             }, {
                 a?: boolean | undefined;
             }>>;
-            arra: z.ZodOptional<z.ZodObject<{
-                a: z.ZodNumber;
-            }, "strip", z.ZodTypeAny, {
-                a: number;
-            }, {
-                a: number;
-            }>>;
+            arra: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
         }, "strip", z.ZodTypeAny, {
             options?: {
                 a?: boolean | undefined;
             } | undefined;
             displayName?: string | null | undefined;
-            arra?: {
-                a: number;
-            } | undefined;
+            arra?: Record<string, string> | undefined;
             name: string;
             age: number;
             timestamp: import("@firebase/firestore").Timestamp | FirebaseFirestore.Timestamp;
@@ -93,9 +75,7 @@ export declare const firestoreModel: FirestoreModel<{
                 a?: boolean | undefined;
             } | undefined;
             displayName?: string | null | undefined;
-            arra?: {
-                a: number;
-            } | undefined;
+            arra?: Record<string, string> | undefined;
             name: string;
             age: number;
             timestamp: import("@firebase/firestore").Timestamp | FirebaseFirestore.Timestamp;

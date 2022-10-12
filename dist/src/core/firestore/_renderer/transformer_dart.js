@@ -94,7 +94,7 @@ const _objectToClass = (t, className, collectionPath, objectNum, root, objects) 
 exports._objectToClass = _objectToClass;
 const _fieldToDart = (t, parentName, root, isTime, nullableField, filedNameGen, objectNum, objects) => {
     if (t instanceof zod_1.ZodOptional) {
-        return (0, exports._fieldToDart)(t.unwrap(), parentName, false, false, root ? true : nullableField, (name) => {
+        return (0, exports._fieldToDart)(t.unwrap(), parentName, false, isTime, root ? true : nullableField, (name) => {
             const name_ = filedNameGen(name);
             if (name_.slice(-1) == '?')
                 return name_;
@@ -102,12 +102,15 @@ const _fieldToDart = (t, parentName, root, isTime, nullableField, filedNameGen, 
         }, objectNum, objects);
     }
     if (t instanceof zod_1.ZodNullable) {
-        return (0, exports._fieldToDart)(t.unwrap(), parentName, false, false, root ? true : nullableField, (name) => {
+        return (0, exports._fieldToDart)(t.unwrap(), parentName, false, isTime, root ? true : nullableField, (name) => {
             const name_ = filedNameGen(name);
             if (name_.slice(-1) == '?')
                 return name_;
             return `${name_}?`;
         }, objectNum, objects);
+    }
+    if (t instanceof zod_1.ZodRecord) {
+        return (0, exports._fieldToDart)(t.element, parentName, false, isTime, nullableField, (name) => filedNameGen(`Map<String, ${name}>`), objectNum, objects);
     }
     if (t instanceof zod_1.ZodAny)
         return [filedNameGen(`any`), objectNum, objects, nullableField, isTime];
@@ -119,8 +122,6 @@ const _fieldToDart = (t, parentName, root, isTime, nullableField, filedNameGen, 
         return [filedNameGen(`CustomDate`), objectNum, objects, nullableField, true];
     if (t instanceof zod_1.ZodString)
         return [filedNameGen(`String`), objectNum, objects, nullableField, isTime];
-    if (t instanceof zod_1.ZodRecord)
-        throw Error('Dart との兼ね合いの関係上, ZodRecord は使えません');
     if (t instanceof zod_1.ZodIntersection)
         throw Error('Dart との兼ね合いの関係上, ZodIntersection は使えません');
     if (t instanceof zod_1.ZodUndefined)
@@ -143,7 +144,7 @@ const _fieldToDart = (t, parentName, root, isTime, nullableField, filedNameGen, 
         ];
     }
     if (t instanceof zod_1.ZodArray) {
-        return (0, exports._fieldToDart)(t.element, parentName, false, false, nullableField, (name) => filedNameGen(`List<${name}>`), objectNum, objects);
+        return (0, exports._fieldToDart)(t.element, parentName, false, isTime, nullableField, (name) => filedNameGen(`List<${name}>`), objectNum, objects);
     }
     if (t instanceof zod_1.ZodObject) {
         objectNum++;

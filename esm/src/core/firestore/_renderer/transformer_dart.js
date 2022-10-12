@@ -89,7 +89,7 @@ export const _objectToClass = (t, className, collectionPath, objectNum, root, ob
 };
 export const _fieldToDart = (t, parentName, root, isTime, nullableField, filedNameGen, objectNum, objects) => {
     if (t instanceof ZodOptional) {
-        return _fieldToDart(t.unwrap(), parentName, false, false, root ? true : nullableField, (name) => {
+        return _fieldToDart(t.unwrap(), parentName, false, isTime, root ? true : nullableField, (name) => {
             const name_ = filedNameGen(name);
             if (name_.slice(-1) == '?')
                 return name_;
@@ -97,12 +97,15 @@ export const _fieldToDart = (t, parentName, root, isTime, nullableField, filedNa
         }, objectNum, objects);
     }
     if (t instanceof ZodNullable) {
-        return _fieldToDart(t.unwrap(), parentName, false, false, root ? true : nullableField, (name) => {
+        return _fieldToDart(t.unwrap(), parentName, false, isTime, root ? true : nullableField, (name) => {
             const name_ = filedNameGen(name);
             if (name_.slice(-1) == '?')
                 return name_;
             return `${name_}?`;
         }, objectNum, objects);
+    }
+    if (t instanceof ZodRecord) {
+        return _fieldToDart(t.element, parentName, false, isTime, nullableField, (name) => filedNameGen(`Map<String, ${name}>`), objectNum, objects);
     }
     if (t instanceof ZodAny)
         return [filedNameGen(`any`), objectNum, objects, nullableField, isTime];
@@ -114,8 +117,6 @@ export const _fieldToDart = (t, parentName, root, isTime, nullableField, filedNa
         return [filedNameGen(`CustomDate`), objectNum, objects, nullableField, true];
     if (t instanceof ZodString)
         return [filedNameGen(`String`), objectNum, objects, nullableField, isTime];
-    if (t instanceof ZodRecord)
-        throw Error('Dart との兼ね合いの関係上, ZodRecord は使えません');
     if (t instanceof ZodIntersection)
         throw Error('Dart との兼ね合いの関係上, ZodIntersection は使えません');
     if (t instanceof ZodUndefined)
@@ -138,7 +139,7 @@ export const _fieldToDart = (t, parentName, root, isTime, nullableField, filedNa
         ];
     }
     if (t instanceof ZodArray) {
-        return _fieldToDart(t.element, parentName, false, false, nullableField, (name) => filedNameGen(`List<${name}>`), objectNum, objects);
+        return _fieldToDart(t.element, parentName, false, isTime, nullableField, (name) => filedNameGen(`List<${name}>`), objectNum, objects);
     }
     if (t instanceof ZodObject) {
         objectNum++;

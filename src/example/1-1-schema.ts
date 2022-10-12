@@ -9,7 +9,7 @@ export const UserType = z.object({
   age: z.number().int(),
   timestamp: timestampType(),
   options: z.object({ a: z.boolean().optional() }).optional(),
-  arra: z.object({ a: z.number() }).optional(),
+  arra: z.record(z.string()).optional(),
 })
 
 type User = z.infer<typeof UserType>

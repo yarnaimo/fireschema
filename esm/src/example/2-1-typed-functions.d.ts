@@ -15,13 +15,7 @@ export declare const UserJsonType: z.ZodObject<z.extendShape<{
     }, {
         a?: boolean | undefined;
     }>>;
-    arra: z.ZodOptional<z.ZodObject<{
-        a: z.ZodNumber;
-    }, "strip", z.ZodTypeAny, {
-        a: number;
-    }, {
-        a: number;
-    }>>;
+    arra: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
 }, {
     timestamp: z.ZodString;
 }>, "strip", z.ZodTypeAny, {
@@ -29,9 +23,7 @@ export declare const UserJsonType: z.ZodObject<z.extendShape<{
         a?: boolean | undefined;
     } | undefined;
     displayName?: string | null | undefined;
-    arra?: {
-        a: number;
-    } | undefined;
+    arra?: Record<string, string> | undefined;
     name: string;
     age: number;
     timestamp: string;
@@ -40,9 +32,7 @@ export declare const UserJsonType: z.ZodObject<z.extendShape<{
         a?: boolean | undefined;
     } | undefined;
     displayName?: string | null | undefined;
-    arra?: {
-        a: number;
-    } | undefined;
+    arra?: Record<string, string> | undefined;
     name: string;
     age: number;
     timestamp: string;
@@ -60,13 +50,7 @@ export declare const callable: {
         }, {
             a?: boolean | undefined;
         }>>;
-        arra: z.ZodOptional<z.ZodObject<{
-            a: z.ZodNumber;
-        }, "strip", z.ZodTypeAny, {
-            a: number;
-        }, {
-            a: number;
-        }>>;
+        arra: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
     }, {
         timestamp: z.ZodString;
     }>, "strip", z.ZodTypeAny, {
@@ -74,9 +58,7 @@ export declare const callable: {
             a?: boolean | undefined;
         } | undefined;
         displayName?: string | null | undefined;
-        arra?: {
-            a: number;
-        } | undefined;
+        arra?: Record<string, string> | undefined;
         name: string;
         age: number;
         timestamp: string;
@@ -85,9 +67,7 @@ export declare const callable: {
             a?: boolean | undefined;
         } | undefined;
         displayName?: string | null | undefined;
-        arra?: {
-            a: number;
-        } | undefined;
+        arra?: Record<string, string> | undefined;
         name: string;
         age: number;
         timestamp: string;
