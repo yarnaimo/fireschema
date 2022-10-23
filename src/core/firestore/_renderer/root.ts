@@ -22,18 +22,6 @@ import { renderFunctions } from './functions.js'
  *   - data._createdAt not changed
  *   - data._updatedAt is server timestamp
  */
-const metaRules = rules.orMultiline(
-  rules.and(
-    'request.method == "create"',
-    `data.${_createdAt} == request.time`,
-    `data.${_updatedAt} == request.time`,
-  ),
-  rules.and(
-    'request.method == "update"',
-    `data.${_createdAt} == resource.data.${_createdAt}`,
-    `data.${_updatedAt} == request.time`,
-  ),
-)
 
 const keysRules = `data.keys().removeAll(['${_createdAt}', '${_updatedAt}']).hasOnly(keys)`
 
@@ -45,7 +33,6 @@ export const renderRoot = (
   const body = join('\n\n')([
     renderFunctions(
       {
-        ...validatorDef('data', metaRules, 4, 'meta'),
         ...validatorDef('data, keys', keysRules, 4, 'keys'),
         ...functions,
       },
